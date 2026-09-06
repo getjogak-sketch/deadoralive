@@ -200,3 +200,70 @@ docs/index.html, docs/methodology.html, docs/latest.json
 results/latest.json, results/history/<as_of>.json
 data/BTCUSD_1d.csv, data/BTCUSD_4h.csv   (offline stand-ins; ETHUSD absent in this environment)
 ```
+
+## Korean edition (Upbit KRW-BTC/KRW-ETH)
+
+A second edition of the exact same weekly pipeline, added additively (no existing module was
+rewritten; `engine.py`, `strategies.py`, `indicators.py`, `metrics.py`, `verdict.py`, and
+`registry.py` are byte-for-byte unchanged, and the English edition's assets, costs, thresholds,
+and output files are untouched).
+
+- **Data source**: Upbit's public candle REST API (no key), `KRW-BTC`/`KRW-ETH`, 1d/4h — see
+  `fetch_data.py`'s Upbit section (`fetch_ohlc_upbit`, `_parse_upbit_page`,
+  `_drop_still_forming_upbit`). Paginates backwards via the `to` parameter until
+  `config.DATA_START_BY_ASSET` (2017-10-01) is passed, sleeping `0.15s` between requests. Like
+  Bitstamp, this is network-blocked in this dev environment — `fetch_data.py --offline` skips both
+  Upbit assets with a console warning (there is no local Upbit stand-in file anywhere in this
+  environment), and any Upbit HTTP error (4xx/5xx) in the online path is caught per-asset and
+  turned into a warning, never a hard failure — the English/Bitstamp edition's fetch is unaffected
+  either way. The Upbit response parser is unit-tested against a hand-written fake payload in
+  `tests.py` (`test_upbit_parser`), since it can't be exercised against the live API here.
+- **Cost**: `config.COST["KRW-BTC"]` / `["KRW-ETH"]` = 0.10% one-way (Upbit fee 0.05% + slippage
+  0.05% — the same figure already used for BTCUSD/ETHUSD), added as new dict entries, not a change
+  to the existing two.
+- **Editions**: `config.EDITIONS = {"en": {...}, "ko": {...}}`. `run_weekly.py`'s existing
+  English-edition code path is untouched and still writes `results/latest.json`,
+  `results/history/<as_of>.json`, `docs/index.html`, `docs/methodology.html`, `docs/latest.json`.
+  A new `_run_ko_edition()` function additionally writes `results/latest_ko.json`,
+  `results/history/ko_<as_of>.json`, `docs/ko/index.html`, `docs/ko/methodology.html`,
+  `docs/ko/latest.json` — **a separate JSON file per edition**, chosen over merging into
+  `results/latest.json` to avoid changing the existing file's row count/shape for any downstream
+  consumer. As a belt-and-braces measure every row in *both* editions' JSON also carries a new
+  `"edition"` key (`"en"` or `"ko"`), so a future consumer that wants a single merged feed can
+  still get one.
+- **Korean page** (`docs/ko/index.html`, `docs/ko/methodology.html`): same layout/columns as the
+  English page (`build_site.py`'s `build_index_ko`/`build_methodology_ko`, reusing `BASE_CSS`,
+  `VERDICT_COLORS`, and the existing `_fmt_*` number helpers as-is), all UI text in Korean, verdict
+  badges shown as 생존/약화/사망/표본 부족 with the English word kept in small text alongside,
+  strategy names as "Korean (English)" (`build_site.STRATEGY_NAME_KO`), and last-bar close prices
+  formatted as whole-won KRW (`₩163,000,000`-style, `_fmt_krw`). The mandatory disclaimer
+  (`config.LEGAL_DISCLAIMER_KO`, verbatim) is rendered at both the top and bottom of every Korean
+  page; `tests.py`'s `test_korean_page_disclaimer_and_banned_words` asserts it appears exactly
+  twice and that none of 추천/수익 보장/확실/필승 appear anywhere on the page (checked against both
+  a synthetic full-data page and the no-data page below). A small language-switch link
+  (`한국어`/`English`) was added to both editions' headers/footers.
+- **No Upbit data this week**: if neither `KRW-BTC` nor `KRW-ETH` has a local data file (as in
+  this dev environment, and possibly in CI if Upbit 4xx's), `_run_ko_edition()` calls
+  `build_site.build_empty_edition_page_ko()` instead of failing — it renders the disclaimer
+  top/bottom plus an explicit "이번 주 데이터 없음" ("no data this week") notice and a link back to
+  the English edition, rather than an empty or missing page. Verified: `python3 fetch_data.py
+  --offline && python3 tests.py && python3 run_weekly.py --offline` all exit 0, and
+  `docs/ko/index.html` is produced showing that notice, while the English edition's 48-row output
+  is unaffected (same verdict tally as before this change: `ALIVE 8, FADING 17, DEAD 12, TOO FEW
+  TRADES 7`).
+- **Workflow**: `.github/workflows/weekly.yml` needed no changes — its existing `python
+  fetch_data.py` step now also fetches Upbit data (with the same `continue-on-error` /
+  failure-reporting steps still covering it), and its existing `python run_weekly.py` step now
+  also builds the Korean pages.
+- **Uncertain / unverifiable in this environment**: Upbit's real API (`api.upbit.com`) is
+  network-blocked here exactly like Bitstamp's, so the online fetch path (`fetch_ohlc_upbit`,
+  `update_symbol_online_upbit`) is written and reviewed against Upbit's public documentation but
+  has only ever been exercised through its pure, unit-tested parsing/partial-candle-drop helpers
+  — never against a live response. In particular: the exact accepted string format for the `to`
+  query parameter on a second and later page (this code sends back the previous page's own
+  `candle_date_time_utc` string verbatim, which matches Upbit's documented convention but was not
+  confirmed against a real multi-page response), and whether Upbit ever includes the still-forming
+  candle in a response with no `to` parameter at all (this code defensively drops the last row
+  whenever its bar hasn't fully closed as of "now", which is correct either way but may drop one
+  extra already-closed bar if Upbit in fact never returns a partial one — a one-bar discrepancy at
+  most, self-correcting next week).

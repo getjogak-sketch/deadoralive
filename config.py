@@ -108,3 +108,58 @@ DCA_WEEKLY_AMOUNT = 1.0
 # Params considered "suspiciously good" per spec_v2 §6 — flagged in README/console, not filtered.
 SUSPICIOUS_OOS_PF = 5.0
 SUSPICIOUS_OOS_SHARPE = 4.0
+
+# ---------------------------------------------------------------------------
+# Korean edition (Upbit KRW spot market) — additive extension, nothing above this line is
+# modified: the English edition's ASSETS/COST/VERDICT_THRESHOLDS/OOS_DAYS/registry are untouched,
+# and this edition is run through the exact same engine.py/strategies.py/verdict.py code paths.
+# ---------------------------------------------------------------------------
+
+# Upbit market codes double as our internal asset ids (unlike Bitstamp, which needed a lowercase
+# symbol-mapping table) — "KRW-BTC" is both the Upbit `market` query param and our asset id.
+UPBIT_ASSETS = ["KRW-BTC", "KRW-ETH"]
+
+# Upbit KRW-BTC was listed 2017-09/10; data is floored a little after listing for thin-liquidity
+# safety, per this task's own instruction (distinct from Bitstamp's DATA_START, which is keyed to
+# Bitstamp's own 2017-08-17 BTCUSD/ETHUSD listing date).
+DATA_START_UPBIT = "2017-10-01"
+
+# Per-asset override of DATA_START, so fetch_data.py/run_weekly.py can look up the right floor
+# date for any asset without an if/else on asset naming convention. Assets not listed here (the
+# Bitstamp ones) fall back to the module-level DATA_START.
+DATA_START_BY_ASSET = {
+    "KRW-BTC": DATA_START_UPBIT,
+    "KRW-ETH": DATA_START_UPBIT,
+}
+
+# Upbit fee (0.05%) + slippage (0.05%) = 0.10% one-way — the same figure already used for BTCUSD/
+# ETHUSD (see COST above and README "Simplifying assumptions"), added here per Upbit asset rather
+# than changing the meaning of the existing COST dict's two entries.
+COST["KRW-BTC"] = 0.0010
+COST["KRW-ETH"] = 0.0010
+
+# Korean-language site copy (verbatim strings required by this task; kept alongside the English
+# PROJECT_NAME/TAGLINE/LEGAL_DISCLAIMER above rather than overloading those constants).
+PROJECT_TITLE_KO = "Dead or Alive — 인기 매매 전략, 수수료 떼고 매주 재검사"
+TAGLINE_KO = "인기 매매 전략, 수수료 떼고 매주 재검사"
+LEGAL_DISCLAIMER_KO = (
+    "본 페이지는 무료로 제공되는 정보·교육 목적의 자료이며, 투자 자문이나 특정 자산의 매수·매도 "
+    "권유가 아닙니다. 과거 백테스트 결과는 미래 수익을 보장하지 않으며, 모든 투자 판단과 책임은 "
+    "이용자 본인에게 있습니다. 운영자는 유사투자자문업자가 아니며 어떠한 수익도 보장하지 않습니다."
+)
+
+# ---------------------------------------------------------------------------
+# Editions (this task's requirement 3): which assets render onto which output page, in which
+# language. run_weekly.py loops this dict. "en" keeps writing to the exact same paths it always
+# has (results/latest.json, docs/index.html, docs/methodology.html, docs/latest.json) for zero
+# behavior change to the existing edition; "ko" writes results/latest_ko.json,
+# results/history/ko_<as_of>.json, and docs/ko/{index,methodology,latest.json}. Every row in every
+# edition's payload also carries an "edition" key (documented in README) — belt-and-braces on top
+# of the separate-file choice, in case anything downstream ever concatenates both editions' rows.
+# ---------------------------------------------------------------------------
+DOCS_DIR_KO = os.path.join(DOCS_DIR, "ko")
+
+EDITIONS = {
+    "en": {"assets": ASSETS, "lang": "en", "out": DOCS_DIR},
+    "ko": {"assets": UPBIT_ASSETS, "lang": "ko", "out": DOCS_DIR_KO},
+}

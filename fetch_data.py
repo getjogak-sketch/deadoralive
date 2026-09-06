@@ -128,6 +128,128 @@ def update_symbol_offline(symbol: str, tf: str) -> bool:
     return True
 
 
+# ---------------------------------------------------------------------------
+# Korean edition data source (this task's requirement 1) — Upbit's public candle REST API, no
+# key required. Additive only: nothing above this line (the Bitstamp/English-edition path) is
+# modified.
+#
+# GET https://api.upbit.com/v1/candles/days?market=KRW-BTC&count=200&to=<ISO8601 UTC>
+# GET https://api.upbit.com/v1/candles/minutes/240?market=KRW-BTC&count=200&to=<ISO8601 UTC>
+#
+# Upbit returns candles NEWEST-FIRST, up to `count` per page (200 max). We page BACKWARDS: each
+# page's oldest candle's own candle_date_time_utc becomes the next page's `to` cursor, until we
+# pass config.DATA_START_BY_ASSET[market] (2017-10-01 for both Upbit assets). The still-forming
+# (not yet closed) candle is dropped from the final assembled series.
+#
+# Upbit's real endpoint is network-blocked in this dev environment exactly like Bitstamp's, so
+# this path is written but exercised here only via its pure parsing helpers (_parse_upbit_page,
+# _drop_still_forming_upbit), unit-tested in tests.py against a hand-written fake payload.
+# ---------------------------------------------------------------------------
+
+UPBIT_CANDLE_URL = {
+    "1d": "https://api.upbit.com/v1/candles/days",
+    "4h": "https://api.upbit.com/v1/candles/minutes/240",
+}
+UPBIT_COUNT = 200
+UPBIT_SLEEP_SECONDS = 0.15  # rate limit between requests, per this task's instruction
+UPBIT_STEP = {"1d": pd.Timedelta(days=1), "4h": pd.Timedelta(hours=4)}
+
+
+def _parse_upbit_page(candles: list) -> pd.DataFrame:
+    """Pure parser for one page of Upbit's candle response (a list of dicts, Upbit's native
+    newest-first order). Maps Upbit's field names to the v1 normalized format
+    (date,open,high,low,close,volume) and returns them ASCENDING (oldest first). No I/O — this is
+    the function tests.py unit-tests against a hand-written fake payload."""
+    rows = [{
+        "date": pd.Timestamp(c["candle_date_time_utc"]),
+        "open": float(c["opening_price"]),
+        "high": float(c["high_price"]),
+        "low": float(c["low_price"]),
+        "close": float(c["trade_price"]),
+        "volume": float(c["candle_acc_trade_volume"]),
+    } for c in candles]
+    df = pd.DataFrame(rows, columns=["date", "open", "high", "low", "close", "volume"])
+    return df.sort_values("date").reset_index(drop=True)
+
+
+def _drop_still_forming_upbit(df: pd.DataFrame, tf: str, now: pd.Timestamp | None = None) -> pd.DataFrame:
+    """Drop the last row if its bar has not fully closed yet (its own close time is still in the
+    future relative to `now`). `now` is injectable so this is unit-testable without a clock."""
+    if df.empty:
+        return df
+    now = pd.Timestamp.utcnow().tz_localize(None) if now is None else now
+    step = UPBIT_STEP[tf]
+    if df["date"].iloc[-1] + step > now:
+        return df.iloc[:-1].reset_index(drop=True)
+    return df
+
+
+def fetch_ohlc_upbit(market: str, tf: str) -> pd.DataFrame:
+    """Page Upbit's public candle endpoint backwards (via `to`) from now until we pass
+    config.DATA_START_BY_ASSET[market]. Returns normalized ascending rows, still-forming last
+    candle dropped. Always fetches the full history each call (Upbit's endpoint has no documented
+    "since" bound, unlike Bitstamp's `start`), which is why the Korean edition's fetch is a full
+    re-fetch rather than an incremental append like update_symbol_online above."""
+    url = UPBIT_CANDLE_URL[tf]
+    min_date = pd.Timestamp(config.DATA_START_BY_ASSET.get(market, config.DATA_START))
+    frames = []
+    to_cursor = None
+    while True:
+        params = {"market": market, "count": UPBIT_COUNT}
+        if to_cursor is not None:
+            params["to"] = to_cursor
+        resp = requests.get(url, params=params, timeout=30,
+                             headers={"User-Agent": "deadoralive/0.1 (+github.com/getjogak-sketch/deadoralive)"})
+        resp.raise_for_status()
+        candles = resp.json()
+        if not candles:
+            break
+        page = _parse_upbit_page(candles)
+        frames.append(page)
+        oldest_date = page["date"].iloc[0]
+        if oldest_date <= min_date:
+            break
+        # candles[-1] is the oldest raw candle in this (newest-first) page — its own
+        # candle_date_time_utc is the correct backward-paging cursor for the next request.
+        to_cursor = candles[-1]["candle_date_time_utc"]
+        time.sleep(UPBIT_SLEEP_SECONDS)
+
+    if not frames:
+        return pd.DataFrame(columns=["date", "open", "high", "low", "close", "volume"])
+    df = pd.concat(frames, ignore_index=True).drop_duplicates(subset="date").sort_values("date").reset_index(drop=True)
+    df = df[df["date"] >= min_date].reset_index(drop=True)
+    df = _drop_still_forming_upbit(df, tf)
+    return df
+
+
+def update_symbol_online_upbit(symbol: str, tf: str) -> bool:
+    """Online update for one Upbit (market, timeframe): full re-fetch (see fetch_ohlc_upbit),
+    written to data/<symbol>_<tf>.csv. Returns True if a file was written, False if the fetch
+    came back empty (e.g. a 4xx from Upbit) — in either case the caller's try/except is what
+    guarantees this never fails the overall run."""
+    fetched = fetch_ohlc_upbit(symbol, tf)
+    if fetched.empty:
+        print(f"[fetch_data] WARNING: Upbit {symbol} {tf} returned no usable candles — skipping "
+              f"(not a failure).")
+        return False
+    os.makedirs(config.DATA_DIR, exist_ok=True)
+    out_path = _out_path(symbol, tf)
+    fetched.to_csv(out_path, index=False)
+    print(f"[fetch_data] (Upbit) {symbol} {tf}: wrote {len(fetched)} rows "
+          f"({fetched['date'].min()} .. {fetched['date'].max()}) -> {out_path}")
+    return True
+
+
+def update_symbol_offline_upbit(symbol: str, tf: str) -> bool:
+    """Offline mode has no local Upbit stand-in file anywhere in this environment (unlike
+    BTCUSD's Bitstamp stand-in) — skip with a warning, per this task's requirement 1. Not a
+    failure: run_weekly.py's Korean edition renders a "no data this week" page in this case."""
+    print(f"[fetch_data] WARNING: --offline has no local Upbit stand-in for {symbol} {tf} — "
+          f"skipping (not a failure). Real Upbit fetch is network-blocked in this dev "
+          f"environment too; run without --offline in production.")
+    return False
+
+
 def main():
     parser = argparse.ArgumentParser(description="netcheck data fetch (spec_v2 §1)")
     parser.add_argument("--offline", action="store_true",
@@ -150,6 +272,21 @@ def main():
                 if not args.offline:
                     print("[fetch_data] (expected in this dev environment — exchange APIs are "
                           "network-blocked; re-run with --offline)")
+
+    # Korean edition (Upbit KRW-BTC/KRW-ETH) — a second, independent data source. Any failure
+    # here (network block, Upbit 4xx/5xx) is caught per-asset and only ever produces a warning:
+    # it must never fail the whole run or affect the Bitstamp/English edition above.
+    for symbol in config.UPBIT_ASSETS:
+        for tf in config.TIMEFRAMES:
+            try:
+                if args.offline:
+                    written = update_symbol_offline_upbit(symbol, tf)
+                else:
+                    written = update_symbol_online_upbit(symbol, tf)
+                any_written = any_written or written
+            except requests.exceptions.RequestException as e:
+                print(f"[fetch_data] WARNING: Upbit fetch failed for {symbol} {tf}: {e} — "
+                      f"skipping (not a failure; the English/Bitstamp edition is unaffected).")
 
     return 0
 

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dead or Alive — 인기 매매 전략, 수수료 떼고 매주 재검사</title>
+<style>
+:root {
+  --bg: #ffffff; --fg: #14181f; --muted: #5b6270; --border: #e2e5ea; --card-bg: #f7f8fa;
+  --link: #1a56db;
+  --alive-bg: #d9f2e3; --alive-fg: #106a37;
+  --fading-bg: #fdf1c8; --fading-fg: #7a5b00;
+  --dead-bg: #e6e8eb; --dead-fg: #4b5160;
+  --toofew-bg: #f2f3f5; --toofew-fg: #8a909c;
+  --suspicious: #c0392b;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #10131a; --fg: #e7e9ee; --muted: #9aa1b0; --border: #2a2f3a; --card-bg: #171b24;
+    --link: #7aa2ff;
+    --alive-bg: #113a26; --alive-fg: #6bdc9c;
+    --fading-bg: #3a3210; --fading-fg: #f0d572;
+    --dead-bg: #262a33; --dead-fg: #a8adb8;
+    --toofew-bg: #1c2029; --toofew-fg: #6b7180;
+    --suspicious: #ff8a7a;
+  }
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; margin: 0; padding: 0 0 3rem 0; line-height: 1.45; }
+a { color: var(--link); }
+header.top { padding: 2rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border); }
+header.top h1 { margin: 0 0 0.25rem 0; font-size: 1.7rem; }
+header.top p.tagline { margin: 0 0 1rem 0; color: var(--muted); }
+.meta { color: var(--muted); font-size: 0.9rem; }
+.tally { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 1rem; }
+.tally span { padding: 0.3rem 0.7rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600; }
+main { max-width: 1200px; margin: 0 auto; padding: 0 1.25rem; }
+nav.jump { display: flex; gap: 0.75rem; flex-wrap: wrap; margin: 1.25rem 0; }
+nav.jump a { padding: 0.3rem 0.7rem; border: 1px solid var(--border); border-radius: 6px; text-decoration: none; font-size: 0.9rem; }
+section.assetblock { margin: 2.25rem 0; }
+section.assetblock h2 { border-bottom: 2px solid var(--border); padding-bottom: 0.4rem; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; min-width: 980px; font-size: 0.85rem; }
+th, td { padding: 0.5rem 0.6rem; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--border); }
+th:nth-child(1), td:nth-child(1), th:nth-child(2), td:nth-child(2) { text-align: left; }
+thead th { background: var(--card-bg); position: sticky; top: 0; }
+tbody tr:hover { background: var(--card-bg); }
+.badge { padding: 0.15rem 0.55rem; border-radius: 999px; font-weight: 700; font-size: 0.78rem; display: inline-block; }
+.ref-row { font-style: italic; color: var(--muted); }
+.suspicious { color: var(--suspicious); font-weight: 700; }
+.gross-note { font-size: 0.75rem; color: var(--muted); }
+footer.bottom { max-width: 1200px; margin: 2.5rem auto 0; padding: 1.25rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem; }
+footer.bottom .disclaimer { margin-top: 0.75rem; }
+
+.disclaimer-block { max-width: 1200px; margin: 1rem auto; padding: 0.9rem 1.1rem; border: 1px solid var(--border); border-radius: 8px; background: var(--card-bg); color: var(--muted); font-size: 0.82rem; line-height: 1.5; }
+.notice-box { max-width: 1200px; margin: 2rem auto; padding: 2rem 1.5rem; border: 1px dashed var(--border); border-radius: 10px; text-align: center; }
+.notice-box h2 { margin-top: 0; }
+.badge small { font-weight: 500; opacity: 0.75; margin-left: 0.3rem; font-size: 0.72em; }
+</style>
+</head>
+<body>
+<div class="disclaimer-block">본 페이지는 무료로 제공되는 정보·교육 목적의 자료이며, 투자 자문이나 특정 자산의 매수·매도 권유가 아닙니다. 과거 백테스트 결과는 미래 수익을 보장하지 않으며, 모든 투자 판단과 책임은 이용자 본인에게 있습니다. 운영자는 유사투자자문업자가 아니며 어떠한 수익도 보장하지 않습니다.</div>
+<header class="top">
+  <h1>Dead or Alive</h1>
+  <p class="tagline">인기 매매 전략, 수수료 떼고 매주 재검사</p>
+  <p class="meta">기준일(as_of): <strong>2026-09-06</strong> &middot;
+     <a href="../index.html">English</a></p>
+</header>
+<main>
+  <div class="notice-box">
+    <h2>이번 주 데이터 없음</h2>
+    <p>이번 주에는 업비트(Upbit) 시세 데이터를 가져오지 못해 결과표를 만들지 못했습니다.<br>
+       (개발 환경 네트워크 차단, 또는 업비트 서버의 일시적 오류일 수 있습니다.)<br>
+       다음 주 자동 실행 때 다시 시도합니다. 영어판(BTC/ETH, Bitstamp 데이터)은 정상적으로
+       갱신되었습니다 — 위의 English 링크를 확인해 주세요.</p>
+  </div>
+</main>
+<footer class="bottom">
+  <div><a href="methodology.html">방법론</a> &middot; <a href="../index.html">English</a></div>
+</footer>
+<div class="disclaimer-block">본 페이지는 무료로 제공되는 정보·교육 목적의 자료이며, 투자 자문이나 특정 자산의 매수·매도 권유가 아닙니다. 과거 백테스트 결과는 미래 수익을 보장하지 않으며, 모든 투자 판단과 책임은 이용자 본인에게 있습니다. 운영자는 유사투자자문업자가 아니며 어떠한 수익도 보장하지 않습니다.</div>
+</body>
+</html>

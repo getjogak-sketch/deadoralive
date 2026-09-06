@@ -30,16 +30,27 @@ jobs:
         run: python tests.py
 
       - name: Run weekly pipeline
-        run: python run_weekly.py
+        id: pipeline
+        continue-on-error: true
+        run: |
+          mkdir -p results
+          set -o pipefail
+          python run_weekly.py 2>&1 | tee results/ci_run.log
 
       - name: Commit & push updated data/results/docs
         run: |
           git config user.name "deadoralive-bot"
           git config user.email "deadoralive-bot@users.noreply.github.com"
-          git add data/ results/ docs/
+          git add -f data/ results/ docs/
           if git diff --cached --quiet; then
             echo "No changes to commit."
           else
             git commit -m "weekly: refresh data/results/site ($(date -u +%F))"
             git push
           fi
+
+      - name: Fail the job if the pipeline failed
+        if: steps.pipeline.outcome == 'failure'
+        run: |
+          echo "run_weekly.py failed — see results/ci_run.log (committed above)."
+          exit 1

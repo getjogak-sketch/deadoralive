@@ -1,0 +1,45 @@
+name: weekly
+
+on:
+  schedule:
+    # Every Monday 00:30 UTC, per spec_v2 §5.
+    - cron: "30 0 * * 1"
+  workflow_dispatch: {}
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install pandas numpy requests
+
+      - name: Fetch data (Binance, incremental)
+        run: python fetch_data.py
+
+      - name: Run tests (hard gate)
+        run: python tests.py
+
+      - name: Run weekly pipeline
+        run: python run_weekly.py
+
+      - name: Commit & push updated data/results/docs
+        run: |
+          git config user.name "deadoralive-bot"
+          git config user.email "deadoralive-bot@users.noreply.github.com"
+          git add data/ results/ docs/
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "weekly: refresh data/results/site ($(date -u +%F))"
+            git push
+          fi

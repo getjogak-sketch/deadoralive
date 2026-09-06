@@ -1,7 +1,7 @@
 {
   "project_name": "Dead or Alive",
   "tagline": "Popular trading strategies, re-tested every week \u2014 after fees, out-of-sample.",
-  "generated_at": "2026-09-06T22:25:25.181889+00:00",
+  "generated_at": "2026-09-06T22:29:56.963875+00:00",
   "as_of": "2026-09-06",
   "oos_days": 730,
   "tally": {
@@ -49,7 +49,8 @@
         "avg_trade_return": 0.05014115862214614,
         "fee_drag": 0.033568745552542856
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "sma_cross",
@@ -89,7 +90,8 @@
         "avg_trade_return": 0.06973202453677832,
         "fee_drag": 0.012592198873975002
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "sma_cross",
@@ -129,7 +131,8 @@
         "avg_trade_return": -0.014622910831721514,
         "fee_drag": 0.003808341375053481
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "ema_cross",
@@ -169,7 +172,8 @@
         "avg_trade_return": 0.038020560414945385,
         "fee_drag": 0.04196856183232578
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "above_sma",
@@ -209,7 +213,8 @@
         "avg_trade_return": 0.024097025059570176,
         "fee_drag": 0.031079670422406114
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "above_sma",
@@ -249,7 +254,8 @@
         "avg_trade_return": 0.026619992804956857,
         "fee_drag": 0.09185624907845114
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "donchian",
@@ -289,7 +295,8 @@
         "avg_trade_return": 0.04677964911119314,
         "fee_drag": 0.03297451004390162
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "donchian",
@@ -329,7 +336,8 @@
         "avg_trade_return": 0.04410354342629684,
         "fee_drag": 0.017789415140737397
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "vol_breakout",
@@ -369,7 +377,8 @@
         "avg_trade_return": -7.687096691205911e-05,
         "fee_drag": 0.7640122563045955
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "vol_breakout",
@@ -409,7 +418,8 @@
         "avg_trade_return": 0.0005486932671482634,
         "fee_drag": 0.566361252368142
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "vol_breakout_trend",
@@ -449,7 +459,8 @@
         "avg_trade_return": 0.0009173676598512551,
         "fee_drag": 0.41362218475131907
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "rsi_mr",
@@ -489,7 +500,8 @@
         "avg_trade_return": -0.022218680360278603,
         "fee_drag": 0.007301018106304236
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "rsi_mr",
@@ -529,7 +541,8 @@
         "avg_trade_return": 0.03400538711452683,
         "fee_drag": 0.006243961716452695
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "rsi2_connors",
@@ -569,7 +582,8 @@
         "avg_trade_return": 0.00876331792036925,
         "fee_drag": 0.031951842252729845
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "bb_mr",
@@ -609,7 +623,8 @@
         "avg_trade_return": 0.003802718968476854,
         "fee_drag": 0.026503501590527945
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "bb_breakout",
@@ -649,7 +664,8 @@
         "avg_trade_return": -0.0056291955020250995,
         "fee_drag": 0.029296871008183678
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "macd",
@@ -689,7 +705,8 @@
         "avg_trade_return": 0.005418329758749594,
         "fee_drag": 0.07152309884068409
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "supertrend",
@@ -729,7 +746,8 @@
         "avg_trade_return": 0.017089061053222766,
         "fee_drag": 0.025261560395012816
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "tsmom",
@@ -769,7 +787,8 @@
         "avg_trade_return": 0.010628869042564125,
         "fee_drag": 0.11081505991509077
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "tsmom",
@@ -809,7 +828,8 @@
         "avg_trade_return": 0.04693592048222901,
         "fee_drag": 0.02127121938729659
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "dip_3down",
@@ -849,7 +869,8 @@
         "avg_trade_return": 0.00726121662849447,
         "fee_drag": 0.15640575035293214
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "dip_pct",
@@ -889,7 +910,8 @@
         "avg_trade_return": -0.0031211594924479727,
         "fee_drag": 0.024845591086937402
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "buy_and_hold",
@@ -909,7 +931,8 @@
         "mdd": 53.0769594637932,
         "fee_drag": 0.002751256402203195
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "dca_weekly",
@@ -929,7 +952,8 @@
         "mdd": 54.646017040166505,
         "fee_drag": 0.0009534136654687497
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "sma_cross",
@@ -969,7 +993,8 @@
         "avg_trade_return": 0.005152614319462895,
         "fee_drag": 0.15724069399692908
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "sma_cross",
@@ -1009,7 +1034,8 @@
         "avg_trade_return": 0.0223909360030658,
         "fee_drag": 0.09206804693482828
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "sma_cross",
@@ -1049,7 +1075,8 @@
         "avg_trade_return": 0.03682104690836447,
         "fee_drag": 0.04431301840980595
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "ema_cross",
@@ -1089,7 +1116,8 @@
         "avg_trade_return": -0.001976510838278622,
         "fee_drag": 0.1442502509177085
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "above_sma",
@@ -1129,7 +1157,8 @@
         "avg_trade_return": 0.007995334178807347,
         "fee_drag": 0.19200480718362356
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "above_sma",
@@ -1169,7 +1198,8 @@
         "avg_trade_return": -0.0005532845270076102,
         "fee_drag": 0.29998379441247824
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "donchian",
@@ -1209,7 +1239,8 @@
         "avg_trade_return": 0.001218416631123093,
         "fee_drag": 0.13544196851278967
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "donchian",
@@ -1249,7 +1280,8 @@
         "avg_trade_return": 0.012765707649581185,
         "fee_drag": 0.08149107535394506
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "vol_breakout",
@@ -1289,7 +1321,8 @@
         "avg_trade_return": -0.0015547967094094062,
         "fee_drag": 1.9856410873954065
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "vol_breakout",
@@ -1329,7 +1362,8 @@
         "avg_trade_return": -0.0012316111452564374,
         "fee_drag": 2.204402335695658
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "vol_breakout_trend",
@@ -1369,7 +1403,8 @@
         "avg_trade_return": -0.0017057181556606109,
         "fee_drag": 1.0870486601064628
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "rsi_mr",
@@ -1409,7 +1444,8 @@
         "avg_trade_return": 0.003930413363334581,
         "fee_drag": 0.07440715020303212
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "rsi_mr",
@@ -1449,7 +1485,8 @@
         "avg_trade_return": 0.008973500339674792,
         "fee_drag": 0.04019005236323081
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "rsi2_connors",
@@ -1489,7 +1526,8 @@
         "avg_trade_return": -0.0015163984476335025,
         "fee_drag": 0.1761258041640833
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "bb_mr",
@@ -1529,7 +1567,8 @@
         "avg_trade_return": -0.0011566767692562153,
         "fee_drag": 0.14049324645392236
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "bb_breakout",
@@ -1569,7 +1608,8 @@
         "avg_trade_return": 0.00024310045566903912,
         "fee_drag": 0.17614334226555595
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "macd",
@@ -1609,7 +1649,8 @@
         "avg_trade_return": 0.0012899697078127754,
         "fee_drag": 0.4152958099774249
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "supertrend",
@@ -1649,7 +1690,8 @@
         "avg_trade_return": 0.004658184392002568,
         "fee_drag": 0.1329009079954393
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "tsmom",
@@ -1689,7 +1731,8 @@
         "avg_trade_return": -0.001264380837392075,
         "fee_drag": 0.3799186278217901
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "tsmom",
@@ -1729,7 +1772,8 @@
         "avg_trade_return": 0.003126873823226275,
         "fee_drag": 0.3093603551531614
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "dip_3down",
@@ -1769,7 +1813,8 @@
         "avg_trade_return": -0.002099243834648384,
         "fee_drag": 0.37125545359639245
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "dip_pct",
@@ -1809,7 +1854,8 @@
         "avg_trade_return": 0.03528902701243911,
         "fee_drag": 0.0066682897125800444
       },
-      "suspicious": true
+      "suspicious": true,
+      "edition": "en"
     },
     {
       "strategy_id": "buy_and_hold",
@@ -1829,7 +1875,8 @@
         "mdd": 53.56229229923255,
         "fee_drag": 0.002838594681098039
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "dca_weekly",
@@ -1849,7 +1896,8 @@
         "mdd": 55.12925146730229,
         "fee_drag": 0.000953641335631028
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "sma_cross",
@@ -1889,7 +1937,8 @@
         "avg_trade_return": 0.08143551487542648,
         "fee_drag": 0.03136519982376118
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "sma_cross",
@@ -1929,7 +1978,8 @@
         "avg_trade_return": 0.20103041844909034,
         "fee_drag": 0.015393439839164191
       },
-      "suspicious": true
+      "suspicious": true,
+      "edition": "en"
     },
     {
       "strategy_id": "sma_cross",
@@ -1969,7 +2019,8 @@
         "avg_trade_return": -0.05703954725935708,
         "fee_drag": 0.004377470191720745
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "ema_cross",
@@ -2009,7 +2060,8 @@
         "avg_trade_return": 0.06805077817784183,
         "fee_drag": 0.03597910927378223
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "above_sma",
@@ -2049,7 +2101,8 @@
         "avg_trade_return": 0.029036700718460665,
         "fee_drag": 0.019436309121595663
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "above_sma",
@@ -2089,7 +2142,8 @@
         "avg_trade_return": 0.072512405272246,
         "fee_drag": 0.0781832506507314
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "donchian",
@@ -2129,7 +2183,8 @@
         "avg_trade_return": -0.020747304470091994,
         "fee_drag": 0.01876951117735559
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "donchian",
@@ -2169,7 +2224,8 @@
         "avg_trade_return": 0.10544312011719285,
         "fee_drag": 0.01595256777651599
       },
-      "suspicious": true
+      "suspicious": true,
+      "edition": "en"
     },
     {
       "strategy_id": "vol_breakout",
@@ -2209,7 +2265,8 @@
         "avg_trade_return": 0.0007206288778695166,
         "fee_drag": 0.8915739124117912
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "vol_breakout",
@@ -2249,7 +2306,8 @@
         "avg_trade_return": 0.004399761950969915,
         "fee_drag": 1.1354548772629656
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "vol_breakout_trend",
@@ -2289,7 +2347,8 @@
         "avg_trade_return": 0.0048989601762347386,
         "fee_drag": 0.5932612937038149
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "rsi_mr",
@@ -2329,7 +2388,8 @@
         "avg_trade_return": -0.10910565341193015,
         "fee_drag": 0.004992065118697209
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "rsi_mr",
@@ -2369,7 +2429,8 @@
         "avg_trade_return": -0.019290316754630443,
         "fee_drag": 0.0051611774301771884
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "rsi2_connors",
@@ -2409,7 +2470,8 @@
         "avg_trade_return": 0.022987018365984713,
         "fee_drag": 0.0250821891298052
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "bb_mr",
@@ -2449,7 +2511,8 @@
         "avg_trade_return": -0.027911153473709555,
         "fee_drag": 0.015134855820008064
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "bb_breakout",
@@ -2489,7 +2552,8 @@
         "avg_trade_return": 0.014544973143227098,
         "fee_drag": 0.03430198735343115
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "macd",
@@ -2529,7 +2593,8 @@
         "avg_trade_return": 0.0024605026972843447,
         "fee_drag": 0.04533346168496977
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "supertrend",
@@ -2569,7 +2634,8 @@
         "avg_trade_return": 0.02459708522710887,
         "fee_drag": 0.021447279849660994
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "tsmom",
@@ -2609,7 +2675,8 @@
         "avg_trade_return": 0.041253137695847784,
         "fee_drag": 0.12495384817098865
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "tsmom",
@@ -2649,7 +2716,8 @@
         "avg_trade_return": 0.039803389791830464,
         "fee_drag": 0.02360166167729938
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "dip_3down",
@@ -2689,7 +2757,8 @@
         "avg_trade_return": 0.005046050745262209,
         "fee_drag": 0.1031316728005578
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "dip_pct",
@@ -2729,7 +2798,8 @@
         "avg_trade_return": -0.007967588557071843,
         "fee_drag": 0.04442691215412076
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "buy_and_hold",
@@ -2749,7 +2819,8 @@
         "mdd": 67.590690740434,
         "fee_drag": 0.0020221231237143034
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "dca_weekly",
@@ -2769,7 +2840,8 @@
         "mdd": 68.27359776209994,
         "fee_drag": 0.000982882372208671
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "sma_cross",
@@ -2809,7 +2881,8 @@
         "avg_trade_return": 0.004772855496320506,
         "fee_drag": 0.14403960538828908
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "sma_cross",
@@ -2849,7 +2922,8 @@
         "avg_trade_return": 0.007281225140585214,
         "fee_drag": 0.06239470530313518
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "sma_cross",
@@ -2889,7 +2963,8 @@
         "avg_trade_return": 0.09166954622135452,
         "fee_drag": 0.05294279348394948
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "ema_cross",
@@ -2929,7 +3004,8 @@
         "avg_trade_return": -0.002349352803731106,
         "fee_drag": 0.1157421079307176
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "above_sma",
@@ -2969,7 +3045,8 @@
         "avg_trade_return": 0.018940163711045736,
         "fee_drag": 0.2512737059917618
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "above_sma",
@@ -3009,7 +3086,8 @@
         "avg_trade_return": 5.791918858718307e-05,
         "fee_drag": 0.31855543644030915
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "donchian",
@@ -3049,7 +3127,8 @@
         "avg_trade_return": 0.006223602296466029,
         "fee_drag": 0.1607822727686934
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "donchian",
@@ -3089,7 +3168,8 @@
         "avg_trade_return": 0.007254529027759942,
         "fee_drag": 0.06361781685810719
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "vol_breakout",
@@ -3129,7 +3209,8 @@
         "avg_trade_return": -0.0013898814212812726,
         "fee_drag": 2.474790350572716
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "vol_breakout",
@@ -3169,7 +3250,8 @@
         "avg_trade_return": -0.0011108603670674797,
         "fee_drag": 2.37840613397659
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "vol_breakout_trend",
@@ -3209,7 +3291,8 @@
         "avg_trade_return": -0.0017524620835945972,
         "fee_drag": 0.9839407756762533
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "rsi_mr",
@@ -3249,7 +3332,8 @@
         "avg_trade_return": -0.0034004531422615076,
         "fee_drag": 0.053794655374366895
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "rsi_mr",
@@ -3289,7 +3373,8 @@
         "avg_trade_return": -0.02443735882288042,
         "fee_drag": 0.017724502459984803
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "rsi2_connors",
@@ -3329,7 +3414,8 @@
         "avg_trade_return": -0.0032510947702494974,
         "fee_drag": 0.1492527033053329
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "bb_mr",
@@ -3369,7 +3455,8 @@
         "avg_trade_return": -0.005568561273702575,
         "fee_drag": 0.09494870867036098
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "bb_breakout",
@@ -3409,7 +3496,8 @@
         "avg_trade_return": -0.0010046117046783212,
         "fee_drag": 0.15042227327919244
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "macd",
@@ -3449,7 +3537,8 @@
         "avg_trade_return": 0.004144962199234494,
         "fee_drag": 0.565512848904925
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "supertrend",
@@ -3489,7 +3578,8 @@
         "avg_trade_return": 0.0070561651723744945,
         "fee_drag": 0.12986449357871277
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "tsmom",
@@ -3529,7 +3619,8 @@
         "avg_trade_return": -0.0003207919871682844,
         "fee_drag": 0.36630086226740854
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "tsmom",
@@ -3569,7 +3660,8 @@
         "avg_trade_return": 0.004478415083662211,
         "fee_drag": 0.21394516603142688
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "dip_3down",
@@ -3609,7 +3701,8 @@
         "avg_trade_return": -0.003271320248164579,
         "fee_drag": 0.26560346045282013
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "dip_pct",
@@ -3649,7 +3742,8 @@
         "avg_trade_return": 0.01760214144697388,
         "fee_drag": 0.05633663540560807
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "buy_and_hold",
@@ -3669,7 +3763,8 @@
         "mdd": 68.07436836550997,
         "fee_drag": 0.0021010789539865904
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     },
     {
       "strategy_id": "dca_weekly",
@@ -3689,7 +3784,8 @@
         "mdd": 68.61153825868087,
         "fee_drag": 0.0009869738829082486
       },
-      "suspicious": false
+      "suspicious": false,
+      "edition": "en"
     }
   ],
   "suspicious": [

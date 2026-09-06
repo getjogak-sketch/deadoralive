@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      issues: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,7 +39,11 @@ jobs:
           python run_weekly.py 2>&1 | tee results/ci_run.log
 
       - name: Commit & push updated data/results/docs
+        id: commit
+        continue-on-error: true
         run: |
+          set -x
+          exec > >(tee /tmp/commit.log) 2>&1
           git config user.name "deadoralive-bot"
           git config user.email "deadoralive-bot@users.noreply.github.com"
           git add -f data/ results/ docs/
@@ -53,4 +58,20 @@ jobs:
         if: steps.pipeline.outcome == 'failure'
         run: |
           echo "run_weekly.py failed — see results/ci_run.log (committed above)."
+          exit 1
+
+      - name: Report failure as an issue (logs are not downloadable from our dev box)
+        if: steps.pipeline.outcome == 'failure' || steps.commit.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            echo "Run: ${{ github.run_id }}"
+            echo; echo "## pipeline (results/ci_run.log, last 80 lines)"; echo '```'
+            tail -n 80 results/ci_run.log 2>/dev/null || echo "(no log)"
+            echo '```'; echo; echo "## commit step (/tmp/commit.log)"; echo '```'
+            cat /tmp/commit.log 2>/dev/null || echo "(no log)"
+            echo '```'
+          } > /tmp/issue.md
+          gh issue create --title "weekly run failed ($(date -u +%F))" --body-file /tmp/issue.md || true
           exit 1

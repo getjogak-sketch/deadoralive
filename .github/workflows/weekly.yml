@@ -25,7 +25,12 @@ jobs:
         run: pip install pandas numpy requests
 
       - name: Fetch data (Binance, incremental)
-        run: python fetch_data.py
+        id: fetch
+        continue-on-error: true
+        run: |
+          mkdir -p results
+          python fetch_data.py 2>&1 | tee results/ci_fetch.log
+          ls -la data/ >> results/ci_fetch.log
 
       - name: Run tests (hard gate)
         run: python tests.py
@@ -61,12 +66,15 @@ jobs:
           exit 1
 
       - name: Report failure as an issue (logs are not downloadable from our dev box)
-        if: steps.pipeline.outcome == 'failure' || steps.commit.outcome == 'failure'
+        if: always() && (steps.pipeline.outcome == 'failure' || steps.commit.outcome == 'failure' || steps.fetch.outcome == 'failure')
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           {
             echo "Run: ${{ github.run_id }}"
+            echo; echo "## fetch (results/ci_fetch.log)"; echo '```'
+            tail -n 40 results/ci_fetch.log 2>/dev/null || echo "(no log)"
+            echo '```'
             echo; echo "## pipeline (results/ci_run.log, last 80 lines)"; echo '```'
             tail -n 80 results/ci_run.log 2>/dev/null || echo "(no log)"
             echo '```'; echo; echo "## commit step (/tmp/commit.log)"; echo '```'

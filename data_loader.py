@@ -17,8 +17,8 @@ DATA_DIR = "/home/claude/data"   # v1 dev-box location (Bitstamp/SPY files)
 # Production fallback (GitHub Actions): the repo's own data/ dir, filled by fetch_data.py.
 _REPO_DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 _PROD_FILES = {
-    ("btc", "1d"): "BTCUSDT_1d.csv",
-    ("btc", "4h"): "BTCUSDT_4h.csv",
+    ("btc", "1d"): "BTCUSD_1d.csv",
+    ("btc", "4h"): "BTCUSD_4h.csv",
 }
 
 
@@ -108,7 +108,7 @@ def load_all():
 #
 # v1's load_raw/FILES/COST/PERIODS hard-code the three (asset, timeframe) combos this repo's
 # original spec covered, at a fixed data directory. netcheck needs to load arbitrary
-# <SYMBOL>_<TF>.csv files from its own data/ directory (BTCUSDT, ETHUSDT, ...), so we add a
+# <SYMBOL>_<TF>.csv files from its own data/ directory (BTCUSD, ETHUSD, ...), so we add a
 # generic loader alongside the v1 one rather than touching it.
 # ---------------------------------------------------------------------------
 

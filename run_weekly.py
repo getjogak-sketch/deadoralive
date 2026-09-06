@@ -12,7 +12,7 @@ every registry.py variant net-of-cost over the rolling IS/OOS window (data_loade
 window), assigns a verdict.py badge from OOS metrics, and additionally re-runs each variant's OOS
 window at zero cost solely to compute the "fee drag" column (gross OOS return - net OOS return;
 spec_v2 §5 — the ONLY place a gross/cost-free number is ever surfaced, and it is explicitly
-labeled as such on the page). Assets with no local data file (ETHUSDT, in this environment) are
+labeled as such on the page). Assets with no local data file (ETHUSD, in this environment) are
 skipped with a warning, per spec_v2 §1 — not a failure.
 """
 from __future__ import annotations

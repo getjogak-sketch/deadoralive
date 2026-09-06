@@ -32,32 +32,37 @@ DOCS_DIR = os.path.join(BASE_DIR, "docs")
 
 # Offline mode data sources (spec_v2 §1): this dev environment has api.binance.com blocked, so
 # fetch_data.py --offline copies these local Bitstamp-sourced v1 files in as a stand-in for the
-# Binance BTCUSDT feed. There is no local ETHUSDT source anywhere — that asset is skipped with a
+# Bitstamp BTCUSD feed. There is no local ETHUSD source anywhere — that asset is skipped with a
 # warning by fetch_data.py, per spec_v2 §1, not treated as a failure.
 OFFLINE_SOURCES = {
-    ("BTCUSDT", "1d"): "/home/claude/data/btc_1d.csv",
-    ("BTCUSDT", "4h"): "/home/claude/data/btc_4h.csv",
+    ("BTCUSD", "1d"): "/home/claude/data/btc_1d.csv",
+    ("BTCUSD", "4h"): "/home/claude/data/btc_4h.csv",
 }
 # The local BTC files' last row is the partial (not-yet-closed) bar dated 2026-09-06 (spec.md §1);
-# fetch_data.py drops it, the same way it would drop Binance's still-forming current candle.
+# fetch_data.py drops it, the same way it would drop the exchange's still-forming current candle.
 OFFLINE_PARTIAL_BAR_DATE = "2026-09-06"
 
 # ---------------------------------------------------------------------------
 # Universe (spec_v2 §1/§3)
 # ---------------------------------------------------------------------------
-ASSETS = ["BTCUSDT", "ETHUSDT"]
+ASSETS = ["BTCUSD", "ETHUSD"]
 TIMEFRAMES = ["1d", "4h"]
 
-# Production Binance data starts at listing (2017-08-17); the offline Bitstamp stand-in file
+# Production data is floored at (2017-08-17); the offline Bitstamp stand-in file
 # starts in 2012 (thin-liquidity years that distort IS metrics). Bars before this date are
 # dropped for every asset/timeframe before any indicator is computed, so offline and production
 # runs see the same history window.
 DATA_START = "2017-08-17"
 
-# Binance symbol listing dates, used by fetch_data.py's online pagination start point.
+# Data source: Bitstamp public OHLC API (no key, no geo-block — Binance returns HTTP 451 from
+# GitHub's US-based runners). Bitstamp market symbols are lowercase: btcusd, ethusd.
+DATA_SOURCE = "bitstamp"
+BITSTAMP_SYMBOL = {"BTCUSD": "btcusd", "ETHUSD": "ethusd"}
+
+# Pagination start dates (Bitstamp), used by fetch_data.py's online pagination start point.
 LISTING_DATE = {
-    "BTCUSDT": "2017-08-17",
-    "ETHUSDT": "2017-08-17",
+    "BTCUSD": "2017-08-17",
+    "ETHUSD": "2017-08-17",
 }
 
 # ---------------------------------------------------------------------------
@@ -68,8 +73,8 @@ LISTING_DATE = {
 # (see README "Simplifying assumptions"), not a new number invented ad hoc.
 # ---------------------------------------------------------------------------
 COST = {
-    "BTCUSDT": 0.0010,
-    "ETHUSDT": 0.0010,
+    "BTCUSD": 0.0010,
+    "ETHUSD": 0.0010,
 }
 
 # bars_per_year for Sharpe annualization (v1 spec.md §5 convention, keyed by timeframe here since

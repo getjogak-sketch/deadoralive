@@ -19,9 +19,9 @@ fees, on real recent data?" — not a signal service and not investment advice.
 ```bash
 cd deadoralive
 
-# 1. Fetch data. Binance's public API (api.binance.com) is network-blocked in this dev
+# 1. Fetch data. Bitstamp's public API (www.bitstamp.net) is network-blocked in this dev
 #    environment, so use --offline, which copies in the local Bitstamp-sourced v1 CSVs as a
-#    stand-in for BTCUSDT (see "Local vs. production data" below). ETHUSDT has no local source
+#    stand-in for BTCUSD (see "Local vs. production data" below). ETHUSD has no local source
 #    and is skipped with a warning, not an error.
 python3 fetch_data.py --offline
 
@@ -36,7 +36,7 @@ python3 run_weekly.py --offline
 ```
 
 In production (`.github/workflows/weekly.yml`, cron Monday 00:30 UTC): `fetch_data.py` (no
-`--offline`, real Binance BTCUSDT/ETHUSDT) → `tests.py` → `run_weekly.py` → commit & push
+`--offline`, real Bitstamp BTCUSD/ETHUSD) → `tests.py` → `run_weekly.py` → commit & push
 `data/`, `results/`, `docs/`.
 
 ## Methodology summary
@@ -60,13 +60,13 @@ rules, verdict thresholds, engine-honesty checks, the full strategy table). In b
 
 ## Local vs. production data
 
-This dev environment blocks `api.binance.com` and every other exchange/finance API, so
-`fetch_data.py`'s real Binance path is **written but never exercised here** — only its
+This dev environment blocks `www.bitstamp.net` and every other exchange/finance API, so
+`fetch_data.py`'s real Bitstamp path is **written but never exercised here** — only its
 `--offline` path has been run, using `data/btc_1d.csv` and `btc_4h.csv` (Bitstamp
-BTC/USD, v1's original source, last-bar-2026-09-06-dropped) copied in as `BTCUSDT_1d.csv` /
-`BTCUSDT_4h.csv`. In real weekly operation this becomes actual Binance BTCUSDT/ETHUSDT klines —
+BTC/USD, v1's original source, last-bar-2026-09-06-dropped) copied in as `BTCUSD_1d.csv` /
+`BTCUSD_4h.csv`. In real weekly operation this becomes actual Bitstamp BTCUSD/ETHUSD klines —
 a different venue, a genuinely different (if closely correlated) price series, not merely a
-renamed copy. `ETHUSDT` has no local stand-in at all in this environment and is skipped with a
+renamed copy. `ETHUSD` has no local stand-in at all in this environment and is skipped with a
 console warning by both `fetch_data.py` and `run_weekly.py`, exactly per spec_v2 §1 ("데이터
 파일이 없는 자산은 경고만 남기고 건너뛴다") — not treated as a failure.
 
@@ -110,7 +110,7 @@ crosscheck.csv`, deliberately left unchanged, since it is a v1 file whose locati
 
 `python3 run_weekly.py --offline` re-runs `tests.py` as a hard gate, then produces:
 
-- **44 verdicted rows**: 22 strategy variants × 1 asset (BTCUSDT; ETHUSDT skipped) × 2 timeframes
+- **44 verdicted rows**: 22 strategy variants × 1 asset (BTCUSD; ETHUSD skipped) × 2 timeframes
   (1d, 4h). In production, with both assets available, this is 88 rows (spec_v2 §6's number).
 - **4 reference rows**: `buy_and_hold` + `dca_weekly`, × 2 timeframes (no verdict badge).
 - **Verdict tally** (this offline BTC-only run, `as_of` = 2026-09-05): `ALIVE 8, FADING 17,
@@ -121,7 +121,7 @@ crosscheck.csv`, deliberately left unchanged, since it is a v1 file whose locati
 
 ### Suspiciously good results (spec_v2 §6: "OOS PF > 5 또는 샤프 > 4는 버그로 간주")
 
-One flagged row: **`dip_pct` (BTCUSDT, 4h): OOS PF = 13.64** (Sharpe = 1.03, not flagged on that
+One flagged row: **`dip_pct` (BTCUSD, 4h): OOS PF = 13.64** (Sharpe = 1.03, not flagged on that
 axis). Investigated, not a bug: this row has only **3 completed OOS trades** — the verdict engine
 correctly assigns it `TOO FEW TRADES` (< 10), so it is never presented as evidence of an edge.
 Its in-sample sibling (222 trades, IS PF = 1.60, IS Sharpe = 0.62) shows ordinary performance at
@@ -198,5 +198,5 @@ verdict.py, run_weekly.py, build_site.py, tests.py, crosscheck_bt.py, data_loade
 .github/workflows/weekly.yml
 docs/index.html, docs/methodology.html, docs/latest.json
 results/latest.json, results/history/<as_of>.json
-data/BTCUSDT_1d.csv, data/BTCUSDT_4h.csv   (offline stand-ins; ETHUSDT absent in this environment)
+data/BTCUSD_1d.csv, data/BTCUSD_4h.csv   (offline stand-ins; ETHUSD absent in this environment)
 ```

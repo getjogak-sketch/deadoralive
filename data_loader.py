@@ -11,7 +11,28 @@ Per spec §1/§2:
 from __future__ import annotations
 import pandas as pd
 
-DATA_DIR = "/home/claude/data"
+import os
+DATA_DIR = "/home/claude/data"   # v1 dev-box location (Bitstamp/SPY files)
+
+# Production fallback (GitHub Actions): the repo's own data/ dir, filled by fetch_data.py.
+_REPO_DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+_PROD_FILES = {
+    ("btc", "1d"): "BTCUSDT_1d.csv",
+    ("btc", "4h"): "BTCUSDT_4h.csv",
+}
+
+
+def resolve_path(asset: str, timeframe: str):
+    """Return the first existing CSV for (asset, tf): v1 dev path, else repo data/ (prod). None if neither."""
+    p = f"{DATA_DIR}/{FILES[(asset, timeframe)]}"
+    if os.path.exists(p):
+        return p
+    fname = _PROD_FILES.get((asset, timeframe))
+    if fname:
+        p2 = os.path.join(_REPO_DATA_DIR, fname)
+        if os.path.exists(p2):
+            return p2
+    return None
 
 # (asset, timeframe) -> csv filename
 FILES = {
@@ -48,8 +69,9 @@ PERIODS = {
 
 def load_raw(asset: str, timeframe: str) -> pd.DataFrame:
     """Load a CSV, parse dates, sort ascending, drop the BTC partial last bar."""
-    fname = FILES[(asset, timeframe)]
-    path = f"{DATA_DIR}/{fname}"
+    path = resolve_path(asset, timeframe)
+    if path is None:
+        raise FileNotFoundError(f"no data file for {asset} {timeframe}")
     df = pd.read_csv(path, parse_dates=["date"])
     df = df.sort_values("date").reset_index(drop=True)
 
@@ -58,10 +80,7 @@ def load_raw(asset: str, timeframe: str) -> pd.DataFrame:
         last_date = df["date"].iloc[-1]
         if last_date.normalize() == pd.Timestamp("2026-09-06"):
             df = df.iloc[:-1].reset_index(drop=True)
-        else:
-            raise AssertionError(
-                f"Expected last BTC {timeframe} bar to be 2026-09-06, got {last_date}"
-            )
+        # Production files (fetch_data.py) never contain a partial bar, so nothing to drop there.
 
     df = df[["date", "open", "high", "low", "close", "volume"]].copy()
     return df

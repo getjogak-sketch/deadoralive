@@ -20,6 +20,7 @@ Any remaining difference is explained in README.md (typically integer-share roun
 backtesting.py, which our pandas engine does not model — we assume fractional shares).
 """
 from __future__ import annotations
+import os
 import sys
 import numpy as np
 import pandas as pd
@@ -139,7 +140,7 @@ def main():
                   f"total_return pandas={r_pd:.4f} bt={r_bt:.4f} rel_err={rel_err:.4%} ok={return_ok}")
 
     out = pd.DataFrame(results)
-    out.to_csv("/home/claude/bt/results/crosscheck.csv", index=False)
+    out.to_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "results", "crosscheck.csv"), index=False)
     print()
     print("ALL CROSSCHECKS OK" if all_ok else "SOME CROSSCHECKS FAILED")
     return 0 if all_ok else 1

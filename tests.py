@@ -10,7 +10,7 @@ import sys
 import numpy as np
 import pandas as pd
 
-from data_loader import load_raw, period_mask, COST, PERIODS
+from data_loader import load_raw, period_mask, COST, PERIODS, resolve_path
 from strategies import ma_cross_target_state, vol_breakout_targets, MA_CROSS_PARAMS, VOL_BREAKOUT_PARAMS
 from engine import simulate_ma_cross, simulate_vol_breakout
 
@@ -30,6 +30,8 @@ def check(name, condition, detail=""):
 
 def test_no_lookahead_ma_cross():
     for asset, tf in [("btc", "1d"), ("btc", "4h"), ("spy", "1d")]:
+        if resolve_path(asset, tf) is None:
+            print(f"[SKIP] {asset} {tf}: no data file"); continue
         df = load_raw(asset, tf)
         n = len(df)
         Ts = sorted(set([n // 4, n // 2, (3 * n) // 4]))
@@ -50,6 +52,8 @@ def test_no_lookahead_ma_cross():
 
 def test_no_lookahead_vol_breakout():
     for asset, tf in [("btc", "1d"), ("btc", "4h"), ("spy", "1d")]:
+        if resolve_path(asset, tf) is None:
+            print(f"[SKIP] {asset} {tf}: no data file"); continue
         df = load_raw(asset, tf)
         n = len(df)
         Ts = sorted(set([n // 4, n // 2, (3 * n) // 4]))
@@ -77,6 +81,8 @@ def test_no_lookahead_vol_breakout():
 
 def test_sanity_cost():
     for asset, tf in [("btc", "1d"), ("btc", "4h"), ("spy", "1d")]:
+        if resolve_path(asset, tf) is None:
+            print(f"[SKIP] {asset} {tf}: no data file"); continue
         df = load_raw(asset, tf)
         cost = COST[asset]
         for period in ["IS", "OOS"]:
@@ -127,6 +133,8 @@ MIN_WARMUP_T = 260  # safely past every registry variant's longest lookback (SMA
 
 def test_no_lookahead_registry():
     for asset, tf in [("btc", "1d"), ("btc", "4h"), ("spy", "1d")]:
+        if resolve_path(asset, tf) is None:
+            print(f"[SKIP] {asset} {tf}: no data file"); continue
         df = load_raw(asset, tf)
         n = len(df)
         Ts = sorted(set([n // 4, n // 2, (3 * n) // 4]))
@@ -166,6 +174,8 @@ def test_no_lookahead_reference_rows():
     from data_loader import period_mask, COST
 
     for asset, tf in [("btc", "1d"), ("btc", "4h")]:
+        if resolve_path(asset, tf) is None:
+            print(f"[SKIP] {asset} {tf}: no data file"); continue
         df = load_raw(asset, tf)
         n = len(df)
         mask_full = pd.Series(True, index=df.index)

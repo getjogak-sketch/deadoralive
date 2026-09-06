@@ -3,9 +3,9 @@
 [fetch_data] ETHUSD 1d: no new bars.
 [fetch_data] ETHUSD 4h: no new bars.
 total 2860
-drwxr-xr-x 2 runner runner    4096 Sep  6 22:24 .
-drwxr-xr-x 8 runner runner    4096 Sep  6 22:24 ..
--rw-r--r-- 1 runner runner  191197 Sep  6 22:24 BTCUSD_1d.csv
--rw-r--r-- 1 runner runner 1310660 Sep  6 22:24 BTCUSD_4h.csv
--rw-r--r-- 1 runner runner  178841 Sep  6 22:24 ETHUSD_1d.csv
--rw-r--r-- 1 runner runner 1235287 Sep  6 22:24 ETHUSD_4h.csv
+drwxr-xr-x 2 runner runner    4096 Sep  6 22:25 .
+drwxr-xr-x 8 runner runner    4096 Sep  6 22:25 ..
+-rw-r--r-- 1 runner runner  191197 Sep  6 22:25 BTCUSD_1d.csv
+-rw-r--r-- 1 runner runner 1310660 Sep  6 22:25 BTCUSD_4h.csv
+-rw-r--r-- 1 runner runner  178841 Sep  6 22:25 ETHUSD_1d.csv
+-rw-r--r-- 1 runner runner 1235287 Sep  6 22:25 ETHUSD_4h.csv

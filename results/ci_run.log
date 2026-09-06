@@ -1,0 +1,57 @@
+Running tests.py as a hard gate before producing results...
+884
+[PASS] no-lookahead bb_breakout params=20-2 btc/4h T=4961
+[PASS] no-lookahead bb_breakout params=20-2 btc/4h T=9923
+[PASS] no-lookahead bb_breakout params=20-2 btc/4h T=14884
+[PASS] no-lookahead macd params=12-26-9 btc/4h T=4961
+[PASS] no-lookahead macd params=12-26-9 btc/4h T=9923
+[PASS] no-lookahead macd params=12-26-9 btc/4h T=14884
+[PASS] no-lookahead supertrend params=10-3 btc/4h T=4961
+[PASS] no-lookahead supertrend params=10-3 btc/4h T=9923
+[PASS] no-lookahead supertrend params=10-3 btc/4h T=14884
+[PASS] no-lookahead tsmom params=n30 btc/4h T=4961
+[PASS] no-lookahead tsmom params=n30 btc/4h T=9923
+[PASS] no-lookahead tsmom params=n30 btc/4h T=14884
+[PASS] no-lookahead tsmom params=n90 btc/4h T=4961
+[PASS] no-lookahead tsmom params=n90 btc/4h T=9923
+[PASS] no-lookahead tsmom params=n90 btc/4h T=14884
+[PASS] no-lookahead dip_3down params=fixed btc/4h T=4961
+[PASS] no-lookahead dip_3down params=fixed btc/4h T=9923
+[PASS] no-lookahead dip_3down params=fixed btc/4h T=14884
+[PASS] no-lookahead dip_pct params=-5pct-5bar btc/4h T=4961
+[PASS] no-lookahead dip_pct params=-5pct-5bar btc/4h T=9923
+[PASS] no-lookahead dip_pct params=-5pct-5bar btc/4h T=14884
+[SKIP] spy 1d: no data file
+[PASS] no-lookahead dca_weekly btc/1d T=2480
+[PASS] no-lookahead dca_weekly btc/4h T=14884
+[PASS] indicator RSI(3) hand-derived value at t=4
+[PASS] indicator RSI(3) hand-derived value at t=5
+[PASS] indicator RSI(14) == 100 on strictly increasing series
+[PASS] indicator RSI(14) == 0 on strictly decreasing series
+[PASS] indicator RSI(14) == 50 on flat series
+[PASS] indicator EMA(2) hand-derived
+[PASS] indicator MACD == 0 on constant series
+[PASS] indicator Bollinger bands collapse to price on constant series
+[PASS] indicator Donchian upper hand-derived
+[PASS] indicator Donchian lower hand-derived
+[PASS] indicator Supertrend: None during ATR(10) warm-up
+[PASS] indicator Supertrend: only up/down after warm-up
+
+ALL TESTS PASSED (pandas-engine tests; run crosscheck_bt.py separately for §6.2)
+
+[run_weekly] BTCUSD 1d: as_of=2026-09-05, 24 rows (22 strategy variants + 2 reference)
+[run_weekly] BTCUSD 4h: as_of=2026-09-06, 24 rows (22 strategy variants + 2 reference)
+[run_weekly] ETHUSD 1d: as_of=2026-09-05, 24 rows (22 strategy variants + 2 reference)
+[run_weekly] ETHUSD 4h: as_of=2026-09-06, 24 rows (22 strategy variants + 2 reference)
+
+Wrote 96 rows to /home/runner/work/deadoralive/deadoralive/results/latest.json
+Wrote /home/runner/work/deadoralive/deadoralive/results/history/2026-09-06.json
+Wrote /home/runner/work/deadoralive/deadoralive/docs/latest.json
+Verdict tally: {'ALIVE': 16, 'FADING': 31, 'DEAD': 26, 'TOO FEW TRADES': 15}
+
+SUSPICIOUS RESULTS (OOS PF > 5.0 or Sharpe > 4.0) — treat as a possible bug, per spec_v2 §6:
+  - {'strategy_id': 'dip_pct', 'params': '-5pct-5bar', 'asset': 'BTCUSD', 'tf': '4h', 'oos_pf': np.float64(13.64100308775583), 'oos_sharpe': np.float64(1.0272979947124028)}
+  - {'strategy_id': 'sma_cross', 'params': '20-100', 'asset': 'ETHUSD', 'tf': '1d', 'oos_pf': np.float64(6.796330825558598), 'oos_sharpe': np.float64(0.9725511031090982)}
+  - {'strategy_id': 'donchian', 'params': '55-20', 'asset': 'ETHUSD', 'tf': '1d', 'oos_pf': np.float64(6.232514125326542), 'oos_sharpe': np.float64(0.8346150652449134)}
+Wrote /home/runner/work/deadoralive/deadoralive/docs/index.html
+Wrote /home/runner/work/deadoralive/deadoralive/docs/methodology.html

@@ -1,19 +1,11 @@
-/home/runner/work/deadoralive/deadoralive/fetch_data.py:75: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
-  now = pd.Timestamp.utcnow().tz_localize(None)
-/home/runner/work/deadoralive/deadoralive/fetch_data.py:75: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
-  now = pd.Timestamp.utcnow().tz_localize(None)
-/home/runner/work/deadoralive/deadoralive/fetch_data.py:75: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
-  now = pd.Timestamp.utcnow().tz_localize(None)
-/home/runner/work/deadoralive/deadoralive/fetch_data.py:75: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
-  now = pd.Timestamp.utcnow().tz_localize(None)
-[fetch_data] BTCUSD 1d: wrote 3307 rows (2017-08-17 00:00:00 .. 2026-09-05 00:00:00) -> /home/runner/work/deadoralive/deadoralive/data/BTCUSD_1d.csv
-[fetch_data] BTCUSD 4h: wrote 19847 rows (2017-08-17 00:00:00 .. 2026-09-06 16:00:00) -> /home/runner/work/deadoralive/deadoralive/data/BTCUSD_4h.csv
-[fetch_data] ETHUSD 1d: wrote 3307 rows (2017-08-17 00:00:00 .. 2026-09-05 00:00:00) -> /home/runner/work/deadoralive/deadoralive/data/ETHUSD_1d.csv
-[fetch_data] ETHUSD 4h: wrote 19847 rows (2017-08-17 00:00:00 .. 2026-09-06 16:00:00) -> /home/runner/work/deadoralive/deadoralive/data/ETHUSD_4h.csv
+[fetch_data] BTCUSD 1d: no new bars.
+[fetch_data] BTCUSD 4h: no new bars.
+[fetch_data] ETHUSD 1d: no new bars.
+[fetch_data] ETHUSD 4h: no new bars.
 total 2860
-drwxr-xr-x 2 runner runner    4096 Sep  6 21:55 .
-drwxr-xr-x 8 runner runner    4096 Sep  6 21:54 ..
--rw-r--r-- 1 runner runner  191197 Sep  6 21:54 BTCUSD_1d.csv
--rw-r--r-- 1 runner runner 1310660 Sep  6 21:54 BTCUSD_4h.csv
--rw-r--r-- 1 runner runner  178841 Sep  6 21:54 ETHUSD_1d.csv
--rw-r--r-- 1 runner runner 1235287 Sep  6 21:55 ETHUSD_4h.csv
+drwxr-xr-x 2 runner runner    4096 Sep  6 22:24 .
+drwxr-xr-x 8 runner runner    4096 Sep  6 22:24 ..
+-rw-r--r-- 1 runner runner  191197 Sep  6 22:24 BTCUSD_1d.csv
+-rw-r--r-- 1 runner runner 1310660 Sep  6 22:24 BTCUSD_4h.csv
+-rw-r--r-- 1 runner runner  178841 Sep  6 22:24 ETHUSD_1d.csv
+-rw-r--r-- 1 runner runner 1235287 Sep  6 22:24 ETHUSD_4h.csv

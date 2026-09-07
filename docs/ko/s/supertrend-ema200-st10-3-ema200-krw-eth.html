@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>슈퍼트렌드 + 200일 이동평균 필터(10, 3; EMA200 필터) 이더리움 전략, 2026년에도 통할까? — 수수료 뗀 백테스트, 매주 갱신</title>
+<meta name="description" content="슈퍼트렌드 + 200일 이동평균 필터(10, 3; EMA200 필터) 이더리움 전략은 2026-09-07 기준 daily (1d) 표본외 구간에서 표본 부족 판정입니다: 순손익비 2.69, 수익률 41.0%, 최대낙폭 29.7%.">
+<link rel="canonical" href="https://getjogak-sketch.github.io/deadoralive/ko/s/supertrend-ema200-st10-3-ema200-krw-eth.html">
+<link rel="alternate" hreflang="x-default" href="https://getjogak-sketch.github.io/deadoralive/ko/s/supertrend-ema200-st10-3-ema200-krw-eth.html"><link rel="alternate" hreflang="ko" href="https://getjogak-sketch.github.io/deadoralive/ko/s/supertrend-ema200-st10-3-ema200-krw-eth.html"><link rel="alternate" hreflang="en" href="https://getjogak-sketch.github.io/deadoralive/s/supertrend-ema200-st10-3-ema200-ethusd.html">
+<style>
+:root {
+  --bg: #ffffff; --fg: #14181f; --muted: #5b6270; --border: #e2e5ea; --card-bg: #f7f8fa;
+  --link: #1a56db;
+  --alive-bg: #d9f2e3; --alive-fg: #106a37;
+  --fading-bg: #fdf1c8; --fading-fg: #7a5b00;
+  --dead-bg: #e6e8eb; --dead-fg: #4b5160;
+  --toofew-bg: #f2f3f5; --toofew-fg: #8a909c;
+  --suspicious: #c0392b;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #10131a; --fg: #e7e9ee; --muted: #9aa1b0; --border: #2a2f3a; --card-bg: #171b24;
+    --link: #7aa2ff;
+    --alive-bg: #113a26; --alive-fg: #6bdc9c;
+    --fading-bg: #3a3210; --fading-fg: #f0d572;
+    --dead-bg: #262a33; --dead-fg: #a8adb8;
+    --toofew-bg: #1c2029; --toofew-fg: #6b7180;
+    --suspicious: #ff8a7a;
+  }
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; margin: 0; padding: 0 0 3rem 0; line-height: 1.45; }
+a { color: var(--link); }
+header.top { padding: 2rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border); }
+header.top h1 { margin: 0 0 0.25rem 0; font-size: 1.7rem; }
+header.top p.tagline { margin: 0 0 1rem 0; color: var(--muted); }
+.meta { color: var(--muted); font-size: 0.9rem; }
+.tally { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 1rem; }
+.tally span { padding: 0.3rem 0.7rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600; }
+main { max-width: 1200px; margin: 0 auto; padding: 0 1.25rem; }
+nav.jump { display: flex; gap: 0.75rem; flex-wrap: wrap; margin: 1.25rem 0; }
+nav.jump a { padding: 0.3rem 0.7rem; border: 1px solid var(--border); border-radius: 6px; text-decoration: none; font-size: 0.9rem; }
+section.assetblock { margin: 2.25rem 0; }
+section.assetblock h2 { border-bottom: 2px solid var(--border); padding-bottom: 0.4rem; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; min-width: 980px; font-size: 0.85rem; }
+th, td { padding: 0.5rem 0.6rem; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--border); }
+th:nth-child(1), td:nth-child(1), th:nth-child(2), td:nth-child(2) { text-align: left; }
+thead th { background: var(--card-bg); position: sticky; top: 0; }
+tbody tr:hover { background: var(--card-bg); }
+.badge { padding: 0.15rem 0.55rem; border-radius: 999px; font-weight: 700; font-size: 0.78rem; display: inline-block; }
+.ref-row { font-style: italic; color: var(--muted); }
+.suspicious { color: var(--suspicious); font-weight: 700; }
+.gross-note { font-size: 0.75rem; color: var(--muted); }
+footer.bottom { max-width: 1200px; margin: 2.5rem auto 0; padding: 1.25rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem; }
+footer.bottom .disclaimer { margin-top: 0.75rem; }
+
+.stratpage main { max-width: 860px; }
+.scorecard { border-collapse: collapse; width: 100%; margin: 0.75rem 0 1.25rem; font-size: 0.88rem; }
+.scorecard th, .scorecard td { border: 1px solid var(--border); padding: 0.4rem 0.6rem; text-align: right; }
+.scorecard th:first-child, .scorecard td:first-child { text-align: left; }
+.scorecard thead th { background: var(--card-bg); }
+.griddump { font-size: 0.8rem; color: var(--muted); }
+.interp { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.1rem; margin: 1rem 0; }
+.histline { font-size: 0.82rem; color: var(--muted); }
+.tfblock { margin: 1.5rem 0; }
+</style>
+</head>
+
+<body class="stratpage">
+<header class="top">
+  <h1>슈퍼트렌드 + 200일 이동평균 필터(10, 3; EMA200 필터) 이더리움 전략, 2026년에도 통할까? — 수수료 뗀 백테스트, 매주 갱신</h1>
+  <p class="meta">as_of: <strong>2026-09-07</strong> &middot;
+     <a href="../index.html">전체 표로 돌아가기</a></p>
+</header>
+<main>
+  <p><strong>규칙:</strong> 슈퍼트렌드(10, 3) 방향이 위이고 종가가 200일 이동평균 위이면 매수, 슈퍼트렌드 방향이 아래로 바뀌는 순간 매도</p>
+  <div class="disclaimer-block">본 페이지는 무료로 제공되는 정보·교육 목적의 자료이며, 투자 자문이나 특정 자산의 매수·매도 권유가 아닙니다. 과거 백테스트 결과는 미래 수익을 보장하지 않으며, 모든 투자 판단과 책임은 이용자 본인에게 있습니다. 운영자는 유사투자자문업자가 아니며 어떠한 수익도 보장하지 않습니다.</div>
+  
+<div class="tfblock">
+  <h2>일봉(1d) &mdash; 판정: <span class="badge" style="background:var(--toofew-bg);color:var(--toofew-fg)">표본 부족<small>TOO FEW TRADES</small></span></h2>
+  <table class='scorecard'><thead><tr><th>지표</th><th>표본내(IS)</th><th>표본외(OOS)</th></tr></thead><tbody><tr><td>누적 수익률</td><td>10429.4%</td><td>41.0%</td></tr><tr><td>연복리수익률(CAGR)</td><td>95.8%</td><td>18.7%</td></tr><tr><td>순손익비(PF)</td><td>11.52</td><td>2.69</td></tr><tr><td>샤프비율</td><td>1.55</td><td>0.70</td></tr><tr><td>최대낙폭(MDD)</td><td>55.4%</td><td>29.7%</td></tr><tr><td>거래 횟수</td><td>18</td><td>6</td></tr><tr><td>승률</td><td>55.6%</td><td>50.0%</td></tr><tr><td>거래당 평균 수익률</td><td>45.3%</td><td>7.8%</td></tr><tr><td>보유 비중</td><td>40.1%</td><td>29.8%</td></tr><tr><td>단순 보유 (OOS)</td><td colspan='2'>6.1% return, 64.3% MDD</td></tr><tr><td>수수료 영향 (OOS)</td><td colspan='2'>1.7%</td></tr></tbody></table>
+  <h3>주변 설정값 안정성 (참고용)</h3><p><span class="badge robustness-badge" style="background:var(--toofew-bg);color:var(--toofew-fg)" title="n_ema=150 → PF=2.74 (n=6); n_ema=200 → PF=2.69 (n=6); n_ema=250 → PF=2.06 (n=6)">0/3</span> 0/3 통과 &mdash; 이 표는 위 판정을 바꾸지 않으며 파라미터를 새로 고르지도 않습니다 — 등록되지 않은 주변 값들도 표본외 순손익비 1.0 이상, 거래 10회 이상을 만족했는지만 참고용으로 보여줍니다.</p><ul class='griddump'><li>n_ema=150 &rarr; PF=2.74 (n=6)</li><li>n_ema=200 &rarr; PF=2.69 (n=6)</li><li>n_ema=250 &rarr; PF=2.06 (n=6)</li></ul>
+  <p class="histline">판정 이력 (1d): 2026-09-06: TOO FEW TRADES &rarr; 2026-09-07: TOO FEW TRADES</p>
+</div>
+<div class="tfblock">
+  <h2>4시간봉(4h) &mdash; 판정: <span class="badge" style="background:var(--alive-bg);color:var(--alive-fg)">생존<small>ALIVE</small></span></h2>
+  <table class='scorecard'><thead><tr><th>지표</th><th>표본내(IS)</th><th>표본외(OOS)</th></tr></thead><tbody><tr><td>누적 수익률</td><td>14810.5%</td><td>81.1%</td></tr><tr><td>연복리수익률(CAGR)</td><td>105.9%</td><td>34.5%</td></tr><tr><td>순손익비(PF)</td><td>3.27</td><td>1.90</td></tr><tr><td>샤프비율</td><td>1.81</td><td>1.09</td></tr><tr><td>최대낙폭(MDD)</td><td>39.1%</td><td>27.5%</td></tr><tr><td>거래 횟수</td><td>113</td><td>36</td></tr><tr><td>승률</td><td>45.1%</td><td>38.9%</td></tr><tr><td>거래당 평균 수익률</td><td>5.7%</td><td>2.1%</td></tr><tr><td>보유 비중</td><td>37.3%</td><td>34.6%</td></tr><tr><td>단순 보유 (OOS)</td><td colspan='2'>11.5% return, 65.2% MDD</td></tr><tr><td>수수료 영향 (OOS)</td><td colspan='2'>13.5%</td></tr></tbody></table>
+  <h3>주변 설정값 안정성 (참고용)</h3><p><span class="badge robustness-badge" style="background:var(--alive-bg);color:var(--alive-fg)" title="n_ema=150 → PF=1.90 (n=37); n_ema=200 → PF=1.90 (n=36); n_ema=250 → PF=1.73 (n=36)">3/3</span> 3/3 통과 &mdash; 이 표는 위 판정을 바꾸지 않으며 파라미터를 새로 고르지도 않습니다 — 등록되지 않은 주변 값들도 표본외 순손익비 1.0 이상, 거래 10회 이상을 만족했는지만 참고용으로 보여줍니다.</p><ul class='griddump'><li>n_ema=150 &rarr; PF=1.90 (n=37)</li><li>n_ema=200 &rarr; PF=1.90 (n=36)</li><li>n_ema=250 &rarr; PF=1.73 (n=36)</li></ul>
+  <p class="histline">판정 이력 (4h): 2026-09-06: ALIVE &rarr; 2026-09-07: ALIVE</p>
+</div>
+  <div class="interp">
+    <h3>숫자 요약 (해석 없음)</h3>
+    <p>일봉(1d) 기준, 2026-09-07 표본외 판정은 표본 부족입니다: 순손익비 2.69, 거래 6회, 누적 수익률 41.0%, 최대낙폭 29.7%이며, 같은 구간 단순 보유는 수익률 6.1%, 최대낙폭 64.3%이었습니다. 4시간봉(4h) 기준, 2026-09-07 표본외 판정은 생존입니다: 순손익비 1.90, 거래 36회, 누적 수익률 81.1%, 최대낙폭 27.5%이며, 같은 구간 단순 보유는 수익률 11.5%, 최대낙폭 65.2%이었습니다. 수수료를 반영하면 일봉(1d) 표본외 수익률이 무비용 기준보다 1.7% 낮아졌습니다. 그 730일 표본외 구간 이전의 더 긴 표본내(IS) 구간에서는 같은 규칙의 순손익비가 11.52, 최대낙폭이 55.4%였습니다.</p>
+  </div>
+  <p>
+    <a href="../index.html">전체 표로 돌아가기</a> &middot;
+    <a href="../methodology.html">방법론</a> &middot;
+    <a href="https://github.com/getjogak-sketch/deadoralive/issues/new?template=check-strategy.yml">내 전략도 검사해 보기</a> &middot; <a href="https://buttondown.com/jogak">매주 결과 받아보기</a> &middot;
+    <a href="index.html">전체 전략 페이지</a>
+  </p>
+  <div class="disclaimer-block">본 페이지는 무료로 제공되는 정보·교육 목적의 자료이며, 투자 자문이나 특정 자산의 매수·매도 권유가 아닙니다. 과거 백테스트 결과는 미래 수익을 보장하지 않으며, 모든 투자 판단과 책임은 이용자 본인에게 있습니다. 운영자는 유사투자자문업자가 아니며 어떠한 수익도 보장하지 않습니다.</div>
+</main>
+<script data-goatcounter="https://jogak.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

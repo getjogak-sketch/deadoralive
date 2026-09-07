@@ -5,6 +5,13 @@
   "feed_url": "https://getjogak-sketch.github.io/deadoralive/feed.json",
   "items": [
     {
+      "id": "https://getjogak-sketch.github.io/deadoralive/digest/2026-09-07.html",
+      "url": "https://getjogak-sketch.github.io/deadoralive/digest/2026-09-07.html",
+      "title": "Week of 2026-09-07: 16 alive / 31 fading / 26 dead \u2014 what changed",
+      "content_html": "<ul><li>This run covers 116 strategy/asset/timeframe rows: 16 ALIVE, 31 FADING, 26 DEAD, 15 with too few trades.</li><li>No verdict changed since the 2026-09-06 run.</li><li>Among rows with at least 30 out-of-sample trades, the highest was 2.22 (Price above SMA (n200) on ETHUSD 4h); the lowest was 0.56 (Volatility breakout + trend filter (k0.5-sma20) on BTCUSD 4h).</li></ul><p><strong>Biggest fee drag:</strong> 254.7% on Larry Williams volatility breakout (k0.5) on ETHUSD 4h.</p>",
+      "date_published": "2026-09-07T00:00:00Z"
+    },
+    {
       "id": "https://getjogak-sketch.github.io/deadoralive/digest/2026-09-05.html",
       "url": "https://getjogak-sketch.github.io/deadoralive/digest/2026-09-05.html",
       "title": "Week of 2026-09-05: 8 alive / 17 fading / 12 dead \u2014 what changed",

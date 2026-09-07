@@ -23,15 +23,15 @@
 [fetch_data] (stocks) QQQ: source=yahoo
 [fetch_data] (stocks) QQQ 1d: wrote 6709 rows (2000-01-03 00:00:00 .. 2026-09-04 00:00:00) -> /home/runner/work/deadoralive/deadoralive/data/QQQ_1d.csv
 total 7364
-drwxr-xr-x 2 runner runner    4096 Sep  7 08:39 .
-drwxr-xr-x 9 runner runner    4096 Sep  7 08:39 ..
--rw-r--r-- 1 runner runner  191254 Sep  7 08:39 BTCUSD_1d.csv
--rw-r--r-- 1 runner runner 1310864 Sep  7 08:39 BTCUSD_4h.csv
--rw-r--r-- 1 runner runner  178894 Sep  7 08:39 ETHUSD_1d.csv
--rw-r--r-- 1 runner runner 1235477 Sep  7 08:39 ETHUSD_4h.csv
--rw-r--r-- 1 runner runner  224883 Sep  7 08:39 KRW-BTC_1d.csv
--rw-r--r-- 1 runner runner 1508996 Sep  7 08:41 KRW-BTC_4h.csv
--rw-r--r-- 1 runner runner  210479 Sep  7 08:41 KRW-ETH_1d.csv
--rw-r--r-- 1 runner runner 1422328 Sep  7 08:42 KRW-ETH_4h.csv
--rw-r--r-- 1 runner runner  613370 Sep  7 08:42 QQQ_1d.csv
--rw-r--r-- 1 runner runner  618270 Sep  7 08:42 SPY_1d.csv
+drwxr-xr-x 2 runner runner    4096 Sep  7 09:26 .
+drwxr-xr-x 9 runner runner    4096 Sep  7 09:26 ..
+-rw-r--r-- 1 runner runner  191254 Sep  7 09:26 BTCUSD_1d.csv
+-rw-r--r-- 1 runner runner 1310864 Sep  7 09:26 BTCUSD_4h.csv
+-rw-r--r-- 1 runner runner  178894 Sep  7 09:26 ETHUSD_1d.csv
+-rw-r--r-- 1 runner runner 1235477 Sep  7 09:26 ETHUSD_4h.csv
+-rw-r--r-- 1 runner runner  224883 Sep  7 09:26 KRW-BTC_1d.csv
+-rw-r--r-- 1 runner runner 1508996 Sep  7 09:27 KRW-BTC_4h.csv
+-rw-r--r-- 1 runner runner  210479 Sep  7 09:28 KRW-ETH_1d.csv
+-rw-r--r-- 1 runner runner 1422328 Sep  7 09:29 KRW-ETH_4h.csv
+-rw-r--r-- 1 runner runner  613370 Sep  7 09:29 QQQ_1d.csv
+-rw-r--r-- 1 runner runner  618270 Sep  7 09:29 SPY_1d.csv

@@ -1,30 +1,41 @@
 Running tests.py as a hard gate before producing results...
-2
-[PASS] robustness above_sma: 1 numeric param -> at most 3 grid points
-[PASS] robustness bb_mr: no numeric params -> empty grid (nothing to vary)
-[PASS] robustness: computing the grid never mutates the registered params dict it was given
-[PASS] robustness runtime btc/1d: full registry grid well under the 10-minute CI budget (0.21s)
-[PASS] robustness runtime btc/4h: full registry grid well under the 10-minute CI budget (0.35s)
-[PASS] check_issue: good input accepted (sma_cross, 'n_fast=10, n_slow=50')
-[PASS] check_issue: good input accepted (vol_breakout, 'k=0.5')
-[PASS] check_issue: good input accepted (macd, '')
-[PASS] check_issue: good input accepted (rsi_uptrend, 'n_sma=200')
-[PASS] check_issue: good input accepted (dip_pct, 'threshold=-0.05, n_hold=5')
-[PASS] check_issue: bad input rejected (not_a_real_strategy, '', checked=True)
-[PASS] check_issue: bad input rejected (sma_cross, 'n_fast=50, n_slow=10', checked=True)
-[PASS] check_issue: bad input rejected (vol_breakout, 'k=5.0', checked=True)
-[PASS] check_issue: bad input rejected (rsi_uptrend, 'n_sma=200', checked=True)
-[PASS] check_issue: bad input rejected (sma_cross, 'n_fast=10, n_slow=50', checked=False)
-[PASS] check_issue: injection-shaped params string rejected ("__import__('os').system('echo hi')")
-[PASS] check_issue: injection-shaped params string rejected ('n_fast=10 and True')
-[PASS] check_issue: injection-shaped params string rejected ('n_fast=10, n_slow=(50)')
-[PASS] check_issue: non-empty params for a fixed strategy rejected
-[PASS] check_issue: end-to-end dry run on real BTCUSD data succeeds
-[PASS] check_issue: dry-run comment carries the valid-status marker
-[PASS] check_issue: dry-run comment shows the verdict line
-[PASS] check_issue: dry-run comment links to methodology
-[PASS] check_issue: end-to-end dry run on bad input is rejected, not crashed
-[PASS] check_issue: invalid comment carries the invalid-status marker
+ (This run covers 2 strategy/asset/timefra...)
+[PASS] digest: one-liner has no opinion/advice language (1 verdict(s) changed since the 2026-09-0...)
+[PASS] digest: one-liner has no opinion/advice language (Among rows with at least 30 out-of-sampl...)
+[PASS] digest: build_for_edition returns a digest dict for en
+[PASS] digest: returns None for editions with no data
+[PASS] digest: per-as_of HTML page written
+[PASS] digest: digest index page written
+[PASS] digest: docs/feed.xml written
+[PASS] digest: feed.xml is RSS 2.0 with full HTML content per item
+[PASS] digest: docs/feed.json written
+[PASS] digest: feed.json is JSON Feed 1.1 with >=1 item
+skipped: BUTTONDOWN_API_KEY not set
+[PASS] publish buttondown: returns 0 with no secret
+skipped: BLUESKY_HANDLE/BLUESKY_APP_PASSWORD not set
+[PASS] publish bluesky: returns 0 with no secret
+skipped: MASTODON_INSTANCE/MASTODON_TOKEN not set
+[PASS] publish mastodon: returns 0 with no secret
+skipped: KAGGLE_USERNAME/KAGGLE_KEY not set
+[PASS] publish kaggle: returns 0 with no secret
+skipped: HF_TOKEN/HF_DATASET_REPO not set
+[PASS] publish huggingface: returns 0 with no secret
+skipped: BUTTONDOWN_API_KEY not set
+skipped: BLUESKY_HANDLE/BLUESKY_APP_PASSWORD not set
+skipped: MASTODON_INSTANCE/MASTODON_TOKEN not set
+skipped: KAGGLE_USERNAME/KAGGLE_KEY not set
+skipped: HF_TOKEN/HF_DATASET_REPO not set
+[PASS] publish all: returns 0 with no secrets at all
+buttondown (en): sent
+bluesky: sent
+mastodon: sent
+[PASS] publish buttondown: posts to api.buttondown.com/v1/emails
+[PASS] publish buttondown: Authorization: Token <key>
+[PASS] publish buttondown: body has subject/body/status=about_to_send
+[PASS] publish bluesky: createSession posts identifier/password
+[PASS] publish bluesky: creates an app.bsky.feed.post record with a link facet
+[PASS] publish mastodon: posts {status: ...} with Bearer auth
+[PASS] publish: no subcommand exceeded Bluesky's 300-char post limit
 
 ALL TESTS PASSED (pandas-engine tests; run crosscheck_bt.py separately for §6.2)
 
@@ -93,3 +104,9 @@ Wrote /home/runner/work/deadoralive/deadoralive/docs/stocks/methodology.html
 Wrote /home/runner/work/deadoralive/deadoralive/docs/api/v1/stocks/latest.json (spec_v3 §B)
 Wrote /home/runner/work/deadoralive/deadoralive/docs/api/v1/README.md
 Wrote /home/runner/work/deadoralive/deadoralive/docs/api/index.html
+Wrote /home/runner/work/deadoralive/deadoralive/docs/places.html
+Wrote /home/runner/work/deadoralive/deadoralive/docs/ko/places.html
+Wrote 58 /s/ pages (en), 58 /s/ pages (ko), 58 /s/ pages (stocks)
+Wrote /home/runner/work/deadoralive/deadoralive/docs/sitemap.xml
+Wrote /home/runner/work/deadoralive/deadoralive/docs/robots.txt
+Wrote /home/runner/work/deadoralive/deadoralive/docs/digest, docs/feed.xml, docs/feed.json, docs/ko/digest, docs/ko/feed.xml (edition data permitting)

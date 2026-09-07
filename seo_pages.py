@@ -30,16 +30,20 @@ EDITION_OUT_DIR = {
     "en": config.DOCS_DIR,
     "ko": config.DOCS_DIR_KO,
     "stocks": config.DOCS_DIR_STOCKS,
+    "macro": config.DOCS_DIR_MACRO,
 }
 EDITION_URL_PATH = {
     "en": "",
     "ko": "/ko",
     "stocks": "/stocks",
+    "macro": "/macro",
 }
 
 ASSET_LABEL_EN = {
     "BTCUSD": "BTC", "ETHUSD": "ETH", "SPY": "SPY", "QQQ": "QQQ",
     "KRW-BTC": "BTC (KRW)", "KRW-ETH": "ETH (KRW)",
+    "GLD": "GLD", "SLV": "SLV", "USO": "USO",
+    "EURUSD": "EUR/USD", "USDJPY": "USD/JPY",
 }
 TF_LABEL_EN = {"1d": "daily (1d)", "4h": "4-hour (4h)"}
 
@@ -171,6 +175,7 @@ _HIST_FILE_RE = {
     "en": re.compile(r"^(\d{4}-\d{2}-\d{2})\.json$"),
     "ko": re.compile(r"^ko_(\d{4}-\d{2}-\d{2})\.json$"),
     "stocks": re.compile(r"^stocks_(\d{4}-\d{2}-\d{2})\.json$"),
+    "macro": re.compile(r"^macro_(\d{4}-\d{2}-\d{2})\.json$"),
 }
 
 
@@ -498,7 +503,8 @@ def _build_one_page(edition_key: str, lang: str, strategy_id: str, params: str, 
                                      tf_rows)
         back_index = "../index.html"
         back_meth = "../methodology.html"
-        back_registry = "../registry.html" if edition_key != "stocks" else "../../registry.html"
+        back_registry = ("../../registry.html" if edition_key in ("stocks", "macro")
+                         else "../registry.html")
         s_index = "index.html"
         check_link = bs._check_strategy_url()
         signup_html = ""

@@ -268,6 +268,67 @@ and output files are untouched).
   extra already-closed bar if Upbit in fact never returns a partial one — a one-bar discrepancy at
   most, self-correcting next week).
 
+## Macro edition (gold, silver, oil, EUR/USD, USD/JPY)
+
+A fourth edition of the same weekly pipeline, English-only, added additively on top of the
+crypto (en/ko) and stocks editions — no existing module was rewritten.
+
+- **Assets**: `GLD` (gold ETF), `SLV` (silver ETF), `USO` (oil ETF), `EURUSD` (EUR/USD),
+  `USDJPY` (USD/JPY), daily only. File-safe asset ids (`config.MACRO_ASSETS`) map to Yahoo's own
+  chart symbols (`config.MACRO_YAHOO_SYMBOL`, e.g. `EURUSD` &rarr; `EURUSD=X`) — Yahoo's FX
+  spelling contains a literal `=`, not a safe bare filename component, which is why the two are
+  kept distinct rather than using the Yahoo ticker as the asset id directly.
+- **Data source**: the existing Yahoo chart JSON fetcher (`fetch_data.py`'s `fetch_ohlc_yahoo`,
+  already generic on the symbol string passed in — reused verbatim, not duplicated), no Stooq leg
+  (Stooq does not carry FX pairs). `DATA_START` is 2007-01-01 — GLD (listed 2004-11-18), SLV
+  (2006-04-28), USO (2006-04-10), and both FX pairs' Yahoo history all predate that floor, so one
+  shared date covers every asset. Network-blocked in this dev environment exactly like
+  Bitstamp/Upbit/Stooq, so this path is exercised here only through the already-unit-tested
+  `_parse_yahoo_chart_json` parser (`tests.py`'s `test_yahoo_parser`, including an FX-shaped fake
+  payload with `volume=0` on every bar — a real Yahoo convention for spot FX, not fetch-side
+  padding). Nothing in `engine.py`/`strategies.py`/`indicators.py`/`metrics.py` ever reads the
+  volume column, so an all-zero volume series is inert for every strategy in the registry
+  (`tests.py`'s `test_macro_edition_fx_volume_zero_is_inert` checks this directly).
+- **Cost**: ETFs (`GLD`/`SLV`/`USO`) 0.02% one-way, FX (`EURUSD`/`USDJPY`) 0.01% one-way — new
+  `config.COST` entries, none of the existing ones changed.
+- **bars_per_year**: 252 for every macro asset (`config.MACRO_BARS_PER_YEAR`), the same convention
+  the stocks edition uses. FX technically trades roughly 260 days/year (no weekend close) rather
+  than an ETF's 252, but a single shared convention keeps the FX and ETF rows in this edition's own
+  table comparable; the &lt;3% difference is called out on `docs/macro/methodology.html` rather
+  than split into two conventions.
+- **Same registry, thresholds, robustness map, badges, Decay Index, digest, feeds, and API** as
+  every other edition — `docs/api/v1/macro/`, `docs/macro/s/` SEO pages, `docs/macro/badges/…`
+  (via `badges.py`'s already-generic `write_badges_for_payload`), sitemap entries, and
+  language/edition switch links everywhere (crypto &harr; stocks &harr; macro &harr; 한국어). No new
+  strategy was added, so `registry_ledger.json` is untouched; `docs/registry.html`/
+  `docs/ko/registry.html` gained an "Editions covered" section instead, listing all four editions.
+- **Page copy**: the macro index page's `<title>` tag reads "Dead or Alive — gold, oil, FX: popular
+  trading strategies re-tested weekly after fees" (`config.PROJECT_TITLE_MACRO`), separate from its
+  `<h1>` (still "Dead or Alive", like every other edition). Both the results page and the
+  methodology page carry a short note that GLD/SLV/USO prices are not adjusted for dividends/
+  distributions and that the FX pairs have no interest-rate carry or rollover cost modelled.
+- **No Yahoo data this week**: if none of the five macro assets has a local data file (as in this
+  dev environment, and possibly in CI if Yahoo rate-limits or 4xx's), `_run_macro_edition()` calls
+  `build_site.build_empty_edition_page_en()` — a new, English-language counterpart of the Korean
+  edition's own `build_empty_edition_page_ko()` — instead of failing: it renders an explicit
+  "No macro data this week" notice and links back to the other editions, exactly like the Korean
+  "no data this week" page does, rather than a missing or blank page. Verified:
+  `python3 fetch_data.py --offline && python3 tests.py && python3 run_weekly.py --offline` all
+  exit 0 and `docs/macro/index.html` shows that notice (there is no local Yahoo stand-in for any
+  macro asset in this environment), while every other edition's output is unaffected.
+- **Uncertain / unverifiable in this environment**: Yahoo's real chart API
+  (`query1.finance.yahoo.com`) is network-blocked here exactly like Stooq/Bitstamp/Upbit, so the
+  online fetch path (`update_symbol_online_macro`) is written and reviewed against the same request
+  shape the stocks edition's already-working Yahoo fallback uses, but has never been exercised
+  against a live response for these five specific symbols — in particular whether Yahoo's FX
+  tickers (`EURUSD=X`, `USDJPY=X`) behave identically to its equity tickers under the
+  `period1`/`period2` explicit-window request this code sends (the stocks edition's own code
+  comment notes `range=max` silently returns monthly bars from Yahoo; the same risk could in
+  principle apply to FX, unconfirmed here) and whether the robustness map's runtime stays well
+  under the ~10-minute CI budget once nine asset/timeframe combinations (up from four) run through
+  it every week — see "Verification results" for the local BTC-only measurement this still relies
+  on as its budget check.
+
 ## Places this engine is published to
 
 `docs/places.html` (English) and `docs/ko/places.html` (Korean) are the always-current, generated
@@ -277,13 +338,14 @@ core weekly pipeline (`fetch_data.py` → `tests.py` → `run_weekly.py`) to run
 
 **Live now — no setup needed:**
 - The site itself: English/crypto (`docs/index.html`), Korean/Upbit (`docs/ko/index.html`),
-  Stocks/SPY+QQQ (`docs/stocks/index.html`).
+  Stocks/SPY+QQQ (`docs/stocks/index.html`), Macro/gold+silver+oil+FX (`docs/macro/index.html`).
 - The pre-registration ledger (`docs/registry.html`, `docs/ko/registry.html`) — see "Pre-registration
   ledger" below.
 - The machine-readable JSON API (`docs/api/v1/<edition>/latest.json`, spec_v3 §B).
 - The "Check my strategy" GitHub Issues bot (spec_v3 §E).
 - One static page per (strategy variant, asset) for search (`docs/s/`, `docs/ko/s/`,
-  `docs/stocks/s/`), plus `docs/sitemap.xml` and `docs/robots.txt` (this task's §S1).
+  `docs/stocks/s/`, `docs/macro/s/`), plus `docs/sitemap.xml` and `docs/robots.txt` (this task's
+  §S1).
 - RSS (`docs/feed.xml`, `docs/ko/feed.xml`) and JSON Feed (`docs/feed.json`) of the weekly digest
   (`digest.py`, §S2), one item per weekly run.
 
@@ -345,12 +407,12 @@ weekly time series per edition: `alive`/`fading`/`dead`/`too_few` as shares of t
 rows, plus a scalar **Decay Index** = share DEAD among rows with &ge;10 OOS trades
 (`dead / (alive+fading+dead)`, `None` when that denominator is 0). Written to
 `docs/api/v1/<edition>/index_history.json` every run. `docs/index-history.html` (en, covering the
-`en`+`stocks` editions) and `docs/ko/index-history.html` (ko) render it as a small inline-SVG line
-chart (`charts.py`, no external JS — the same "no external resource loads" rule as the rest of this
-site) plus a table, with an explicit note that the chart's value only ever grows week by week and
-can't be reconstructed retroactively by re-running anything. `charts.py`'s sparkline primitive is
-also used on every SEO strategy page (`seo_pages.py`) to show OOS profit factor over time, once
-&ge;3 history points exist for that (strategy, params, asset, timeframe).
+`en`+`stocks`+`macro` editions) and `docs/ko/index-history.html` (ko) render it as a small
+inline-SVG line chart (`charts.py`, no external JS — the same "no external resource loads" rule as
+the rest of this site) plus a table, with an explicit note that the chart's value only ever grows
+week by week and can't be reconstructed retroactively by re-running anything. `charts.py`'s
+sparkline primitive is also used on every SEO strategy page (`seo_pages.py`) to show OOS profit
+factor over time, once &ge;3 history points exist for that (strategy, params, asset, timeframe).
 
 ## Verdict badges
 

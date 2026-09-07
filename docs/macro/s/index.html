@@ -3,8 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Strategy Decay Index &mdash; Dead or Alive</title>
-<meta name="description" content="What share of pre-registered strategies are currently badged DEAD, tracked week over week since this pipeline started archiving snapshots.">
+<title>Dead or Alive — every strategy page</title>
 <style>
 :root {
   --bg: #ffffff; --fg: #14181f; --muted: #5b6270; --border: #e2e5ea; --card-bg: #f7f8fa;
@@ -53,34 +52,22 @@ tbody tr:hover { background: var(--card-bg); }
 footer.bottom { max-width: 1200px; margin: 2.5rem auto 0; padding: 1.25rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem; }
 footer.bottom .disclaimer { margin-top: 0.75rem; }
 
-.chartwrap { overflow-x: auto; margin: 0.5rem 0 1rem; }
-.chartwrap svg { display: block; }
+.stratpage main { max-width: 860px; }
+.scorecard { border-collapse: collapse; width: 100%; margin: 0.75rem 0 1.25rem; font-size: 0.88rem; }
+.scorecard th, .scorecard td { border: 1px solid var(--border); padding: 0.4rem 0.6rem; text-align: right; }
+.scorecard th:first-child, .scorecard td:first-child { text-align: left; }
+.scorecard thead th { background: var(--card-bg); }
+.griddump { font-size: 0.8rem; color: var(--muted); }
+.interp { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.1rem; margin: 1rem 0; }
+.histline { font-size: 0.82rem; color: var(--muted); }
+.tfblock { margin: 1.5rem 0; }
+.sparkline { display: inline-flex; align-items: center; gap: 0.3rem; margin-left: 0.5rem; }
+.sparkline svg { vertical-align: middle; }
 </style>
 </head>
-<body>
-<header class="top">
-  <h1>Strategy Decay Index</h1>
-  <p class="tagline">What share of pre-registered strategies are currently badged DEAD, tracked
-     week over week.</p>
-  <p class="meta"><a href="index.html">&larr; back to results</a> &middot; <a href="ko/index-history.html">한국어 (Korean)</a></p>
-</header>
-<main>
-  <section class="assetblock">
-    <p>The Decay Index is the share of textbook-registry rows with at least 10 out-of-sample trades that are currently badged DEAD (dead &divide; (alive + fading + dead)). It only ever grows week by week, as this pipeline runs and archives another snapshot to results/history/&lt;as_of&gt;.json &mdash; nobody, including us, can go back and add last year's snapshot after the fact. With only a week or two of history the chart below will be short; that is expected, not a bug, and its value compounds precisely because it can't be reconstructed retroactively.</p>
-  </section>
-  <section class="assetblock">
-    <h2>English (crypto: BTCUSD, ETHUSD)</h2>
-    <div class="chartwrap"><svg width="560" height="200" viewBox="0 0 560 200" role="img" aria-label="chart"><line x1="42" y1="174.0" x2="548" y2="174.0" stroke="var(--border)" stroke-width="1"/><circle cx="42.0" cy="122.1" r="3.2" fill="var(--dead-fg)"><title>2026-09-05: 32%</title></circle><text x="36" y="174.0" text-anchor="end" font-size="10" fill="var(--muted)">0%</text><text x="36" y="22" text-anchor="end" font-size="10" fill="var(--muted)">100%</text><text x="42.0" y="194" text-anchor="middle" font-size="9" fill="var(--muted)">2026-09-05</text></svg></div>
-    <div class="tablewrap"><table><thead><tr><th>as_of</th><th>ALIVE</th><th>FADING</th><th>DEAD</th><th>TOO FEW</th><th>Decay Index</th><th>n</th></tr></thead><tbody><tr><td>2026-09-05</td><td>18.2%</td><td>38.6%</td><td>27.3%</td><td>15.9%</td><td>32.4%</td><td>44</td></tr></tbody></table></div>
-  </section><section class="assetblock"><h2>Stocks (SPY, QQQ)</h2><p class="meta">No archived snapshots yet for this edition.</p></section><section class="assetblock"><h2>Macro (GLD, SLV, USO, EURUSD, USDJPY)</h2><p class="meta">No archived snapshots yet for this edition.</p></section>
-</main>
-<footer class="bottom">
-  <div><a href="index.html">&larr; back to results</a>
-  &middot; <a href="methodology.html">Methodology</a>
-  &middot; <a href="registry.html">Strategy registry</a>
-  &middot; <a href="places.html">Places this is published to</a></div>
-  <div class="disclaimer">Educational / informational content only. This is not investment advice, and nothing here is a recommendation to buy or sell any asset. Past backtested performance, especially net-of-cost historical simulation, does not guarantee future results.</div>
-</footer>
+<body class="stratpage">
+<header class="top"><h1>All strategy pages</h1><p class="meta"><a href="../index.html">Back to the full table</a></p></header>
+<main><p>No data for this edition this week.</p></main>
 <script data-goatcounter="https://jogak.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

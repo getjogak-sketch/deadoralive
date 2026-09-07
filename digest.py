@@ -32,10 +32,14 @@ _HIST_FILE_RE = {
     "en": re.compile(r"^(\d{4}-\d{2}-\d{2})\.json$"),
     "ko": re.compile(r"^ko_(\d{4}-\d{2}-\d{2})\.json$"),
     "stocks": re.compile(r"^stocks_(\d{4}-\d{2}-\d{2})\.json$"),
+    "macro": re.compile(r"^macro_(\d{4}-\d{2}-\d{2})\.json$"),
 }
 
-EDITION_DOCS_SUBDIR = {"en": config.DOCS_DIR, "ko": config.DOCS_DIR_KO, "stocks": config.DOCS_DIR_STOCKS}
-EDITION_LABEL_EN = {"en": "Crypto (BTC/ETH)", "ko": "Korean (Upbit KRW)", "stocks": "Stocks (SPY/QQQ)"}
+EDITION_DOCS_SUBDIR = {"en": config.DOCS_DIR, "ko": config.DOCS_DIR_KO,
+                       "stocks": config.DOCS_DIR_STOCKS, "macro": config.DOCS_DIR_MACRO}
+EDITION_LABEL_EN = {"en": "Crypto (BTC/ETH)", "ko": "Korean (Upbit KRW)",
+                    "stocks": "Stocks (SPY/QQQ)",
+                    "macro": "Macro (GLD/SLV/USO/EURUSD/USDJPY)"}
 
 
 def _variant_rows(payload: dict) -> list:
@@ -494,7 +498,7 @@ def build_all(payloads: dict) -> dict:
     out = {}
     for edition_key, payload in payloads.items():
         out[edition_key] = build_for_edition(edition_key, payload)
-        if out[edition_key] is None and edition_key in ("en", "ko"):
+        if out[edition_key] is None and edition_key in ("en", "ko", "macro"):
             # No data this run (e.g. ko/stocks with no local Upbit/Stooq file yet) — still write
             # a (possibly empty, listing only past weeks') digest index so the main page's
             # "Weekly digests" footer link never points at a missing file.
@@ -534,6 +538,7 @@ def main() -> int:
         "en": _load_json_or_none(os.path.join(config.RESULTS_DIR, "latest.json")),
         "ko": _load_json_or_none(os.path.join(config.RESULTS_DIR, "latest_ko.json")),
         "stocks": _load_json_or_none(os.path.join(config.RESULTS_DIR, "latest_stocks.json")),
+        "macro": _load_json_or_none(os.path.join(config.RESULTS_DIR, "latest_macro.json")),
     }
     if not any(payloads.values()):
         print("digest.py: no results/latest*.json found yet (run run_weekly.py first) — nothing "

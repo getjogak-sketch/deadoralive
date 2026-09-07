@@ -194,3 +194,55 @@ COST["QQQ"] = 0.0002
 DOCS_DIR_STOCKS = os.path.join(DOCS_DIR, "stocks")
 EDITIONS["stocks"] = {"assets": STOCKS_ASSETS, "lang": "en", "out": DOCS_DIR_STOCKS,
                        "timeframes": STOCKS_TIMEFRAMES}
+
+# ---------------------------------------------------------------------------
+# Macro edition (M1) — gold, silver, oil, EUR/USD, USD/JPY, daily, English only. Additive:
+# nothing above this line (crypto en/ko, stocks) is modified. Runs through the exact same
+# engine.py/strategies.py/verdict.py/registry.py machinery as every other edition — only the
+# asset list, one-way cost (ETF vs. FX), data floor date, and output paths/language differ.
+# ---------------------------------------------------------------------------
+MACRO_ASSETS = ["GLD", "SLV", "USO", "EURUSD", "USDJPY"]
+MACRO_TIMEFRAMES = ["1d"]
+
+# GLD listed 2004-11-18, SLV 2006-04-28, USO 2006-04-10; both FX pairs' Yahoo history goes back
+# to the 1970s/1990s. A single shared floor date covers every one of these five assets (this
+# task's own instruction: "DATA_START 2007-01-01 (all exist by then)"), so no per-asset override
+# table (like DATA_START_BY_ASSET above) is needed here.
+MACRO_DATA_START = "2007-01-01"
+
+# bars_per_year for this edition's Sharpe annualization. FX technically trades ~260 days/year
+# (no weekend close) versus an ETF's 252, but this task's own instruction is "252 for all, note
+# it" — the <3% difference is called out on the macro methodology page rather than split into two
+# conventions that would make the FX and ETF rows in the same table harder to compare.
+MACRO_BARS_PER_YEAR = 252
+
+# File-safe asset ids (used everywhere else in this codebase — output filenames, URL slugs, the
+# badges/seo_pages label tables) mapped to the Yahoo chart symbol actually fetched. FX tickers
+# carry a literal "=" (Yahoo's own convention, e.g. "EURUSD=X") that is not a safe bare filename
+# component, which is why the two are kept distinct here rather than using the Yahoo spelling as
+# the asset id directly.
+MACRO_YAHOO_SYMBOL = {
+    "GLD": "GLD", "SLV": "SLV", "USO": "USO",
+    "EURUSD": "EURUSD=X", "USDJPY": "USDJPY=X",
+}
+
+# One-way cost (this task's own instruction: "ETFs 0.02%/side, FX 0.01%/side"), added as new
+# COST dict entries — every existing BTCUSD/ETHUSD/KRW-*/SPY/QQQ entry above is untouched.
+COST["GLD"] = 0.0002
+COST["SLV"] = 0.0002
+COST["USO"] = 0.0002
+COST["EURUSD"] = 0.0001
+COST["USDJPY"] = 0.0001
+
+# Korean-language site copy has no macro counterpart: the macro edition is English-only (same
+# choice this task makes for the stocks edition), so there is no MACRO equivalent of
+# PROJECT_TITLE_KO/TAGLINE_KO here — only an English <title>-tag override and tagline, consumed by
+# build_site.build_index()'s page_title/lang_links params (see run_weekly._run_macro_edition).
+PROJECT_TITLE_MACRO = ("Dead or Alive — gold, oil, FX: popular trading strategies re-tested "
+                       "weekly after fees")
+TAGLINE_MACRO = ("Gold, silver, oil, EUR/USD, and USD/JPY: popular trading strategies re-tested "
+                 "every week, after fees, out-of-sample.")
+
+DOCS_DIR_MACRO = os.path.join(DOCS_DIR, "macro")
+EDITIONS["macro"] = {"assets": MACRO_ASSETS, "lang": "en", "out": DOCS_DIR_MACRO,
+                      "timeframes": MACRO_TIMEFRAMES}

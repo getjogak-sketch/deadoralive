@@ -41,6 +41,7 @@ _HIST_FILE_RE = {
     "en": re.compile(r"^(\d{4}-\d{2}-\d{2})\.json$"),
     "ko": re.compile(r"^ko_(\d{4}-\d{2}-\d{2})\.json$"),
     "stocks": re.compile(r"^stocks_(\d{4}-\d{2}-\d{2})\.json$"),
+    "macro": re.compile(r"^macro_(\d{4}-\d{2}-\d{2})\.json$"),
 }
 
 
@@ -115,6 +116,6 @@ def load_index_history(edition_key: str, out_root: str | None = None) -> list[di
 
 
 if __name__ == "__main__":
-    for ed in ("en", "ko", "stocks"):
+    for ed in ("en", "ko", "stocks", "macro"):
         p = write_index_history(ed)
         print(f"Wrote {p} ({len(load_index_history(ed))} points)")

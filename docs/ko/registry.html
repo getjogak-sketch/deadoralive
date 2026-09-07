@@ -75,6 +75,19 @@ table.ledger td, table.ledger th { text-align: left; white-space: normal; }
 </header>
 <main>
   <section class="assetblock">
+    <h2>검사 대상 에디션</h2>
+    <p>아래 목록의 모든 전략은 한 번만 등록되고, 그 뒤 해당하는 모든 에디션에서 똑같은 방식으로
+       검사됩니다(같은 규칙 문구, 같은 고정 설정값, 같은 엔진과 판정 기준 — 에디션마다 다른 것은
+       자산·수수료·언어뿐입니다):</p>
+    <ul>
+      <li><code>en</code> — 영어(암호화폐: BTCUSD, ETHUSD, 1d/4h)</li>
+      <li><code>ko</code> — 한국어(암호화폐: KRW-BTC, KRW-ETH, 1d/4h)</li>
+      <li><code>stocks</code> — 주식(SPY, QQQ, 1d, 영어만)</li>
+      <li><code>macro</code> — 원자재·외환(GLD, SLV, USO, EURUSD, USDJPY, 1d, 영어만)</li>
+    </ul>
+  </section>
+
+  <section class="assetblock">
     <h2>왜 사전 등록인가</h2>
     <p>임상시험을 사전 등록하는 것과 같은 원리입니다 — 무엇을 검증할지, 어떤 고정값으로 검증할지를
        결과를 보기 <strong>전에</strong> 미리 문서로 남겨 둡니다. 아래 목록에 한 번 들어간 항목은

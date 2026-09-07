@@ -398,6 +398,12 @@ def main():
     payload_stocks = _run_stocks_edition()
 
     # -------------------------------------------------------------------------------------------
+    # Macro edition (gold/silver/oil/EUR-USD/USD-JPY, daily) — M1, additive extension. Nothing
+    # above this line (crypto en/ko, stocks) is changed by this block.
+    # -------------------------------------------------------------------------------------------
+    payload_macro = _run_macro_edition()
+
+    # -------------------------------------------------------------------------------------------
     # API docs (spec_v3 §B) — human-readable description of the docs/api/v1/ JSON tree written by
     # each edition's _write_api_v1() call above. Written last so it can be generated even if an
     # edition above this point wrote nothing new this run (it only describes the schema/endpoints,
@@ -436,12 +442,12 @@ def main():
     # exactly the set of files already on disk; nothing here recomputes a past week's numbers).
     # -------------------------------------------------------------------------------------------
     import decay as decay_mod
-    for edition_key in ("en", "ko", "stocks"):
+    for edition_key in ("en", "ko", "stocks", "macro"):
         decay_mod.write_index_history(edition_key)
     build_site.build_index_history_page()
     build_site.build_index_history_page_ko()
     print(f"Wrote {os.path.join(config.DOCS_DIR, 'api', 'v1', '<edition>', 'index_history.json')} "
-          f"(en/ko/stocks)")
+          f"(en/ko/stocks/macro)")
     print(f"Wrote {os.path.join(config.DOCS_DIR, 'index-history.html')}")
     print(f"Wrote {os.path.join(config.DOCS_DIR_KO, 'index-history.html')}")
 
@@ -454,11 +460,14 @@ def main():
     n_badges_en = badges.write_badges_for_payload("en", payload)
     n_badges_ko = badges.write_badges_for_payload("ko", payload_ko)
     n_badges_stocks = badges.write_badges_for_payload("stocks", payload_stocks)
+    n_badges_macro = badges.write_badges_for_payload("macro", payload_macro)
     print(f"Wrote {n_badges_en} badge(s) + summary.svg to {os.path.join(config.DOCS_DIR, 'badges', 'en')}")
     print(f"Wrote {n_badges_ko} badge(s) (+ summary.svg if ko had data) to "
           f"{os.path.join(config.DOCS_DIR, 'badges', 'ko')}")
     print(f"Wrote {n_badges_stocks} badge(s) (+ summary.svg if stocks had data) to "
           f"{os.path.join(config.DOCS_DIR, 'badges', 'stocks')}")
+    print(f"Wrote {n_badges_macro} badge(s) (+ summary.svg if macro had data) to "
+          f"{os.path.join(config.DOCS_DIR, 'badges', 'macro')}")
 
     # -------------------------------------------------------------------------------------------
     # Programmatic SEO pages, sitemap, robots.txt (this task's §S1) — additive, read-only over the
@@ -466,12 +475,15 @@ def main():
     # already in scope from this function's top half.
     # -------------------------------------------------------------------------------------------
     import seo_pages
-    edition_payloads = {"en": payload, "ko": payload_ko, "stocks": payload_stocks}
+    edition_payloads = {"en": payload, "ko": payload_ko, "stocks": payload_stocks,
+                        "macro": payload_macro}
     seo_manifest = seo_pages.build_all(edition_payloads)
     n_en = len(seo_manifest.get("en", []))
     n_ko = len(seo_manifest.get("ko", []))
     n_stocks = len(seo_manifest.get("stocks", []))
-    print(f"Wrote {n_en} /s/ pages (en), {n_ko} /s/ pages (ko), {n_stocks} /s/ pages (stocks)")
+    n_macro = len(seo_manifest.get("macro", []))
+    print(f"Wrote {n_en} /s/ pages (en), {n_ko} /s/ pages (ko), {n_stocks} /s/ pages (stocks), "
+          f"{n_macro} /s/ pages (macro)")
 
     extra_urls = [
         (config.PAGES_URL.rstrip("/") + "/index.html", payload["as_of"]),
@@ -494,6 +506,14 @@ def main():
     if payload_stocks:
         extra_urls.append((config.PAGES_URL.rstrip("/") + "/stocks/index.html", payload_stocks["as_of"]))
         extra_urls.append((config.PAGES_URL.rstrip("/") + "/stocks/methodology.html", payload_stocks["as_of"]))
+    # docs/macro/index.html and docs/macro/methodology.html are always written above (a "no data
+    # this week" notice when Yahoo has nothing this run, same tolerance as the Korean edition's
+    # own always-written pages), so they always belong in the sitemap — falling back to the
+    # English as_of for <lastmod> on a week where the macro edition itself has nothing new.
+    extra_urls.append((config.PAGES_URL.rstrip("/") + "/macro/index.html",
+                        (payload_macro or {}).get("as_of", payload["as_of"])))
+    extra_urls.append((config.PAGES_URL.rstrip("/") + "/macro/methodology.html",
+                        (payload_macro or {}).get("as_of", payload["as_of"])))
     seo_pages.build_sitemap(seo_manifest, extra_urls)
     seo_pages.build_robots()
     print(f"Wrote {os.path.join(config.DOCS_DIR, 'sitemap.xml')}")
@@ -750,6 +770,162 @@ def _run_stocks_edition():
 
     _write_api_v1("stocks", payload)
     print(f"Wrote {os.path.join(config.DOCS_DIR, 'api', 'v1', 'stocks', 'latest.json')} (spec_v3 §B)")
+
+    return payload
+
+
+def _run_macro_edition():
+    """Macro edition (GLD/SLV/USO/EURUSD/USDJPY, daily) — M1. English-only, reuses the exact same
+    registry/engine/verdict machinery as every other edition, via _build_rows_for_asset_tf_impl
+    (same reason the stocks edition uses it: config.MACRO_BARS_PER_YEAR = 252 differs from the
+    calendar-day convention config.BARS_PER_YEAR[tf] encodes for the crypto editions). Unlike the
+    stocks edition (which simply skips writing its pages when it has no data this week), this
+    edition writes an explicit English "no data this week" page when Yahoo has nothing for any of
+    its five assets this run — matching the Korean edition's own "never a blank/missing page"
+    tolerance for a data source that can go dark (see build_site.build_empty_edition_page_en)."""
+    import build_site
+
+    edition = config.EDITIONS["macro"]
+    assets = edition["assets"]
+    timeframes = edition["timeframes"]
+    out_dir = edition["out"]
+
+    lang_links = ('<a href="../index.html">English (crypto)</a> &middot; '
+                  '<a href="../stocks/index.html">Stocks</a> &middot; '
+                  '<a href="../ko/index.html">한국어</a>')
+    lang_links_meth = ('<a href="../methodology.html">English (crypto)</a> &middot; '
+                       '<a href="../stocks/methodology.html">Stocks</a> &middot; '
+                       '<a href="../ko/methodology.html">한국어</a>')
+    note_html = ('<p class="meta">Note: GLD/SLV/USO prices are not adjusted for dividends or other '
+                'distributions, and the FX pairs (EUR/USD, USD/JPY) have no interest-rate carry or '
+                'rollover cost modelled &mdash; both are simplifications, not adjustments made in '
+                'anyone&rsquo;s favor.</p>')
+
+    all_rows = []
+    all_suspicious = []
+    all_combo_rows = []
+    run_as_of = None
+
+    for symbol in assets:
+        for tf in timeframes:
+            path = _data_path(symbol, tf)
+            if not os.path.exists(path):
+                print(f"[run_weekly] [macro] WARNING: no data file for {symbol} {tf} ({path}) — "
+                      f"skipping (not a failure; Yahoo may be unavailable this run).")
+                continue
+            df = load_generic(path, min_date=config.MACRO_DATA_START)
+            if len(df) < 260:
+                print(f"[run_weekly] [macro] WARNING: {symbol} {tf} has only {len(df)} bars — "
+                      f"skipping (not enough history for the longest-lookback strategies).")
+                continue
+
+            cost = config.COST[symbol]
+            as_of, rows, suspicious = _build_rows_for_asset_tf_impl(
+                symbol, tf, df, cost, config.MACRO_BARS_PER_YEAR)
+            for r in rows:
+                r["edition"] = "macro"
+            all_rows.extend(rows)
+            all_suspicious.extend(suspicious)
+            _, combo_rows, combo_suspicious = _build_popular_combo_rows_impl(
+                symbol, tf, df, cost, config.MACRO_BARS_PER_YEAR)
+            for r in combo_rows:
+                r["edition"] = "macro"
+            all_combo_rows.extend(combo_rows)
+            all_suspicious.extend(combo_suspicious)
+            run_as_of = as_of if run_as_of is None else max(run_as_of, as_of)
+            print(f"[run_weekly] [macro] {symbol} {tf}: as_of={as_of.date()}, {len(rows)} rows "
+                  f"({reg.count_variants()} strategy variants + 2 reference), "
+                  f"{len(combo_rows)} popular-combo rows")
+
+    os.makedirs(config.RESULTS_DIR, exist_ok=True)
+    os.makedirs(config.HISTORY_DIR, exist_ok=True)
+    os.makedirs(out_dir, exist_ok=True)
+
+    if not all_rows:
+        print("[run_weekly] [macro] No Yahoo data available for any asset this week — writing an "
+              "English 'no data this week' page (not a failure for the other editions).")
+        as_of_str = datetime.now(timezone.utc).date().isoformat()
+        empty_payload = {
+            "project_name": config.PROJECT_NAME, "edition": "macro", "lang": "en",
+            "tagline": config.TAGLINE_MACRO,
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "as_of": as_of_str, "oos_days": config.OOS_DAYS,
+            "tally": vd.tally([]), "rows": [], "popular_combos": [], "suspicious": [],
+            "legal_disclaimer": config.LEGAL_DISCLAIMER,
+            "repo_url": config.REPO_URL, "signup_url": config.SIGNUP_URL,
+        }
+        with open(os.path.join(config.RESULTS_DIR, "latest_macro.json"), "w") as f:
+            json.dump(empty_payload, f, indent=2, default=str)
+        with open(os.path.join(config.HISTORY_DIR, f"macro_{as_of_str}.json"), "w") as f:
+            json.dump(empty_payload, f, indent=2, default=str)
+        with open(os.path.join(out_dir, "latest.json"), "w") as f:
+            json.dump(empty_payload, f, indent=2, default=str)
+        build_site.build_empty_edition_page_en(
+            os.path.join(out_dir, "index.html"), as_of_str, lang_links,
+            notice_title="No macro data this week",
+            notice_body=("This week's gold/silver/oil/FX price data could not be fetched from "
+                         "Yahoo Finance. This may be a temporary problem with Yahoo's own "
+                         "service; the next scheduled run will try again. The crypto, stocks, "
+                         "and Korean editions are unaffected &mdash; see the links above."),
+            page_title=config.PROJECT_TITLE_MACRO)
+        build_site.build_methodology(
+            out_path=os.path.join(out_dir, "methodology.html"), assets=assets,
+            lang_links=lang_links_meth, places_href="../places.html",
+            registry_href="../registry.html", decay_href="../index-history.html",
+            extra_note_html=note_html)
+        print(f"Wrote {os.path.join(out_dir, 'index.html')} (no-data notice)")
+        print(f"Wrote {os.path.join(out_dir, 'methodology.html')}")
+        _write_api_v1("macro", empty_payload)
+        print(f"Wrote {os.path.join(config.DOCS_DIR, 'api', 'v1', 'macro', 'latest.json')}")
+        return None
+
+    tally = vd.tally([r["verdict"] for r in all_rows if r["verdict"] is not None])
+    payload = {
+        "project_name": config.PROJECT_NAME, "edition": "macro", "lang": "en",
+        "tagline": config.TAGLINE_MACRO,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "as_of": str(run_as_of.date()), "oos_days": config.OOS_DAYS,
+        "tally": tally, "rows": all_rows, "popular_combos": all_combo_rows,
+        "suspicious": all_suspicious,
+        "legal_disclaimer": config.LEGAL_DISCLAIMER,
+        "repo_url": config.REPO_URL, "signup_url": config.SIGNUP_URL,
+    }
+
+    latest_path = os.path.join(config.RESULTS_DIR, "latest_macro.json")
+    with open(latest_path, "w") as f:
+        json.dump(payload, f, indent=2, default=str)
+    history_path = os.path.join(config.HISTORY_DIR, f"macro_{run_as_of.date()}.json")
+    with open(history_path, "w") as f:
+        json.dump(payload, f, indent=2, default=str)
+    docs_json_path = os.path.join(out_dir, "latest.json")
+    with open(docs_json_path, "w") as f:
+        json.dump(payload, f, indent=2, default=str)
+
+    print(f"\n[macro] Wrote {len(all_rows)} rows to {latest_path}")
+    print(f"Wrote {history_path}")
+    print(f"Wrote {docs_json_path}")
+    print(f"[macro] Verdict tally: {tally}")
+    if all_suspicious:
+        print(f"\n[macro] SUSPICIOUS RESULTS (OOS PF > {config.SUSPICIOUS_OOS_PF} or Sharpe > "
+              f"{config.SUSPICIOUS_OOS_SHARPE}) — treat as a possible bug, per spec_v2 §6:")
+        for s in all_suspicious:
+            print(f"  - {s}")
+
+    build_site.build_index(payload, out_path=os.path.join(out_dir, "index.html"),
+                            assets=assets, timeframes=timeframes, lang_links=lang_links,
+                            feed_html="", places_href="../places.html",
+                            registry_href="../registry.html", decay_href="../index-history.html",
+                            page_title=config.PROJECT_TITLE_MACRO, extra_note_html=note_html)
+    build_site.build_methodology(out_path=os.path.join(out_dir, "methodology.html"),
+                                  assets=assets, lang_links=lang_links_meth,
+                                  places_href="../places.html", registry_href="../registry.html",
+                                  decay_href="../index-history.html",
+                                  extra_note_html=note_html)
+    print(f"Wrote {os.path.join(out_dir, 'index.html')}")
+    print(f"Wrote {os.path.join(out_dir, 'methodology.html')}")
+
+    _write_api_v1("macro", payload)
+    print(f"Wrote {os.path.join(config.DOCS_DIR, 'api', 'v1', 'macro', 'latest.json')} (spec_v3 §B)")
 
     return payload
 

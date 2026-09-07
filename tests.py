@@ -817,6 +817,273 @@ def test_drop_unclosed_stocks_bar():
 
 
 # ---------------------------------------------------------------------------
+# Macro edition (M1: gold, silver, oil, EUR/USD, USD/JPY, daily, English only) — additive
+# extension, nothing above this line is modified.
+#
+# Yahoo is network-blocked in this dev environment exactly like Stooq/Bitstamp/Upbit, so:
+# 1. the FX-shaped Yahoo parse (volume=0 on every bar, a real Yahoo convention for spot FX) is
+#    unit-tested against a hand-written fake payload, extending test_yahoo_parser's existing
+#    equity-shaped coverage without changing it;
+# 2. edition wiring (config, asset-id -> Yahoo-symbol map, cost) is checked directly;
+# 3. the volume=0 column is proven inert by running the full registry twice on the identical price
+#    series — once with a realistic volume column, once with volume=0 throughout — and diffing
+#    every row's metrics;
+# 4. page rendering (cost table, extra note, edition-switch links, custom <title>) is checked on a
+#    synthetic full-data payload, the same way test_stocks_edition_pipeline does for SPY/QQQ;
+# 5. the "no data this week" branch (this dev box has no local Yahoo stand-in for any macro asset,
+#    same as ko's Upbit / stocks' Stooq+Yahoo) is exercised end-to-end via run_weekly.py's own
+#    _run_macro_edition(), confirming it renders build_site.build_empty_edition_page_en() rather
+#    than silently skipping like the stocks edition does.
+# ---------------------------------------------------------------------------
+
+def test_yahoo_parser_fx_shape():
+    """M1: 'fake-Yahoo parse for FX symbols (they have volume 0 — make sure volume=0 does not
+    break anything)'. Same parser as test_yahoo_parser (_parse_yahoo_chart_json is generic on the
+    symbol string — it has no FX-specific branch), exercised here against a payload shaped like a
+    real Yahoo FX response: every bar's volume is 0 (int, not float — Yahoo's own JSON encoding),
+    which must parse cleanly to a 0.0 float column, never crash, never get treated as missing/null
+    the way a None OHLC value would."""
+    import fetch_data as fd
+
+    fx_payload = {
+        "chart": {
+            "result": [{
+                "timestamp": [1704196800, 1704283200, 1704369600],
+                "indicators": {
+                    "quote": [{
+                        "open": [1.1050, 1.1062, 1.1048],
+                        "high": [1.1075, 1.1080, 1.1065],
+                        "low": [1.1030, 1.1040, 1.1020],
+                        "close": [1.1062, 1.1048, 1.1055],
+                        "volume": [0, 0, 0],
+                    }]
+                },
+            }],
+            "error": None,
+        }
+    }
+    df = fd._parse_yahoo_chart_json(fx_payload)
+    check("Yahoo FX parser: 3 rows in, 3 rows out (no bar dropped as null-OHLC)", len(df) == 3,
+          f"got {len(df)}")
+    check("Yahoo FX parser: volume column is present and all-zero",
+          list(df["volume"]) == [0.0, 0.0, 0.0], f"got {list(df['volume'])}")
+    check("Yahoo FX parser: volume column dtype is float (not left as the raw int)",
+          df["volume"].dtype == float, f"got {df['volume'].dtype}")
+    check("Yahoo FX parser: OHLC values map correctly despite volume=0",
+          df["close"].iloc[0] == 1.1062 and df["open"].iloc[-1] == 1.1048)
+    check("Yahoo FX parser: ascending order (oldest first)", list(df["date"]) == sorted(df["date"]))
+
+
+def test_macro_edition_config_wiring():
+    """Sanity check on the additive config.py wiring itself: asset list, file-safe-id -> Yahoo-
+    symbol map, one-way costs (ETF vs. FX), bars_per_year, and the EDITIONS entry — before any
+    pipeline/page test below relies on them."""
+    check("macro config: 5 assets (GLD, SLV, USO, EURUSD, USDJPY)",
+          config.MACRO_ASSETS == ["GLD", "SLV", "USO", "EURUSD", "USDJPY"],
+          f"got {config.MACRO_ASSETS}")
+    check("macro config: daily only", config.MACRO_TIMEFRAMES == ["1d"])
+    check("macro config: DATA_START is 2007-01-01 (all 5 assets exist by then)",
+          config.MACRO_DATA_START == "2007-01-01")
+    check("macro config: bars_per_year is 252, same convention as the stocks edition",
+          config.MACRO_BARS_PER_YEAR == 252)
+    check("macro config: FX Yahoo symbols carry the '=X' suffix, ETFs don't",
+          config.MACRO_YAHOO_SYMBOL["EURUSD"] == "EURUSD=X"
+          and config.MACRO_YAHOO_SYMBOL["USDJPY"] == "USDJPY=X"
+          and config.MACRO_YAHOO_SYMBOL["GLD"] == "GLD")
+    check("macro config: ETF cost is 0.02% one-way",
+          config.COST["GLD"] == 0.0002 and config.COST["SLV"] == 0.0002
+          and config.COST["USO"] == 0.0002)
+    check("macro config: FX cost is 0.01% one-way",
+          config.COST["EURUSD"] == 0.0001 and config.COST["USDJPY"] == 0.0001)
+    check("macro config: EDITIONS['macro'] wired to docs/macro/",
+          config.EDITIONS["macro"]["out"] == config.DOCS_DIR_MACRO
+          and config.EDITIONS["macro"]["assets"] == config.MACRO_ASSETS)
+    check("macro config: crypto/stocks/ko editions and their costs are untouched",
+          config.ASSETS == ["BTCUSD", "ETHUSD"] and config.COST["BTCUSD"] == 0.0010
+          and config.STOCKS_ASSETS == ["SPY", "QQQ"] and config.COST["SPY"] == 0.0002)
+
+
+def test_macro_edition_fx_volume_zero_is_inert():
+    """FX symbols carry volume=0 on every bar (a real Yahoo convention for spot FX, not fetch-side
+    padding). Nothing in engine.py/strategies.py/indicators.py/metrics.py ever reads the volume
+    column, so this must be provably inert: the exact same OHLC price series, run through the full
+    registry once with a realistic positive volume column and once with volume=0 throughout, must
+    produce byte-identical IS/OOS metrics and verdicts on every strategy variant."""
+    import run_weekly as rw
+
+    if resolve_path("btc", "1d") is None:
+        print("[SKIP] test_macro_edition_fx_volume_zero_is_inert: no local BTC data")
+        return
+    base = load_raw("btc", "1d").tail(1200).reset_index(drop=True)
+    df_vol = base.copy()
+    df_zero = base.copy()
+    df_zero["volume"] = 0.0
+    check("macro FX volume test: the two input frames really do differ only in volume",
+          df_vol["volume"].sum() > 0 and df_zero["volume"].sum() == 0)
+
+    cost = config.COST["EURUSD"]
+    _, rows_vol, _ = rw._build_rows_for_asset_tf_impl(
+        "EURUSD", "1d", df_vol, cost, config.MACRO_BARS_PER_YEAR)
+    _, rows_zero, _ = rw._build_rows_for_asset_tf_impl(
+        "EURUSD", "1d", df_zero, cost, config.MACRO_BARS_PER_YEAR)
+
+    check("macro FX volume=0: same row count as a normal-volume run",
+          len(rows_vol) == len(rows_zero), f"{len(rows_vol)} vs {len(rows_zero)}")
+    mismatches = [
+        (rv["strategy_id"], rv["params"]) for rv, rz in zip(rows_vol, rows_zero)
+        if rv["oos"] != rz["oos"] or rv["is"] != rz["is"] or rv["verdict"] != rz["verdict"]
+    ]
+    check("macro FX volume=0: every row's IS/OOS metrics and verdict are unaffected by the volume "
+          "column (volume=0 is inert)", not mismatches, f"mismatches: {mismatches}")
+
+
+def test_macro_edition_pipeline_and_page_wiring():
+    """End-to-end check of the macro edition's row-building + page templates, on a real BTC price
+    series relabeled as GLD (this dev box has no local Yahoo stand-in for any macro asset — see
+    test_macro_edition_no_data_renders_notice below for that branch). Mirrors
+    test_stocks_edition_pipeline's own approach for the stocks edition."""
+    import tempfile
+    import run_weekly as rw
+    import build_site
+
+    if resolve_path("btc", "1d") is None:
+        print("[SKIP] test_macro_edition_pipeline_and_page_wiring: no local BTC data")
+        return
+
+    df = load_raw("btc", "1d").tail(1200).reset_index(drop=True)
+    as_of, rows, suspicious = rw._build_rows_for_asset_tf_impl(
+        "GLD", "1d", df, config.COST["GLD"], config.MACRO_BARS_PER_YEAR)
+    for r in rows:
+        r["edition"] = "macro"
+    check("macro pipeline: full registry row count (22 variants + 2 reference)",
+          len(rows) == _registry.count_variants() + 2, f"got {len(rows)}")
+
+    payload = {
+        "project_name": config.PROJECT_NAME, "edition": "macro", "lang": "en",
+        "tagline": config.TAGLINE_MACRO, "generated_at": "2026-09-07T00:00:00+00:00",
+        "as_of": str(as_of.date()), "oos_days": config.OOS_DAYS,
+        "tally": __import__("verdict").tally([r["verdict"] for r in rows if r["verdict"]]),
+        "rows": rows, "popular_combos": [], "suspicious": suspicious,
+        "legal_disclaimer": config.LEGAL_DISCLAIMER,
+        "repo_url": config.REPO_URL, "signup_url": config.SIGNUP_URL,
+    }
+    note_html = '<p class="meta">MACRO_TEST_NOTE ETF/FX simplification note.</p>'
+
+    with tempfile.TemporaryDirectory() as tmp:
+        index_path = build_site.build_index(
+            payload, out_path=os.path.join(tmp, "index.html"),
+            assets=config.MACRO_ASSETS, timeframes=config.MACRO_TIMEFRAMES,
+            lang_links=('<a href="../index.html">English (crypto)</a> &middot; '
+                       '<a href="../stocks/index.html">Stocks</a> &middot; '
+                       '<a href="../ko/index.html">한국어</a>'),
+            feed_html="", places_href="../places.html", registry_href="../registry.html",
+            decay_href="../index-history.html", page_title=config.PROJECT_TITLE_MACRO,
+            extra_note_html=note_html)
+        meth_path = build_site.build_methodology(
+            out_path=os.path.join(tmp, "methodology.html"), assets=config.MACRO_ASSETS,
+            lang_links='<a href="../methodology.html">English (crypto)</a>',
+            extra_note_html=note_html)
+        with open(index_path, encoding="utf-8") as f:
+            index_html = f.read()
+        with open(meth_path, encoding="utf-8") as f:
+            meth_html = f.read()
+
+        check("macro index page: GLD section present", 'id="GLD-1d"' in index_html)
+        check("macro index page: no SLV/USO/EURUSD/USDJPY rows rendered (no data for them in this "
+              "synthetic payload)",
+              'id="SLV-1d"' not in index_html and 'id="USO-1d"' not in index_html
+              and 'id="EURUSD-1d"' not in index_html and 'id="USDJPY-1d"' not in index_html)
+        check("macro index page: <title> is the macro-specific PROJECT_TITLE_MACRO string",
+              f"<title>{config.PROJECT_TITLE_MACRO}</title>" in index_html)
+        check("macro index page: shows a verdict badge", "badge" in index_html)
+        check("macro index page: edition-switch links to stocks and Korean editions",
+              'href="../stocks/index.html"' in index_html and 'href="../ko/index.html"' in index_html)
+        check("macro index page: carries the ETF/FX simplification note",
+              "MACRO_TEST_NOTE" in index_html)
+
+        check("macro methodology page: GLD cost row present (0.02%)",
+              "<td>GLD</td><td>0.02%</td>" in meth_html)
+        check("macro methodology page: EURUSD cost row present (0.01%)",
+              "<td>EURUSD</td><td>0.01%</td>" in meth_html)
+        check("macro methodology page: no KRW-BTC cost row leaked in (edition isolation)",
+              "KRW-BTC" not in meth_html)
+        check("macro methodology page: no SPY/QQQ cost row leaked in (edition isolation)",
+              "SPY" not in meth_html and "QQQ" not in meth_html)
+        check("macro methodology page: carries the ETF/FX simplification note",
+              "MACRO_TEST_NOTE" in meth_html)
+        check("macro methodology page: <title> is unaffected (still 'Dead or Alive methodology', "
+              "not a run-on of the long index-page title)",
+              "<title>Dead or Alive methodology</title>" in meth_html)
+
+
+def test_macro_edition_no_data_renders_notice():
+    """M1: 'an offline run that skips macro assets with warnings (no local data) yet still renders
+    docs/macro/index.html with a "no data this week" notice like ko'. This dev box has no local
+    Yahoo stand-in for GLD/SLV/USO/EURUSD/USDJPY (config.DATA_DIR has no such files), so calling
+    run_weekly.py's own _run_macro_edition() here exercises exactly that branch — it must render
+    build_site.build_empty_edition_page_en() rather than silently skipping (unlike the stocks
+    edition, which simply writes nothing when it has no data)."""
+    import json as _json
+    import tempfile
+    import run_weekly as rw
+
+    for symbol in config.MACRO_ASSETS:
+        path = os.path.join(config.DATA_DIR, f"{symbol}_1d.csv")
+        if os.path.exists(path):
+            print(f"[SKIP] test_macro_edition_no_data_renders_notice: {path} exists locally "
+                  f"(this test only applies to the no-local-data case)")
+            return
+
+    orig_results, orig_history = config.RESULTS_DIR, config.HISTORY_DIR
+    orig_docs_macro = config.DOCS_DIR_MACRO
+    orig_out = config.EDITIONS["macro"]["out"]
+    orig_docs = config.DOCS_DIR
+    tmp = tempfile.mkdtemp()
+    config.RESULTS_DIR = os.path.join(tmp, "results")
+    config.HISTORY_DIR = os.path.join(tmp, "results", "history")
+    config.DOCS_DIR = os.path.join(tmp, "docs")
+    config.DOCS_DIR_MACRO = os.path.join(tmp, "docs", "macro")
+    config.EDITIONS["macro"]["out"] = config.DOCS_DIR_MACRO
+    try:
+        payload = rw._run_macro_edition()
+        check("macro no-data: _run_macro_edition() returns None (no data this week)",
+              payload is None)
+
+        index_path = os.path.join(config.DOCS_DIR_MACRO, "index.html")
+        check("macro no-data: docs/macro/index.html written", os.path.exists(index_path))
+        with open(index_path, encoding="utf-8") as f:
+            index_html = f.read()
+        check("macro no-data: shows the 'No macro data this week' notice",
+              "No macro data this week" in index_html)
+        check("macro no-data: <title> is the macro-specific PROJECT_TITLE_MACRO string",
+              f"<title>{config.PROJECT_TITLE_MACRO}</title>" in index_html)
+        check("macro no-data: links back to the crypto, stocks, and Korean editions",
+              'href="../index.html"' in index_html and 'href="../stocks/index.html"' in index_html
+              and 'href="../ko/index.html"' in index_html)
+        check("macro no-data: carries the legal disclaimer",
+              config.LEGAL_DISCLAIMER in index_html)
+
+        meth_path = os.path.join(config.DOCS_DIR_MACRO, "methodology.html")
+        check("macro no-data: docs/macro/methodology.html is still written",
+              os.path.exists(meth_path))
+
+        latest_path = os.path.join(config.RESULTS_DIR, "latest_macro.json")
+        check("macro no-data: results/latest_macro.json written", os.path.exists(latest_path))
+        with open(latest_path, encoding="utf-8") as f:
+            empty_payload = _json.load(f)
+        check("macro no-data: empty payload has zero rows and a zero tally",
+              empty_payload["rows"] == [] and sum(empty_payload["tally"].values()) == 0)
+
+        api_path = os.path.join(config.DOCS_DIR, "api", "v1", "macro", "latest.json")
+        check("macro no-data: docs/api/v1/macro/latest.json still written (spec_v3 §B)",
+              os.path.exists(api_path))
+    finally:
+        config.RESULTS_DIR, config.HISTORY_DIR = orig_results, orig_history
+        config.DOCS_DIR, config.DOCS_DIR_MACRO = orig_docs, orig_docs_macro
+        config.EDITIONS["macro"]["out"] = orig_out
+
+
+# ---------------------------------------------------------------------------
 # spec_v3 §E: "Check my strategy" via GitHub Issues — parser/validator unit test, 5 good + 5 bad
 # inputs (spec's own requirement). Uses check_issue.py's own parse_issue_body/validate directly
 # (not the full run_check backtest, which needs local data files that may not exist for every
@@ -1321,6 +1588,11 @@ def test_registry_page_builds_and_no_banned_korean_words():
               "issues/new?template=propose-strategy.yml" in en_html)
         check("registry page: lists every ledger entry's id",
               all(f">{e['id']}<" in en_html for e in __import__("ledger").load_ledger()))
+        check("registry page: 'Editions covered' section lists all four editions (M1)",
+              "Editions covered" in en_html and "<code>en</code>" in en_html
+              and "<code>ko</code>" in en_html and "<code>stocks</code>" in en_html
+              and "<code>macro</code>" in en_html
+              and "GLD, SLV, USO, EURUSD, USDJPY" in en_html)
 
         with open(ko_path, encoding="utf-8") as f:
             ko_html = f.read()
@@ -1331,6 +1603,8 @@ def test_registry_page_builds_and_no_banned_korean_words():
               config.LEGAL_DISCLAIMER_KO in ko_html)
         check("registry page ko: disclaimer appears at top and bottom",
               ko_html.count(config.LEGAL_DISCLAIMER_KO) == 2)
+        check("registry page ko: '검사 대상 에디션' section mentions the macro edition (M1)",
+              "검사 대상 에디션" in ko_html and "<code>macro</code>" in ko_html)
     finally:
         config.DOCS_DIR, config.DOCS_DIR_KO = orig_docs, orig_docs_ko
 
@@ -1413,8 +1687,9 @@ def test_decay_index_page_builds_and_no_banned_korean_words():
         with open(en_path, encoding="utf-8") as f:
             en_html = f.read()
         check("index-history page: has an <svg> chart (en has archived data)", "<svg" in en_html)
-        check("index-history page: mentions both en and stocks edition labels",
-              "English (crypto" in en_html and "Stocks (SPY, QQQ)" in en_html)
+        check("index-history page: mentions en, stocks, and macro edition labels (M1)",
+              "English (crypto" in en_html and "Stocks (SPY, QQQ)" in en_html
+              and "Macro (GLD, SLV, USO, EURUSD, USDJPY)" in en_html)
 
         with open(ko_path, encoding="utf-8") as f:
             ko_html = f.read()
@@ -1839,6 +2114,11 @@ if __name__ == "__main__":
     test_yahoo_parser()
     test_drop_unclosed_stocks_bar()
     test_stocks_edition_pipeline()
+    test_yahoo_parser_fx_shape()
+    test_macro_edition_config_wiring()
+    test_macro_edition_fx_volume_zero_is_inert()
+    test_macro_edition_pipeline_and_page_wiring()
+    test_macro_edition_no_data_renders_notice()
     test_write_api_v1()
     test_robustness_neighbour_values()
     test_robustness_ma_pair_and_grid_size()

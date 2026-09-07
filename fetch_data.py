@@ -466,6 +466,70 @@ def update_symbol_offline_stocks(symbol: str, tf: str = "1d") -> bool:
     return False
 
 
+# ---------------------------------------------------------------------------
+# Macro edition data source (M1) — the existing Yahoo chart fetcher (fetch_ohlc_yahoo above, which
+# is already generic on the symbol string passed in), called with config.MACRO_YAHOO_SYMBOL's
+# ETF/FX tickers instead of a bare stock ticker. No Stooq leg (Stooq does not carry FX pairs) —
+# this task's own instruction is "via the existing Yahoo chart fetcher" only. Additive only:
+# nothing above this line (Bitstamp/Upbit/stocks fetchers) is modified.
+#
+# Yahoo is network-blocked in this dev environment exactly like Bitstamp/Upbit/Stooq, so this path
+# is exercised here only through fetch_ohlc_yahoo's already-unit-tested pure parser
+# (_parse_yahoo_chart_json, tests.py's test_yahoo_parser, extended in this task with an
+# FX-shaped fake payload to confirm volume=0 survives parsing intact) — this function itself is
+# written but not exercised against a live response.
+#
+# FX symbols carry volume=0 for every bar (a real Yahoo convention for FX, not fetch-side
+# padding — Yahoo simply has no trade-volume figure for a spot FX pair). Nothing downstream ever
+# reads the volume column (engine.py/strategies.py/indicators.py/metrics.py all key off
+# open/high/low/close only), so an all-zero volume column is inert for every strategy in the
+# registry — this is checked directly by tests.py's test_macro_edition_fx_volume_zero_is_inert.
+# ---------------------------------------------------------------------------
+
+def update_symbol_online_macro(asset: str, tf: str = "1d") -> bool:
+    yahoo_symbol = config.MACRO_YAHOO_SYMBOL[asset]
+    try:
+        df = fetch_ohlc_yahoo(yahoo_symbol)
+    except requests.exceptions.RequestException as e:
+        print(f"[fetch_data] WARNING: Yahoo fetch failed for macro {asset} ({yahoo_symbol}): "
+              f"{e} — skipping (not a failure).")
+        return False
+
+    if not df.empty and not _looks_daily(df):
+        print(f"[fetch_data] Yahoo returned non-daily-looking data for macro {asset} "
+              f"({len(df)} rows) — discarding (not a failure).")
+        df = _empty_ohlc_df()
+    if df.empty:
+        print(f"[fetch_data] WARNING: Yahoo returned no usable data for macro {asset} "
+              f"({yahoo_symbol}) — skipping (not a failure).")
+        return False
+
+    df = df[df["date"] >= pd.Timestamp(config.MACRO_DATA_START)].reset_index(drop=True)
+    df = _drop_unclosed_stocks_bar(df)  # same "drop today's still-open session" rule as stocks
+    if df.empty:
+        print(f"[fetch_data] WARNING: macro {asset} data was empty after filtering — skipping.")
+        return False
+
+    os.makedirs(config.DATA_DIR, exist_ok=True)
+    out_path = _out_path(asset, tf)
+    df.to_csv(out_path, index=False)
+    print(f"[fetch_data] (macro) {asset} {tf}: source=yahoo, wrote {len(df)} rows "
+          f"({df['date'].min()} .. {df['date'].max()}) -> {out_path}")
+    return True
+
+
+def update_symbol_offline_macro(asset: str, tf: str = "1d") -> bool:
+    """Offline mode has no local Yahoo stand-in for any macro asset in this environment — skip
+    with a warning, exactly like the Korean edition's Upbit assets and the stocks edition's
+    SPY/QQQ do offline. Not a failure: run_weekly.py's macro edition renders an explicit "no data
+    this week" page (like the Korean edition's) when this leaves every macro asset without a
+    local file."""
+    print(f"[fetch_data] WARNING: --offline has no local stand-in for {asset} {tf} (macro "
+          f"edition) — skipping (not a failure). Yahoo is network-blocked in this dev "
+          f"environment too; run without --offline in production.")
+    return False
+
+
 def main():
     parser = argparse.ArgumentParser(description="netcheck data fetch (spec_v2 §1)")
     parser.add_argument("--offline", action="store_true",
@@ -518,6 +582,21 @@ def main():
             except requests.exceptions.RequestException as e:
                 print(f"[fetch_data] WARNING: stocks fetch failed for {symbol} {tf}: {e} — "
                       f"skipping (not a failure; the crypto editions are unaffected).")
+
+    # Macro edition (GLD/SLV/USO/EURUSD/USDJPY, daily) — a fourth, independent data source (Yahoo
+    # only). Any failure here is caught per-symbol and only ever produces a warning: it must never
+    # fail the whole run or affect the crypto/stocks editions above.
+    for symbol in config.MACRO_ASSETS:
+        for tf in config.MACRO_TIMEFRAMES:
+            try:
+                if args.offline:
+                    written = update_symbol_offline_macro(symbol, tf)
+                else:
+                    written = update_symbol_online_macro(symbol, tf)
+                any_written = any_written or written
+            except requests.exceptions.RequestException as e:
+                print(f"[fetch_data] WARNING: macro fetch failed for {symbol} {tf}: {e} — "
+                      f"skipping (not a failure; the crypto/stocks editions are unaffected).")
 
     return 0
 

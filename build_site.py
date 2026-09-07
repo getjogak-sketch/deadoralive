@@ -280,7 +280,8 @@ def _popular_combos_html(payload: dict, assets: list | None = None, timeframes: 
 def build_index(payload: dict, out_path: str | None = None, assets: list | None = None,
                  timeframes: list | None = None, lang_links: str | None = None,
                  feed_html: str | None = None, places_href: str | None = None,
-                 registry_href: str | None = None, decay_href: str | None = None):
+                 registry_href: str | None = None, decay_href: str | None = None,
+                 page_title: str | None = None, extra_note_html: str | None = None):
     """spec_v3 §A extension (additive): `assets`/`timeframes`/`lang_links` let a second edition
     (the stocks edition — SPY/QQQ, 1d only) reuse this exact template instead of duplicating it,
     per spec_v3 §A's own instruction ("reuse the English builders with an edition parameter").
@@ -289,12 +290,21 @@ def build_index(payload: dict, out_path: str | None = None, assets: list | None 
     table structure as before — only its header gained one more nav link (Stocks), which changes
     no number on the page. `feed_html` (task S1/S2 addition): the stocks edition has no feed.xml
     of its own (spec_v3 §A is English/ko/stocks but S1's feeds are only en+ko), so its call site
-    passes feed_html="" while the English crypto edition's default links docs/feed.xml/feed.json."""
+    passes feed_html="" while the English crypto edition's default links docs/feed.xml/feed.json.
+    `page_title` (M1 addition): overrides the <title> tag text only (the <h1> still reads
+    `payload['project_name']`, unchanged) — the macro edition needs its <title> to lead with its
+    own search-facing phrase (config.PROJECT_TITLE_MACRO) without renaming its <h1>; every other
+    edition's call site omits this and keeps using `payload['project_name']` for both, exactly as
+    before. `extra_note_html` (M1 addition): an optional extra `<p class="meta">`-style note
+    rendered under the header's as_of/lang-links line — used by the macro edition for its
+    "ETF prices unadjusted for distributions; FX has no carry/rollover modelled" note; every other
+    edition's call site omits this and renders nothing extra, exactly as before."""
     out_path = out_path or os.path.join(config.DOCS_DIR, "index.html")
     assets = assets if assets is not None else config.ASSETS
     timeframes = timeframes if timeframes is not None else config.TIMEFRAMES
     lang_links = lang_links if lang_links is not None else (
         '<a href="stocks/index.html">Stocks edition</a> &middot; '
+        '<a href="macro/index.html">Macro edition</a> &middot; '
         '<a href="ko/index.html">한국어 (Korean edition)</a>'
     )
     feed_html = feed_html if feed_html is not None else (
@@ -310,6 +320,8 @@ def build_index(payload: dict, out_path: str | None = None, assets: list | None 
     # task R2: the stocks edition's Decay Index is shown as its own section on the shared English
     # docs/index-history.html page (there is no docs/stocks/index-history.html of its own).
     decay_href = decay_href if decay_href is not None else "index-history.html"
+    page_title = page_title if page_title is not None else payload['project_name']
+    extra_note_html = extra_note_html or ""
 
     groups = {}
     order = []
@@ -353,7 +365,7 @@ def build_index(payload: dict, out_path: str | None = None, assets: list | None 
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{html.escape(payload['project_name'])}</title>
+<title>{html.escape(page_title)}</title>
 <style>{BASE_CSS}</style>
 </head>
 <body>
@@ -364,6 +376,7 @@ def build_index(payload: dict, out_path: str | None = None, assets: list | None 
   &middot; {lang_links}</p>
   <div class="tally">{tally_html}</div>
   {skipped_note}
+  {extra_note_html}
 </header>
 <main>
   <nav class="jump">{nav_html}</nav>
@@ -422,22 +435,32 @@ def _popular_combos_table_html() -> str:
 
 def build_methodology(out_path: str | None = None, assets: list | None = None,
                        lang_links: str | None = None, places_href: str | None = None,
-                       registry_href: str | None = None, decay_href: str | None = None):
+                       registry_href: str | None = None, decay_href: str | None = None,
+                       page_title: str | None = None, extra_note_html: str | None = None):
     """spec_v3 §A extension (additive): `assets`/`lang_links` let the stocks edition reuse this
     template (see build_index's docstring above for the same rationale); both default to exactly
     what this function already hard-coded before spec_v3. `places_href` (task S4): see
     build_index's own docstring — the stocks edition has no places.html of its own.
     `registry_href` (task R1) / `decay_href` (task R2): same reasoning, for the shared
-    registry.html / index-history.html pages."""
+    registry.html / index-history.html pages. `page_title`/`extra_note_html` (M1 addition): same
+    purpose as build_index's own params of the same name — the macro edition's <title> tag and its
+    ETF-distributions/FX-carry note; every other edition's call site omits both."""
     out_path = out_path or os.path.join(config.DOCS_DIR, "methodology.html")
     assets = assets if assets is not None else config.ASSETS
     lang_links = lang_links if lang_links is not None else (
         '<a href="stocks/methodology.html">Stocks edition</a> &middot; '
+        '<a href="macro/methodology.html">Macro edition</a> &middot; '
         '<a href="ko/methodology.html">한국어 (Korean edition)</a>'
     )
     places_href = places_href if places_href is not None else "places.html"
     registry_href = registry_href if registry_href is not None else "registry.html"
     decay_href = decay_href if decay_href is not None else "index-history.html"
+    # `page_title` is the FULL <title>-tag text, used verbatim when given — unlike build_index's
+    # own page_title (which stands in for `payload['project_name']` alone), this function always
+    # appended " methodology" itself, so a caller passing a long descriptive override (as the
+    # macro edition briefly did) would otherwise get a run-on "...after fees methodology" title.
+    page_title = page_title if page_title is not None else f"{config.PROJECT_NAME} methodology"
+    extra_note_html = extra_note_html or ""
     # Filtered to `assets` (not all of config.COST) so this page's output is unaffected by the
     # other editions' COST entries added alongside it.
     cost_rows = "".join(
@@ -451,7 +474,7 @@ def build_methodology(out_path: str | None = None, assets: list | None = None,
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{html.escape(config.PROJECT_NAME)} methodology</title>
+<title>{html.escape(page_title)}</title>
 <style>{BASE_CSS}</style>
 </head>
 <body>
@@ -467,6 +490,7 @@ def build_methodology(out_path: str | None = None, assets: list | None = None,
        except the single "Fee drag" column, which is explicitly labeled gross/illustrative.</p>
     <div class="tablewrap"><table><thead><tr><th>Asset</th><th>One-way cost</th></tr></thead>
     <tbody>{cost_rows}</tbody></table></div>
+    {extra_note_html}
   </section>
 
   <section class="assetblock">
@@ -893,7 +917,7 @@ def build_index_ko(payload: dict, out_path: str | None = None):
   <h1>{html.escape(payload['project_name'])}</h1>
   <p class="tagline">{html.escape(payload.get('tagline') or config.TAGLINE_KO)}</p>
   <p class="meta">기준일 <strong>{html.escape(payload['as_of'])}</strong> &middot;
-     매주 월요일 오전 9시 30분(한국 시간)에 자동으로 다시 계산합니다 &middot; <a href="../index.html">English</a> &middot; <a href="../stocks/index.html">Stocks</a></p>
+     매주 월요일 오전 9시 30분(한국 시간)에 자동으로 다시 계산합니다 &middot; <a href="../index.html">English</a> &middot; <a href="../stocks/index.html">Stocks</a> &middot; <a href="../macro/index.html">Macro</a></p>
   <div class="tally">{tally_html}</div>
   {skipped_note}
 </header>
@@ -903,7 +927,7 @@ def build_index_ko(payload: dict, out_path: str | None = None):
   {popular_combos_html}
 </main>
 <footer class="bottom">
-  <div><a href="methodology.html">어떻게 계산했나</a>{repo_html}{signup_html} &middot; <a href="../index.html">English</a> &middot; <a href="../stocks/index.html">Stocks</a>
+  <div><a href="methodology.html">어떻게 계산했나</a>{repo_html}{signup_html} &middot; <a href="../index.html">English</a> &middot; <a href="../stocks/index.html">Stocks</a> &middot; <a href="../macro/index.html">Macro</a>
   &middot; <a href="registry.html">전략 등록부</a>
   &middot; <a href="index-history.html">전략 쇠퇴 지수</a>
   &middot; <a href="{html.escape(_check_strategy_url())}">내 전략도 검사해 보기</a>
@@ -1013,7 +1037,7 @@ def build_methodology_ko(out_path: str | None = None):
 <header class="top">
   <h1>어떻게 계산했나</h1>
   <p class="tagline"><a href="index.html">&larr; 결과표로 돌아가기</a> &middot;
-     <a href="../methodology.html">English</a> &middot; <a href="../stocks/methodology.html">Stocks</a></p>
+     <a href="../methodology.html">English</a> &middot; <a href="../stocks/methodology.html">Stocks</a> &middot; <a href="../macro/methodology.html">Macro</a></p>
 </header>
 <main>
   <section class="assetblock">
@@ -1138,7 +1162,7 @@ def build_methodology_ko(out_path: str | None = None):
   </section>
 </main>
 <footer class="bottom">
-  <div><a href="index.html">&larr; 결과표로 돌아가기</a> &middot; <a href="../methodology.html">English</a> &middot; <a href="../stocks/methodology.html">Stocks</a>
+  <div><a href="index.html">&larr; 결과표로 돌아가기</a> &middot; <a href="../methodology.html">English</a> &middot; <a href="../stocks/methodology.html">Stocks</a> &middot; <a href="../macro/methodology.html">Macro</a>
   &middot; <a href="registry.html">전략 등록부</a>
   &middot; <a href="index-history.html">전략 쇠퇴 지수</a>
   &middot; <a href="{html.escape(_check_strategy_url())}">내 전략도 검사해 보기</a>
@@ -1177,7 +1201,7 @@ def build_empty_edition_page_ko(out_path: str | None = None, as_of: str | None =
   <h1>{html.escape(config.PROJECT_NAME)}</h1>
   <p class="tagline">{html.escape(config.TAGLINE_KO)}</p>
   <p class="meta">기준일 <strong>{html.escape(as_of)}</strong> &middot;
-     <a href="../index.html">English</a> &middot; <a href="../stocks/index.html">Stocks</a></p>
+     <a href="../index.html">English</a> &middot; <a href="../stocks/index.html">Stocks</a> &middot; <a href="../macro/index.html">Macro</a></p>
 </header>
 <main>
   <div class="notice-box">
@@ -1189,7 +1213,7 @@ def build_empty_edition_page_ko(out_path: str | None = None, as_of: str | None =
   </div>
 </main>
 <footer class="bottom">
-  <div><a href="methodology.html">어떻게 계산했나</a> &middot; <a href="../index.html">English</a> &middot; <a href="../stocks/index.html">Stocks</a>
+  <div><a href="methodology.html">어떻게 계산했나</a> &middot; <a href="../index.html">English</a> &middot; <a href="../stocks/index.html">Stocks</a> &middot; <a href="../macro/index.html">Macro</a>
   &middot; <a href="registry.html">전략 등록부</a>
   &middot; <a href="index-history.html">전략 쇠퇴 지수</a>
   &middot; <a href="{html.escape(_check_strategy_url())}">내 전략도 검사해 보기</a>
@@ -1198,6 +1222,57 @@ def build_empty_edition_page_ko(out_path: str | None = None, as_of: str | None =
   &middot; <a href="places.html">이 엔진이 공개되는 곳</a></div>
 </footer>
 {_disclaimer_block_ko()}
+{config.ANALYTICS_SNIPPET}
+</body>
+</html>
+"""
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    with open(out_path, "w") as f:
+        f.write(doc)
+    return out_path
+
+
+def build_empty_edition_page_en(out_path: str, as_of: str, lang_links: str, notice_title: str,
+                                 notice_body: str, feed_html: str = "",
+                                 places_href: str = "../places.html",
+                                 registry_href: str = "../registry.html",
+                                 decay_href: str = "../index-history.html",
+                                 page_title: str | None = None) -> str:
+    """Generic English "no data this week" page (M1 addition) — the English-language counterpart
+    of build_empty_edition_page_ko above, for an English edition whose own data source can also go
+    dark (the macro edition's Yahoo fetch, in this dev environment where every exchange/finance API
+    is network-blocked). Same idea: a clear notice, never a blank or missing page. Not used by the
+    stocks edition, which simply skips writing its pages instead when it has no data this week (see
+    run_weekly._run_stocks_edition's own docstring) — that existing behavior is untouched; this
+    function only backs the macro edition's new "no data this week" requirement."""
+    page_title = page_title or config.PROJECT_NAME
+    doc = f"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{html.escape(page_title)}</title>
+<style>{BASE_CSS}</style>
+</head>
+<body>
+<header class="top">
+  <h1>{html.escape(config.PROJECT_NAME)}</h1>
+  <p class="tagline">{html.escape(config.TAGLINE)}</p>
+  <p class="meta">as_of: <strong>{html.escape(as_of)}</strong> &middot; {lang_links}</p>
+</header>
+<main>
+  <div style="max-width:1200px;margin:2rem auto;padding:2rem 1.5rem;border:1px dashed var(--border);border-radius:10px;text-align:center;">
+    <h2>{html.escape(notice_title)}</h2>
+    <p>{notice_body}</p>
+  </div>
+</main>
+<footer class="bottom">
+  <div><a href="methodology.html">Methodology</a>
+  &middot; <a href="{html.escape(registry_href)}">Strategy registry</a>
+  &middot; <a href="{html.escape(decay_href)}">Strategy Decay Index</a>{feed_html}
+  &middot; <a href="{html.escape(places_href)}">Places this is published to</a></div>
+  <div class="disclaimer">{html.escape(config.LEGAL_DISCLAIMER)}</div>
+</footer>
 {config.ANALYTICS_SNIPPET}
 </body>
 </html>
@@ -1219,6 +1294,7 @@ API_EDITIONS_INFO = [
     ("en", "English (crypto: BTCUSD, ETHUSD, 1d/4h)", "methodology.html"),
     ("ko", "한국어 (Korean, crypto: KRW-BTC, KRW-ETH, 1d/4h)", "ko/methodology.html"),
     ("stocks", "Stocks (SPY, QQQ, 1d)", "stocks/methodology.html"),
+    ("macro", "Macro (GLD, SLV, USO, EURUSD, USDJPY, 1d)", "macro/methodology.html"),
 ]
 
 API_SCHEMA_FIELDS = [
@@ -1452,6 +1528,7 @@ _PLACES_LIVE_EN = [
     ("Site — English (crypto, BTC/ETH)", "docs/index.html", "Always on; rebuilt every weekly run."),
     ("Site — Korean (Upbit KRW)", "docs/ko/index.html", "Always on; shows a 'no data this week' notice when Upbit is unreachable."),
     ("Site — Stocks (SPY/QQQ)", "docs/stocks/index.html", "Always on; skipped for a run with no Stooq/Yahoo data."),
+    ("Site — Macro (gold/silver/oil/FX)", "docs/macro/index.html", "Always on; shows a 'no data this week' notice when Yahoo is unreachable."),
     ("Machine-readable API (JSON)", "docs/api/v1/&lt;edition&gt;/latest.json", "No key; see docs/api/index.html for the schema."),
     ('"Check my strategy" GitHub Issues bot', ".github/ISSUE_TEMPLATE/check-strategy.yml", "Open an issue with that template; a bot replies and closes it."),
     ("RSS / JSON Feed", "docs/feed.xml, docs/feed.json, docs/ko/feed.xml", "One item per weekly run, full HTML content per item."),
@@ -1551,6 +1628,7 @@ _PLACES_LIVE_KO = [
     ("사이트 — 영어(암호화폐, BTC/ETH)", "docs/index.html", "항상 켜져 있으며 매주 자동 갱신됩니다."),
     ("사이트 — 한국어(업비트 KRW)", "docs/ko/index.html", "업비트 접속이 안 될 때는 '이번 주는 결과가 없습니다' 안내가 표시됩니다."),
     ("사이트 — 주식(SPY/QQQ)", "docs/stocks/index.html", "Stooq/Yahoo 데이터가 없는 주에는 건너뜁니다."),
+    ("사이트 — 원자재·외환(금/은/원유/FX, 영어만)", "docs/macro/index.html", "야후 데이터가 없을 때는 '이번 주는 결과가 없습니다'에 해당하는 영어 안내가 표시됩니다."),
     ("기계 판독용 API(JSON)", "docs/api/v1/&lt;edition&gt;/latest.json", "별도 키 없이 열람 가능합니다. 자세한 형식은 docs/api/index.html 참고."),
     ('"내 전략도 검사해 보기" 깃허브 이슈 봇', ".github/ISSUE_TEMPLATE/check-strategy.yml", "해당 템플릿으로 이슈를 열면 봇이 댓글로 답하고 이슈를 닫습니다."),
     ("RSS / JSON 피드", "docs/feed.xml, docs/feed.json, docs/ko/feed.xml", "매주 실행마다 항목이 하나씩 추가되며 전체 내용을 담고 있습니다."),
@@ -1705,6 +1783,14 @@ table.ledger td, table.ledger th {{ text-align: left; white-space: normal; }}
 </header>
 <main>
   <section class="assetblock">
+    <h2>Editions covered</h2>
+    <p>Every entry below is registered once and then tested identically across whichever of these
+       editions it applies to (the same rule text, the same fixed parameters, the same engine and
+       verdict thresholds — only the asset, cost, and language differ per edition):</p>
+    <ul>{"".join(f'<li><code>{html.escape(k)}</code> — {html.escape(label)}</li>' for k, label, _l in API_EDITIONS_INFO)}</ul>
+  </section>
+
+  <section class="assetblock">
     <h2>Why pre-registration</h2>
     <p>This works the same way pre-registering a clinical trial does: the exact thing being
        tested, and the exact fixed numbers it runs at, are written down and dated
@@ -1783,6 +1869,19 @@ table.ledger td, table.ledger th {{ text-align: left; white-space: normal; }}
 </header>
 <main>
   <section class="assetblock">
+    <h2>검사 대상 에디션</h2>
+    <p>아래 목록의 모든 전략은 한 번만 등록되고, 그 뒤 해당하는 모든 에디션에서 똑같은 방식으로
+       검사됩니다(같은 규칙 문구, 같은 고정 설정값, 같은 엔진과 판정 기준 — 에디션마다 다른 것은
+       자산·수수료·언어뿐입니다):</p>
+    <ul>
+      <li><code>en</code> — 영어(암호화폐: BTCUSD, ETHUSD, 1d/4h)</li>
+      <li><code>ko</code> — 한국어(암호화폐: KRW-BTC, KRW-ETH, 1d/4h)</li>
+      <li><code>stocks</code> — 주식(SPY, QQQ, 1d, 영어만)</li>
+      <li><code>macro</code> — 원자재·외환(GLD, SLV, USO, EURUSD, USDJPY, 1d, 영어만)</li>
+    </ul>
+  </section>
+
+  <section class="assetblock">
     <h2>왜 사전 등록인가</h2>
     <p>임상시험을 사전 등록하는 것과 같은 원리입니다 — 무엇을 검증할지, 어떤 고정값으로 검증할지를
        결과를 보기 <strong>전에</strong> 미리 문서로 남겨 둡니다. 아래 목록에 한 번 들어간 항목은
@@ -1851,6 +1950,7 @@ _DECAY_EXPLAINER_KO = (
 )
 
 _EDITION_LABEL_EN = {"en": "English (crypto: BTCUSD, ETHUSD)", "stocks": "Stocks (SPY, QQQ)",
+                      "macro": "Macro (GLD, SLV, USO, EURUSD, USDJPY)",
                       "ko": "한국어 (Upbit KRW-BTC, KRW-ETH)"}
 
 
@@ -1889,7 +1989,7 @@ def build_index_history_page(out_path: str | None = None, editions: list | None 
                               lang_links: str | None = None, places_href: str | None = None,
                               registry_href: str | None = None) -> str:
     out_path = out_path or os.path.join(config.DOCS_DIR, "index-history.html")
-    editions = editions if editions is not None else ["en", "stocks"]
+    editions = editions if editions is not None else ["en", "stocks", "macro"]
     lang_links = lang_links if lang_links is not None else (
         '<a href="ko/index-history.html">한국어 (Korean)</a>'
     )

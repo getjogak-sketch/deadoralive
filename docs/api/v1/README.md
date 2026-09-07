@@ -8,6 +8,7 @@ served by GitHub Pages, refreshed once a week by the same pipeline that renders 
 - `en` — English (crypto: BTCUSD, ETHUSD, 1d/4h) (`methodology.html`)
 - `ko` — 한국어 (Korean, crypto: KRW-BTC, KRW-ETH, 1d/4h) (`ko/methodology.html`)
 - `stocks` — Stocks (SPY, QQQ, 1d) (`stocks/methodology.html`)
+- `macro` — Macro (GLD, SLV, USO, EURUSD, USDJPY, 1d) (`macro/methodology.html`)
 
 ## Endpoints (per edition)
 

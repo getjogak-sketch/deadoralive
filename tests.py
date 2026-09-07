@@ -1504,6 +1504,83 @@ def test_seo_pages_no_banned_korean_words():
 
 
 # ---------------------------------------------------------------------------
+# M2: SEO title tuning from the demand study (seo_pages.py's ASSET_LEAD_EN/STRATEGY_LEAD_EN +
+# _seo_lead_phrase). Additive extension, nothing above this line is modified.
+# ---------------------------------------------------------------------------
+
+def test_seo_lead_phrases_mapping():
+    import seo_pages as sp
+
+    check("seo lead: GLD -> 'Gold trading strategy' (asset-level, any strategy)",
+          sp._seo_lead_phrase("supertrend", "GLD") == "Gold trading strategy")
+    check("seo lead: EURUSD -> 'EUR/USD trading strategy' (asset-level)",
+          sp._seo_lead_phrase("macd", "EURUSD") == "EUR/USD trading strategy")
+    check("seo lead: QQQ -> 'QQQ strategy' (asset-level)",
+          sp._seo_lead_phrase("sma_cross", "QQQ") == "QQQ strategy")
+    check("seo lead: bb_mr, any asset -> 'Bollinger Bands strategy' (strategy-level)",
+          sp._seo_lead_phrase("bb_mr", "BTCUSD") == "Bollinger Bands strategy")
+    check("seo lead: bb_breakout -> 'Bollinger Bands strategy'",
+          sp._seo_lead_phrase("bb_breakout", "SPY") == "Bollinger Bands strategy")
+    check("seo lead: bb_squeeze -> 'Bollinger Bands strategy'",
+          sp._seo_lead_phrase("bb_squeeze", "USO") == "Bollinger Bands strategy")
+    check("seo lead: ichimoku_cloud -> 'Ichimoku strategy'",
+          sp._seo_lead_phrase("ichimoku_cloud", "BTCUSD") == "Ichimoku strategy")
+    check("seo lead: an unmapped asset/strategy combo has no lead phrase",
+          sp._seo_lead_phrase("sma_cross", "BTCUSD") is None)
+    check("seo lead: USDJPY/SLV/USO have no keyword-pool evidence yet, so no forced lead phrase",
+          sp._seo_lead_phrase("supertrend", "USDJPY") is None
+          and sp._seo_lead_phrase("supertrend", "SLV") is None
+          and sp._seo_lead_phrase("supertrend", "USO") is None)
+    check("seo lead: asset-level match wins over a strategy-level match when both would apply",
+          sp._seo_lead_phrase("bb_mr", "QQQ") == "QQQ strategy")
+    check("seo lead: 'grid bot'/'pionex' (bot_templates keywords) are intentionally NOT mapped yet",
+          not any("grid bot" in v.lower() or "pionex" in v.lower()
+                  for v in list(sp.ASSET_LEAD_EN.values()) + list(sp.STRATEGY_LEAD_EN.values())))
+
+
+def test_seo_pages_lead_phrase_in_rendered_title():
+    """Integration check: the lead phrase actually reaches the rendered page's <title>/<h1>, not
+    just the pure mapping function above."""
+    import tempfile
+    import seo_pages as sp
+
+    fake_row = {
+        "strategy_id": "supertrend", "strategy_name": "Supertrend", "type": "state",
+        "params": "10-3", "asset": "GLD", "timeframe": "1d", "as_of": "2026-09-05",
+        "verdict": "ALIVE",
+        "is": {"profit_factor": 1.5, "mdd": 20.0, "total_return": 0.3, "cagr": 0.1, "sharpe": 1.0,
+               "n_trades": 40, "win_rate": 50.0, "avg_trade_return": 0.01, "exposure": 40.0},
+        "oos": {"profit_factor": 1.4, "mdd": 15.0, "total_return": 0.2, "cagr": 0.08, "sharpe": 0.9,
+                "n_trades": 35, "win_rate": 48.0, "avg_trade_return": 0.01, "exposure": 35.0,
+                "bh_return": 0.1, "bh_mdd": 25.0, "fee_drag": 0.01},
+        "suspicious": False, "edition": "macro",
+    }
+    payload = {"project_name": config.PROJECT_NAME, "as_of": "2026-09-05", "oos_days": 730,
+               "signup_url": "", "repo_url": config.REPO_URL}
+
+    orig_out = sp.EDITION_OUT_DIR.get("macro")
+    tmp = tempfile.mkdtemp()
+    sp.EDITION_OUT_DIR["macro"] = tmp
+    try:
+        page = sp._build_one_page("macro", "en", "supertrend", "10-3", "GLD",
+                                    {"1d": fake_row}, payload, {}, None, {})
+        check("seo lead integration: page manifest title leads with 'Gold trading strategy:'",
+              page["title"].startswith("Gold trading strategy: Supertrend"),
+              f"got {page['title']!r}")
+        with open(os.path.join(tmp, "s", page["filename"]), encoding="utf-8") as f:
+            html_out = f.read()
+        check("seo lead integration: rendered page's <title> carries the lead phrase",
+              f"<title>{page['title']}</title>" in html_out)
+        check("seo lead integration: rendered page's <h1> carries the lead phrase too",
+              f"<h1>{page['title']}</h1>" in html_out)
+    finally:
+        if orig_out is not None:
+            sp.EDITION_OUT_DIR["macro"] = orig_out
+        else:
+            sp.EDITION_OUT_DIR.pop("macro", None)
+
+
+# ---------------------------------------------------------------------------
 # R1: pre-registration ledger (ledger.py, registry_ledger.json, docs/registry.html)
 # ---------------------------------------------------------------------------
 
@@ -2132,6 +2209,8 @@ if __name__ == "__main__":
     test_check_issue_extended_check_sections()
     test_seo_pages_strategy_page_count_and_shape()
     test_seo_pages_no_banned_korean_words()
+    test_seo_lead_phrases_mapping()
+    test_seo_pages_lead_phrase_in_rendered_title()
     test_ledger_matches_registry_bijection()
     test_ledger_immutable_against_snapshot()
     test_registry_page_builds_and_no_banned_korean_words()

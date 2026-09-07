@@ -134,6 +134,46 @@ def _params_display(strategy_id: str, params: str, lang: str) -> str:
     return table.get((strategy_id, params), f"({params})" if params not in ("fixed", "-") else "")
 
 
+# ---------------------------------------------------------------------------
+# SEO title lead phrases (M1's macro-asset examples + M2's demand-study tuning). research/demand's
+# keyword pool (research/demand/keywords.yml, read-only from this module) already contains, in the
+# exact search-phrase spelling used below: "qqq strategy" (stocks_etf group), "bollinger bands
+# strategy" (anchor_crypto group), "ichimoku strategy" (indicator_combos group), and
+# "gold trading strategy" / "eurusd strategy" (forex_commodities group, matched here as
+# "EUR/USD trading strategy" per M1's own page-copy instruction). Where a page's asset or strategy
+# id matches, its <title>/<h1> leads with that phrase instead of opening with the bare strategy
+# name — e.g. "QQQ strategy: SMA crossover (50, 200) on QQQ — does it still work in 2026? ..."
+# instead of "SMA crossover (50, 200) on QQQ — does it still work in 2026? ...". Everything else
+# about the title (the "on <asset> — does it still work in <year>? ..." tail) is unchanged.
+#
+# Deliberately conservative: only phrases this repo has actual keyword-pool evidence for are
+# mapped here (see research/demand/results/RESULTS.md, produced by a separate study, once it has
+# run) — "grid bot" / "pionex" (bot_templates) are not strategies this site tests yet and are
+# intentionally absent, per this task's own instruction to skip them.
+# ---------------------------------------------------------------------------
+ASSET_LEAD_EN = {
+    "QQQ": "QQQ strategy",
+    "GLD": "Gold trading strategy",
+    "EURUSD": "EUR/USD trading strategy",
+}
+STRATEGY_LEAD_EN = {
+    "bb_mr": "Bollinger Bands strategy",
+    "bb_breakout": "Bollinger Bands strategy",
+    "bb_squeeze": "Bollinger Bands strategy",
+    "ichimoku_cloud": "Ichimoku strategy",
+}
+
+
+def _seo_lead_phrase(strategy_id: str, asset: str) -> str | None:
+    """The high-demand lead phrase for this (strategy, asset) SEO page, or None if neither matches
+    one of the mapped phrases above. An asset-level match (e.g. every GLD page, whichever strategy)
+    takes precedence over a strategy-level one (e.g. every bb_* page, whichever asset) when both
+    would apply, since "people search for this asset" is at least as strong a signal as "people
+    search for this strategy" and the two would otherwise collide on, say, a hypothetical future
+    bb_* variant on QQQ."""
+    return ASSET_LEAD_EN.get(asset) or STRATEGY_LEAD_EN.get(strategy_id)
+
+
 def _ko_short_name(strategy_id: str) -> str:
     full = bs.STRATEGY_NAME_KO.get(strategy_id, strategy_id)
     return full.split(" (")[0]
@@ -491,6 +531,9 @@ def _build_one_page(edition_key: str, lang: str, strategy_id: str, params: str, 
         edition_word = " (stocks)" if edition_key == "stocks" else ""
         title = (f"{strategy_name_disp} {params_disp} on {asset_label}{edition_word} — does it "
                  f"still work in {year}? After-fees backtest, updated weekly").replace("  ", " ")
+        lead = _seo_lead_phrase(strategy_id, asset)
+        if lead:
+            title = f"{lead}: {title}"
         description = (
             f"{strategy_name_disp} {params_disp} on {asset_label} is currently rated "
             f"{primary['verdict']} on the {TF_LABEL_EN.get(tf_order[0], tf_order[0])} "

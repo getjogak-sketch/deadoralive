@@ -304,9 +304,13 @@ crypto (en/ko) and stocks editions — no existing module was rewritten.
   `docs/ko/registry.html` gained an "Editions covered" section instead, listing all four editions.
 - **Page copy**: the macro index page's `<title>` tag reads "Dead or Alive — gold, oil, FX: popular
   trading strategies re-tested weekly after fees" (`config.PROJECT_TITLE_MACRO`), separate from its
-  `<h1>` (still "Dead or Alive", like every other edition). Both the results page and the
-  methodology page carry a short note that GLD/SLV/USO prices are not adjusted for dividends/
-  distributions and that the FX pairs have no interest-rate carry or rollover cost modelled.
+  `<h1>` (still "Dead or Alive", like every other edition). Its SEO strategy pages
+  (`docs/macro/s/…`) lead with the matching high-demand phrase where one applies — e.g. "Gold
+  trading strategy: Supertrend (10, 3) on GLD — does it still work in 2026? ..." for GLD, "EUR/USD
+  trading strategy: ..." for EURUSD — via the same lead-phrase mapping described in "SEO title
+  tuning" below. Both the results page and the methodology page carry a short note that GLD/SLV/USO
+  prices are not adjusted for dividends/distributions and that the FX pairs have no interest-rate
+  carry or rollover cost modelled.
 - **No Yahoo data this week**: if none of the five macro assets has a local data file (as in this
   dev environment, and possibly in CI if Yahoo rate-limits or 4xx's), `_run_macro_edition()` calls
   `build_site.build_empty_edition_page_en()` — a new, English-language counterpart of the Korean
@@ -328,6 +332,26 @@ crypto (en/ko) and stocks editions — no existing module was rewritten.
   under the ~10-minute CI budget once nine asset/timeframe combinations (up from four) run through
   it every week — see "Verification results" for the local BTC-only measurement this still relies
   on as its budget check.
+
+## SEO title tuning from the demand study
+
+`seo_pages.py`'s `ASSET_LEAD_EN`/`STRATEGY_LEAD_EN` maps (and `_seo_lead_phrase`, which picks
+between them, asset match winning over strategy match) make a strategy page's `<title>`/`<h1>`
+lead with the exact high-demand search phrase from `research/demand/keywords.yml`'s keyword pool
+where one is known to match, instead of opening with the bare strategy name: `QQQ` pages lead
+"QQQ strategy: …", gold (`GLD`) pages lead "Gold trading strategy: …", `EURUSD` pages lead
+"EUR/USD trading strategy: …", and any Bollinger-Bands-family page (`bb_mr`/`bb_breakout`/
+`bb_squeeze`, on any asset) leads "Bollinger Bands strategy: …", `ichimoku_cloud` pages lead
+"Ichimoku strategy: …". Everything after the lead phrase (the "on &lt;asset&gt; — does it still
+work in &lt;year&gt;? ..." tail) is unchanged. Deliberately conservative: only phrases this repo
+already has keyword-pool evidence for are mapped — "grid bot" / "pionex" (the `bot_templates`
+keyword group) are not strategies this site tests yet and are intentionally left unmapped, per
+this task's own instruction. `research/demand/results/RESULTS.md` (the qualification study itself,
+maintained by a separate agent) had not yet been produced at the time this mapping was written;
+the mapping above follows this task's own explicit phrase list, which matches
+`research/demand/keywords.yml`'s existing keyword pool verbatim — re-check
+`research/demand/results/RESULTS.md` once it exists and extend the two maps if it surfaces further
+qualifying phrases this site already covers.
 
 ## Places this engine is published to
 

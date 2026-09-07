@@ -475,6 +475,46 @@ def test_yahoo_parser():
     check("Yahoo parser: None payload -> empty frame", fd._parse_yahoo_chart_json(None).empty)
 
 
+def test_write_api_v1():
+    """spec_v3 §B: _write_api_v1 must (1) write latest.json + a history/<as_of>.json snapshot,
+    (2) build/merge history/index.json across repeated calls (dedup on as_of, newest first)
+    rather than clobbering earlier weeks' entries, and (3) never touch another edition's files."""
+    import json as _json
+    import tempfile
+    import run_weekly as rw
+
+    with tempfile.TemporaryDirectory() as tmp:
+        orig_docs_dir = config.DOCS_DIR
+        config.DOCS_DIR = tmp
+        try:
+            rw._write_api_v1("en", {"as_of": "2026-08-01", "rows": [], "edition": "en"})
+            rw._write_api_v1("en", {"as_of": "2026-08-08", "rows": [], "edition": "en"})
+            # Re-writing the same as_of (e.g. a re-run the same week) must not duplicate it.
+            rw._write_api_v1("en", {"as_of": "2026-08-08", "rows": [{"x": 1}], "edition": "en"})
+
+            api_dir = os.path.join(tmp, "api", "v1", "en")
+            check("write_api_v1: latest.json written",
+                  os.path.exists(os.path.join(api_dir, "latest.json")))
+            check("write_api_v1: latest.json reflects the most recent write",
+                  _json.load(open(os.path.join(api_dir, "latest.json")))["rows"] == [{"x": 1}])
+            check("write_api_v1: both history snapshots present",
+                  os.path.exists(os.path.join(api_dir, "history", "2026-08-01.json"))
+                  and os.path.exists(os.path.join(api_dir, "history", "2026-08-08.json")))
+
+            with open(os.path.join(api_dir, "history", "index.json")) as f:
+                idx = _json.load(f)
+            check("write_api_v1: history/index.json has exactly 2 entries (dedup on as_of)",
+                  len(idx["history"]) == 2, f"got {idx['history']}")
+            check("write_api_v1: history/index.json sorted newest-first",
+                  [e["as_of"] for e in idx["history"]] == ["2026-08-08", "2026-08-01"],
+                  f"got {[e['as_of'] for e in idx['history']]}")
+
+            check("write_api_v1: does not create a sibling edition's directory",
+                  not os.path.exists(os.path.join(tmp, "api", "v1", "ko")))
+        finally:
+            config.DOCS_DIR = orig_docs_dir
+
+
 def test_stocks_edition_pipeline():
     """End-to-end check of the stocks edition's row-building + page templates, using the same
     real SPY daily file the rest of this dev box already has locally
@@ -569,6 +609,7 @@ if __name__ == "__main__":
     test_yahoo_parser()
     test_drop_unclosed_stocks_bar()
     test_stocks_edition_pipeline()
+    test_write_api_v1()
 
     print()
     if FAILURES:

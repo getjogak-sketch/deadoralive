@@ -820,6 +820,222 @@ def build_empty_edition_page_ko(out_path: str | None = None, as_of: str | None =
     return out_path
 
 
+# =================================================================================================
+# Machine-readable API docs (spec_v3 §B) — additive extension, nothing above this line is
+# modified. `docs/api/v1/README.md` and `docs/api/index.html` document the same static JSON tree
+# run_weekly.py's _write_api_v1() writes under docs/api/v1/<edition>/ — this module only renders
+# the human-readable description, never the data files themselves.
+# =================================================================================================
+
+API_EDITIONS_INFO = [
+    ("en", "English (crypto: BTCUSD, ETHUSD, 1d/4h)", "methodology.html"),
+    ("ko", "한국어 (Korean, crypto: KRW-BTC, KRW-ETH, 1d/4h)", "ko/methodology.html"),
+    ("stocks", "Stocks (SPY, QQQ, 1d)", "stocks/methodology.html"),
+]
+
+API_SCHEMA_FIELDS = [
+    ("strategy_id", "registry id, e.g. \"sma_cross\" — see the methodology page's strategy table "
+                     "for the full list, including the POPULAR_COMBOS group"),
+    ("strategy_name", "human-readable name of the strategy"),
+    ("params", "the fixed parameter string for this variant, e.g. \"10-50\"; \"-\" for reference rows"),
+    ("type", "\"state\" | \"onebar\" | \"holdN\" | \"reference\" — which engine primitive ran this row"),
+    ("asset", "e.g. \"BTCUSD\", \"KRW-BTC\", \"SPY\""),
+    ("timeframe", "\"1d\" or \"4h\""),
+    ("edition", "\"en\" | \"ko\" | \"stocks\""),
+    ("as_of", "date (UTC) of the last fully-closed bar this run used, ISO YYYY-MM-DD"),
+    ("verdict", "\"ALIVE\" | \"FADING\" | \"DEAD\" | \"TOO FEW TRADES\" | null (reference rows)"),
+    ("is", "object of in-sample metrics — see the methodology page's metric definitions"),
+    ("oos", "object of out-of-sample metrics (the ones the verdict is based on), plus fee_drag"),
+    ("robustness", "object — {grid: [...], share_pf_ge_1, note}; diagnostic only, added by the "
+                    "parameter-neighbourhood robustness map (see methodology: \"Robustness map "
+                    "(diagnostic)\"); present on tradeable (non-reference) rows once that "
+                    "extension has run, absent on older history snapshots and on reference rows"),
+    ("suspicious", "bool — OOS PF or Sharpe crossed the \"investigate, don't trust\" threshold"),
+]
+
+
+def _api_readme_markdown() -> str:
+    editions_md = "\n".join(f"- `{k}` — {label} (`{link}`)" for k, label, link in API_EDITIONS_INFO)
+    schema_md = "\n".join(f"- `{name}`: {desc}" for name, desc in API_SCHEMA_FIELDS)
+    example = (
+        "```python\n"
+        "import requests\n\n"
+        f'data = requests.get("{config.PAGES_URL}/api/v1/en/latest.json").json()\n'
+        'for row in data["rows"]:\n'
+        '    print(row["strategy_id"], row["params"], row["asset"], row["timeframe"], row["verdict"])\n'
+        "```\n"
+    )
+    return f"""# {config.PROJECT_NAME} — API v1
+
+Static, read-only JSON. No key, no rate limit beyond normal HTTP caching — these are plain files
+served by GitHub Pages, refreshed once a week by the same pipeline that renders the HTML pages.
+
+## Editions
+
+{editions_md}
+
+## Endpoints (per edition)
+
+- `GET /api/v1/<edition>/latest.json` — the most recent run's full payload (identical in shape to
+  this repo's own `results/latest.json` / `results/latest_ko.json` / `results/latest_stocks.json`).
+- `GET /api/v1/<edition>/history/index.json` — `{{"edition": "...", "history": [{{"as_of": "...",
+  "file": "history/<as_of>.json"}}, ...]}}`, newest first.
+- `GET /api/v1/<edition>/history/<as_of>.json` — a copy of that edition's payload as of that date.
+
+## Row schema
+
+Every element of `payload["rows"]` carries:
+
+{schema_md}
+
+Cost model and verdict-badge thresholds are defined once, by reference, on each edition's
+methodology page (see the table above) — they are not repeated as numbers in this document so
+this document never goes stale relative to `config.py`, the single source of truth for both.
+
+## Update cadence
+
+Weekly, Monday 00:30 UTC (see `.github/workflows/weekly.yml`) — one run per week, rolling the
+in-sample/out-of-sample window forward by a week each time. `workflow_dispatch` can trigger an
+out-of-cycle run; `payload["generated_at"]` (UTC, ISO 8601) is the actual wall-clock time of the
+run that produced a given snapshot, which may differ from `as_of` (the date of the last
+fully-closed price bar that run used).
+
+## Stability
+
+Fields are only ever added, never renamed or removed, and an existing field's meaning is never
+changed — a consumer that only reads fields it recognizes keeps working across every future
+weekly run. `robustness` above is one such field: it did not exist in the first release of this
+API and appears only once the robustness-map extension started running; its absence on an older
+`history/<as_of>.json` snapshot is not an error.
+
+## License
+
+- **Data**: sourced from each exchange's/data provider's own public API (Bitstamp, Upbit, Stooq,
+  Yahoo Finance) — subject to those providers' own terms, not this project's.
+- **Results** (the computed metrics, verdicts, and this JSON structure itself): CC BY 4.0 — reuse
+  freely with attribution.
+
+## Legal
+
+{config.LEGAL_DISCLAIMER}
+
+## Example
+
+{example}"""
+
+
+def _api_readme_html_body() -> str:
+    editions_li = "\n".join(
+        f'<li><code>{html.escape(k)}</code> — {html.escape(label)} '
+        f'(<a href="../{html.escape(link)}">methodology</a>)</li>'
+        for k, label, link in API_EDITIONS_INFO
+    )
+    schema_li = "\n".join(
+        f'<li><code>{html.escape(name)}</code>: {html.escape(desc)}</li>'
+        for name, desc in API_SCHEMA_FIELDS
+    )
+    example = (
+        "import requests\n\n"
+        f'data = requests.get("{config.PAGES_URL}/api/v1/en/latest.json").json()\n'
+        'for row in data["rows"]:\n'
+        '    print(row["strategy_id"], row["params"], row["asset"], row["timeframe"], row["verdict"])'
+    )
+    return f"""
+  <section class="assetblock">
+    <h2>Editions</h2>
+    <ul>{editions_li}</ul>
+  </section>
+
+  <section class="assetblock">
+    <h2>Endpoints (per edition)</h2>
+    <ul>
+      <li><code>GET /api/v1/&lt;edition&gt;/latest.json</code> &mdash; the most recent run's full
+        payload (identical in shape to this repo's own <code>results/latest.json</code> /
+        <code>results/latest_ko.json</code> / <code>results/latest_stocks.json</code>).</li>
+      <li><code>GET /api/v1/&lt;edition&gt;/history/index.json</code> &mdash; a list of every
+        available snapshot, newest first: <code>{{"edition": "...", "history": [{{"as_of": "...",
+        "file": "history/&lt;as_of&gt;.json"}}, ...]}}</code>.</li>
+      <li><code>GET /api/v1/&lt;edition&gt;/history/&lt;as_of&gt;.json</code> &mdash; a copy of
+        that edition's payload as of that date.</li>
+    </ul>
+  </section>
+
+  <section class="assetblock">
+    <h2>Row schema</h2>
+    <p>Every element of <code>payload["rows"]</code> carries:</p>
+    <ul>{schema_li}</ul>
+    <p>Cost model and verdict-badge thresholds are defined once, by reference, on each edition's
+       methodology page linked above &mdash; not repeated as numbers here, so this page never goes
+       stale relative to <code>config.py</code>.</p>
+  </section>
+
+  <section class="assetblock">
+    <h2>Update cadence</h2>
+    <p>Weekly, Monday 00:30 UTC. <code>payload["generated_at"]</code> is the run's own wall-clock
+       time; <code>as_of</code> is the date of the last fully-closed price bar that run used.</p>
+  </section>
+
+  <section class="assetblock">
+    <h2>Stability</h2>
+    <p>Fields are only ever added, never renamed or removed. <code>robustness</code> is one such
+       field, added by a later extension &mdash; its absence on an older history snapshot is not
+       an error.</p>
+  </section>
+
+  <section class="assetblock">
+    <h2>License</h2>
+    <p><strong>Data</strong>: sourced from each provider's own public API (Bitstamp, Upbit, Stooq,
+       Yahoo Finance) &mdash; subject to those providers' own terms.
+       <strong>Results</strong> (computed metrics, verdicts, this JSON structure): CC BY 4.0.</p>
+  </section>
+
+  <section class="assetblock">
+    <h2>Example</h2>
+    <pre style="white-space:pre-wrap;background:var(--card-bg);padding:1rem;border-radius:8px;overflow-x:auto;">{html.escape(example)}</pre>
+  </section>
+"""
+
+
+def build_api_readme(out_path: str | None = None) -> str:
+    out_path = out_path or os.path.join(config.DOCS_DIR, "api", "v1", "README.md")
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    with open(out_path, "w") as f:
+        f.write(_api_readme_markdown())
+    return out_path
+
+
+def build_api_index_html(out_path: str | None = None) -> str:
+    out_path = out_path or os.path.join(config.DOCS_DIR, "api", "index.html")
+    doc = f"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{html.escape(config.PROJECT_NAME)} API</title>
+<style>{BASE_CSS}</style>
+</head>
+<body>
+<header class="top">
+  <h1>{html.escape(config.PROJECT_NAME)} &mdash; API v1</h1>
+  <p class="tagline">Static, read-only JSON — no key, refreshed weekly.
+     <a href="../index.html">&larr; back to results</a></p>
+</header>
+<main>
+{_api_readme_html_body()}
+</main>
+<footer class="bottom">
+  <div><a href="../index.html">&larr; back to results</a></div>
+  <div class="disclaimer">{html.escape(config.LEGAL_DISCLAIMER)}</div>
+</footer>
+</body>
+</html>
+"""
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    with open(out_path, "w") as f:
+        f.write(doc)
+    return out_path
+
+
 if __name__ == "__main__":
     import json
     with open(os.path.join(config.RESULTS_DIR, "latest.json")) as f:

@@ -41,6 +41,41 @@ def _data_path(symbol: str, tf: str) -> str:
     return os.path.join(config.DATA_DIR, f"{symbol}_{tf}.csv")
 
 
+def _write_api_v1(edition_key: str, payload: dict):
+    """spec_v3 §B: mirror one edition's just-written payload into the static API tree
+    docs/api/v1/<edition>/{latest.json, history/<as_of>.json, history/index.json}. Purely
+    additive/read-only bookkeeping on top of data this module already computed and already wrote
+    to results/latest*.json and docs/*/latest.json above — this function changes no number, it
+    only copies. history/index.json is read back and merged (not overwritten) so snapshots from
+    earlier weekly runs accumulate rather than being replaced each week."""
+    api_dir = os.path.join(config.DOCS_DIR, "api", "v1", edition_key)
+    hist_dir = os.path.join(api_dir, "history")
+    os.makedirs(hist_dir, exist_ok=True)
+
+    as_of = payload["as_of"]
+
+    with open(os.path.join(api_dir, "latest.json"), "w") as f:
+        json.dump(payload, f, indent=2, default=str)
+
+    hist_filename = f"{as_of}.json"
+    with open(os.path.join(hist_dir, hist_filename), "w") as f:
+        json.dump(payload, f, indent=2, default=str)
+
+    index_path = os.path.join(hist_dir, "index.json")
+    entries = []
+    if os.path.exists(index_path):
+        try:
+            with open(index_path) as f:
+                entries = json.load(f).get("history", [])
+        except (json.JSONDecodeError, OSError):
+            entries = []
+    entries = [e for e in entries if e.get("as_of") != as_of]
+    entries.append({"as_of": as_of, "file": f"history/{hist_filename}"})
+    entries.sort(key=lambda e: e["as_of"], reverse=True)
+    with open(index_path, "w") as f:
+        json.dump({"edition": edition_key, "history": entries}, f, indent=2)
+
+
 def _run_variant(stype, signal_out, hold_n, df, mask, cost):
     """Dispatch one registry variant's simulation for one period mask; returns (trades, eq_df)."""
     if stype == "state":
@@ -267,6 +302,9 @@ def main():
     print(f"Wrote {os.path.join(config.DOCS_DIR, 'index.html')}")
     print(f"Wrote {os.path.join(config.DOCS_DIR, 'methodology.html')}")
 
+    _write_api_v1("en", payload)
+    print(f"Wrote {os.path.join(config.DOCS_DIR, 'api', 'v1', 'en', 'latest.json')} (spec_v3 §B)")
+
     # -------------------------------------------------------------------------------------------
     # Korean edition (Upbit KRW-BTC/KRW-ETH) — additive extension, requirement 3. Nothing above
     # this line (the English edition's results/latest.json, docs/index.html, docs/methodology.html
@@ -282,6 +320,17 @@ def main():
     # (English/Korean crypto editions) is changed by this block.
     # -------------------------------------------------------------------------------------------
     _run_stocks_edition()
+
+    # -------------------------------------------------------------------------------------------
+    # API docs (spec_v3 §B) — human-readable description of the docs/api/v1/ JSON tree written by
+    # each edition's _write_api_v1() call above. Written last so it can be generated even if an
+    # edition above this point wrote nothing new this run (it only describes the schema/endpoints,
+    # not any one run's numbers).
+    # -------------------------------------------------------------------------------------------
+    build_site.build_api_readme()
+    build_site.build_api_index_html()
+    print(f"Wrote {os.path.join(config.DOCS_DIR, 'api', 'v1', 'README.md')}")
+    print(f"Wrote {os.path.join(config.DOCS_DIR, 'api', 'index.html')}")
 
     return 0
 
@@ -355,6 +404,8 @@ def _run_ko_edition():
         build_site.build_methodology_ko(os.path.join(out_dir, "methodology.html"))
         print(f"Wrote {os.path.join(out_dir, 'index.html')} (no-data notice)")
         print(f"Wrote {os.path.join(out_dir, 'methodology.html')}")
+        _write_api_v1(edition_key, empty_payload)
+        print(f"Wrote {os.path.join(config.DOCS_DIR, 'api', 'v1', edition_key, 'latest.json')} (spec_v3 §B)")
         return
 
     tally = vd.tally([r["verdict"] for r in all_rows if r["verdict"] is not None])
@@ -394,6 +445,9 @@ def _run_ko_edition():
     build_site.build_methodology_ko(os.path.join(out_dir, "methodology.html"))
     print(f"Wrote {os.path.join(out_dir, 'index.html')}")
     print(f"Wrote {os.path.join(out_dir, 'methodology.html')}")
+
+    _write_api_v1(edition_key, payload)
+    print(f"Wrote {os.path.join(config.DOCS_DIR, 'api', 'v1', edition_key, 'latest.json')} (spec_v3 §B)")
 
 
 def _run_stocks_edition():
@@ -492,6 +546,9 @@ def _run_stocks_edition():
                                               '&middot; <a href="../ko/methodology.html">한국어</a>'))
     print(f"Wrote {os.path.join(out_dir, 'index.html')}")
     print(f"Wrote {os.path.join(out_dir, 'methodology.html')}")
+
+    _write_api_v1("stocks", payload)
+    print(f"Wrote {os.path.join(config.DOCS_DIR, 'api', 'v1', 'stocks', 'latest.json')} (spec_v3 §B)")
 
 
 if __name__ == "__main__":

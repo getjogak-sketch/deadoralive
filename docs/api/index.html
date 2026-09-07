@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dead or Alive API</title>
+<style>
+:root {
+  --bg: #ffffff; --fg: #14181f; --muted: #5b6270; --border: #e2e5ea; --card-bg: #f7f8fa;
+  --link: #1a56db;
+  --alive-bg: #d9f2e3; --alive-fg: #106a37;
+  --fading-bg: #fdf1c8; --fading-fg: #7a5b00;
+  --dead-bg: #e6e8eb; --dead-fg: #4b5160;
+  --toofew-bg: #f2f3f5; --toofew-fg: #8a909c;
+  --suspicious: #c0392b;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #10131a; --fg: #e7e9ee; --muted: #9aa1b0; --border: #2a2f3a; --card-bg: #171b24;
+    --link: #7aa2ff;
+    --alive-bg: #113a26; --alive-fg: #6bdc9c;
+    --fading-bg: #3a3210; --fading-fg: #f0d572;
+    --dead-bg: #262a33; --dead-fg: #a8adb8;
+    --toofew-bg: #1c2029; --toofew-fg: #6b7180;
+    --suspicious: #ff8a7a;
+  }
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; margin: 0; padding: 0 0 3rem 0; line-height: 1.45; }
+a { color: var(--link); }
+header.top { padding: 2rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border); }
+header.top h1 { margin: 0 0 0.25rem 0; font-size: 1.7rem; }
+header.top p.tagline { margin: 0 0 1rem 0; color: var(--muted); }
+.meta { color: var(--muted); font-size: 0.9rem; }
+.tally { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 1rem; }
+.tally span { padding: 0.3rem 0.7rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600; }
+main { max-width: 1200px; margin: 0 auto; padding: 0 1.25rem; }
+nav.jump { display: flex; gap: 0.75rem; flex-wrap: wrap; margin: 1.25rem 0; }
+nav.jump a { padding: 0.3rem 0.7rem; border: 1px solid var(--border); border-radius: 6px; text-decoration: none; font-size: 0.9rem; }
+section.assetblock { margin: 2.25rem 0; }
+section.assetblock h2 { border-bottom: 2px solid var(--border); padding-bottom: 0.4rem; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; min-width: 980px; font-size: 0.85rem; }
+th, td { padding: 0.5rem 0.6rem; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--border); }
+th:nth-child(1), td:nth-child(1), th:nth-child(2), td:nth-child(2) { text-align: left; }
+thead th { background: var(--card-bg); position: sticky; top: 0; }
+tbody tr:hover { background: var(--card-bg); }
+.badge { padding: 0.15rem 0.55rem; border-radius: 999px; font-weight: 700; font-size: 0.78rem; display: inline-block; }
+.ref-row { font-style: italic; color: var(--muted); }
+.suspicious { color: var(--suspicious); font-weight: 700; }
+.gross-note { font-size: 0.75rem; color: var(--muted); }
+footer.bottom { max-width: 1200px; margin: 2.5rem auto 0; padding: 1.25rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem; }
+footer.bottom .disclaimer { margin-top: 0.75rem; }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Dead or Alive &mdash; API v1</h1>
+  <p class="tagline">Static, read-only JSON — no key, refreshed weekly.
+     <a href="../index.html">&larr; back to results</a></p>
+</header>
+<main>
+
+  <section class="assetblock">
+    <h2>Editions</h2>
+    <ul><li><code>en</code> — English (crypto: BTCUSD, ETHUSD, 1d/4h) (<a href="../methodology.html">methodology</a>)</li>
+<li><code>ko</code> — 한국어 (Korean, crypto: KRW-BTC, KRW-ETH, 1d/4h) (<a href="../ko/methodology.html">methodology</a>)</li>
+<li><code>stocks</code> — Stocks (SPY, QQQ, 1d) (<a href="../stocks/methodology.html">methodology</a>)</li></ul>
+  </section>
+
+  <section class="assetblock">
+    <h2>Endpoints (per edition)</h2>
+    <ul>
+      <li><code>GET /api/v1/&lt;edition&gt;/latest.json</code> &mdash; the most recent run's full
+        payload (identical in shape to this repo's own <code>results/latest.json</code> /
+        <code>results/latest_ko.json</code> / <code>results/latest_stocks.json</code>).</li>
+      <li><code>GET /api/v1/&lt;edition&gt;/history/index.json</code> &mdash; a list of every
+        available snapshot, newest first: <code>{"edition": "...", "history": [{"as_of": "...",
+        "file": "history/&lt;as_of&gt;.json"}, ...]}</code>.</li>
+      <li><code>GET /api/v1/&lt;edition&gt;/history/&lt;as_of&gt;.json</code> &mdash; a copy of
+        that edition's payload as of that date.</li>
+    </ul>
+  </section>
+
+  <section class="assetblock">
+    <h2>Row schema</h2>
+    <p>Every element of <code>payload["rows"]</code> carries:</p>
+    <ul><li><code>strategy_id</code>: registry id, e.g. &quot;sma_cross&quot; — see the methodology page&#x27;s strategy table for the full list, including the POPULAR_COMBOS group</li>
+<li><code>strategy_name</code>: human-readable name of the strategy</li>
+<li><code>params</code>: the fixed parameter string for this variant, e.g. &quot;10-50&quot;; &quot;-&quot; for reference rows</li>
+<li><code>type</code>: &quot;state&quot; | &quot;onebar&quot; | &quot;holdN&quot; | &quot;reference&quot; — which engine primitive ran this row</li>
+<li><code>asset</code>: e.g. &quot;BTCUSD&quot;, &quot;KRW-BTC&quot;, &quot;SPY&quot;</li>
+<li><code>timeframe</code>: &quot;1d&quot; or &quot;4h&quot;</li>
+<li><code>edition</code>: &quot;en&quot; | &quot;ko&quot; | &quot;stocks&quot;</li>
+<li><code>as_of</code>: date (UTC) of the last fully-closed bar this run used, ISO YYYY-MM-DD</li>
+<li><code>verdict</code>: &quot;ALIVE&quot; | &quot;FADING&quot; | &quot;DEAD&quot; | &quot;TOO FEW TRADES&quot; | null (reference rows)</li>
+<li><code>is</code>: object of in-sample metrics — see the methodology page&#x27;s metric definitions</li>
+<li><code>oos</code>: object of out-of-sample metrics (the ones the verdict is based on), plus fee_drag</li>
+<li><code>robustness</code>: object — {grid: [...], share_pf_ge_1, note}; diagnostic only, added by the parameter-neighbourhood robustness map (see methodology: &quot;Robustness map (diagnostic)&quot;); present on tradeable (non-reference) rows once that extension has run, absent on older history snapshots and on reference rows</li>
+<li><code>suspicious</code>: bool — OOS PF or Sharpe crossed the &quot;investigate, don&#x27;t trust&quot; threshold</li></ul>
+    <p>Cost model and verdict-badge thresholds are defined once, by reference, on each edition's
+       methodology page linked above &mdash; not repeated as numbers here, so this page never goes
+       stale relative to <code>config.py</code>.</p>
+  </section>
+
+  <section class="assetblock">
+    <h2>Update cadence</h2>
+    <p>Weekly, Monday 00:30 UTC. <code>payload["generated_at"]</code> is the run's own wall-clock
+       time; <code>as_of</code> is the date of the last fully-closed price bar that run used.</p>
+  </section>
+
+  <section class="assetblock">
+    <h2>Stability</h2>
+    <p>Fields are only ever added, never renamed or removed. <code>robustness</code> is one such
+       field, added by a later extension &mdash; its absence on an older history snapshot is not
+       an error.</p>
+  </section>
+
+  <section class="assetblock">
+    <h2>License</h2>
+    <p><strong>Data</strong>: sourced from each provider's own public API (Bitstamp, Upbit, Stooq,
+       Yahoo Finance) &mdash; subject to those providers' own terms.
+       <strong>Results</strong> (computed metrics, verdicts, this JSON structure): CC BY 4.0.</p>
+  </section>
+
+  <section class="assetblock">
+    <h2>Example</h2>
+    <pre style="white-space:pre-wrap;background:var(--card-bg);padding:1rem;border-radius:8px;overflow-x:auto;">import requests
+
+data = requests.get(&quot;https://getjogak-sketch.github.io/deadoralive/api/v1/en/latest.json&quot;).json()
+for row in data[&quot;rows&quot;]:
+    print(row[&quot;strategy_id&quot;], row[&quot;params&quot;], row[&quot;asset&quot;], row[&quot;timeframe&quot;], row[&quot;verdict&quot;])</pre>
+  </section>
+
+</main>
+<footer class="bottom">
+  <div><a href="../index.html">&larr; back to results</a></div>
+  <div class="disclaimer">Educational / informational content only. This is not investment advice, and nothing here is a recommendation to buy or sell any asset. Past backtested performance, especially net-of-cost historical simulation, does not guarantee future results.</div>
+</footer>
+</body>
+</html>

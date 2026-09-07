@@ -1,0 +1,18 @@
+[study] universe from monthly top lists up to 2026-08 ...
+[study] pool=25873, sampled=3000
+[study] 0/3000 fetched_ok=1 events=68 0s
+[study] 200/3000 fetched_ok=197 events=5014 53s
+[study] 400/3000 fetched_ok=395 events=10545 116s
+[study] 600/3000 fetched_ok=590 events=15943 177s
+[study] 800/3000 fetched_ok=786 events=21415 232s
+[study] 1000/3000 fetched_ok=980 events=26854 298s
+[study] 1200/3000 fetched_ok=1176 events=32025 379s
+[study] 1400/3000 fetched_ok=1374 events=37819 433s
+[study] 1600/3000 fetched_ok=1573 events=42533 498s
+[study] 1800/3000 fetched_ok=1773 events=47971 553s
+[study] 2000/3000 fetched_ok=1965 events=53034 613s
+[study] 2200/3000 fetched_ok=2161 events=58291 683s
+[study] 2400/3000 fetched_ok=2354 events=63483 743s
+[study] 2600/3000 fetched_ok=2551 events=68558 804s
+[study] 2800/3000 fetched_ok=2745 events=73790 865s
+{"verdict": "HOLD", "reason": "neither GO nor NO-GO thresholds met"}

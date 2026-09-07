@@ -388,23 +388,23 @@ VERDICT_LABELS_KO = {
 
 # Strategy id -> "Korean name (English name)", per this task's requirement 4.
 STRATEGY_NAME_KO = {
-    "sma_cross": "이동평균 교차 (SMA crossover)",
+    "sma_cross": "단순이동평균 교차 (SMA crossover)",
     "ema_cross": "지수이동평균 교차 (EMA crossover)",
-    "above_sma": "이동평균선 상회 (Price above SMA)",
-    "donchian": "돈치안/터틀 브레이크아웃 (Donchian/Turtle breakout)",
+    "above_sma": "이동평균선 위에서만 보유 (Price above SMA)",
+    "donchian": "돈치안 채널 돌파, 터틀 방식 (Donchian/Turtle breakout)",
     "vol_breakout": "변동성 돌파 (Larry Williams volatility breakout)",
     "vol_breakout_trend": "변동성 돌파 + 추세 필터 (Volatility breakout + trend filter)",
     "rsi_mr": "RSI 평균회귀 (RSI mean reversion)",
-    "rsi2_connors": "코너스 RSI(2) (Connors RSI(2))",
+    "rsi2_connors": "코너스 RSI(2) 전략 (Connors RSI(2))",
     "bb_mr": "볼린저밴드 평균회귀 (Bollinger mean reversion)",
-    "bb_breakout": "볼린저밴드 브레이크아웃 (Bollinger breakout)",
+    "bb_breakout": "볼린저밴드 돌파 (Bollinger breakout)",
     "macd": "MACD 시그널 교차 (MACD signal cross)",
     "supertrend": "슈퍼트렌드 (Supertrend)",
     "tsmom": "시계열 모멘텀 (Time-series momentum)",
-    "dip_3down": "하락 눌림목 매수, 3일 연속 하락 (Buy the dip, 3 down closes)",
-    "dip_pct": "하락 눌림목 매수, 일정 비율 하락 (Buy the dip, -x% bar)",
-    "dca_weekly": "주간 정액 매수 (참고용) (Weekly DCA, reference)",
-    "buy_and_hold": "매수 후 보유 (참고용) (Buy & hold, reference)",
+    "dip_3down": "3봉 연속 하락 뒤 매수 (Buy the dip, 3 down closes)",
+    "dip_pct": "한 봉에 5% 이상 급락하면 매수 (Buy the dip, -x% bar)",
+    "dca_weekly": "매주 일정 금액 적립 매수 — 참고용 (Weekly DCA)",
+    "buy_and_hold": "단순 보유 — 참고용 (Buy & hold)",
 }
 
 ASSET_LABEL_KO = {
@@ -430,6 +430,9 @@ def _disclaimer_block_ko(css_class="disclaimer-block"):
 
 
 KO_EXTRA_CSS = """
+.regtable th, .regtable td { text-align: left; white-space: normal; }
+.regtable td:nth-child(4) { white-space: nowrap; }
+
 .disclaimer-block { max-width: 1200px; margin: 1rem auto; padding: 0.9rem 1.1rem; border: 1px solid var(--border); border-radius: 8px; background: var(--card-bg); color: var(--muted); font-size: 0.82rem; line-height: 1.5; }
 .notice-box { max-width: 1200px; margin: 2rem auto; padding: 2rem 1.5rem; border: 1px dashed var(--border); border-radius: 10px; text-align: center; }
 .notice-box h2 { margin-top: 0; }
@@ -451,8 +454,8 @@ def _row_html_ko(row):
     oos = row["oos"]
     is_ref = row["type"] == "reference"
     cls = ' class="ref-row"' if is_ref else ""
-    susp = (' <span class="suspicious" title="OOS PF 또는 샤프비율이 비정상적으로 높음 — 방법론 '
-            '참고">&#9888;</span>') if row.get("suspicious") else ""
+    susp = (' <span class="suspicious" title="수치가 비정상적으로 높습니다. 표본이 적을 때 흔한 착시이니 '
+            '방법론을 참고하세요">&#9888;</span>') if row.get("suspicious") else ""
 
     name_ko = STRATEGY_NAME_KO.get(row["strategy_id"], row["strategy_name"])
 
@@ -496,25 +499,26 @@ def _asset_tf_section_ko(asset, tf, rows, as_of, last_price):
     return f"""
 <section class="assetblock" id="{anchor}">
   <h2>{html.escape(asset_label)} &middot; {html.escape(tf_label)}</h2>
-  <p class="meta">기준일(as of) {html.escape(as_of)}{price_note} &mdash; OOS(표본외) = 최근
-     {config.OOS_DAYS}일, IS(표본내) = 그 이전 전체 기간.</p>
+  <p class="meta">기준일 {html.escape(as_of)}{price_note} &mdash; 최근 {config.OOS_DAYS}일을
+     시험 구간(OOS), 그 이전 전체를 학습 구간(IS)으로 나누어 봅니다. 판정은 시험 구간만 봅니다.</p>
   <div class="tablewrap">
     <table>
       <thead><tr>
-        <th>전략</th><th>파라미터</th><th>판정</th>
-        <th>OOS 수익률</th><th>OOS PF</th><th>OOS MDD</th><th>OOS 거래수</th><th>OOS 승률</th>
-        <th>IS PF</th><th>IS MDD</th>
-        <th>B&amp;H OOS 수익률</th><th>B&amp;H OOS MDD</th>
-        <th>수수료 손실&sup1;</th>
+        <th>전략</th><th>설정값</th><th>판정</th>
+        <th>최근 2년 수익률</th><th>PF</th><th>최대 낙폭</th><th>거래 횟수</th><th>승률</th>
+        <th>이전 기간 PF</th><th>이전 기간 최대 낙폭</th>
+        <th>단순 보유 수익률</th><th>단순 보유 최대 낙폭</th>
+        <th>수수료로 사라진 수익&sup1;</th>
       </tr></thead>
       <tbody>
 {body_rows}
       </tbody>
     </table>
   </div>
-  <p class="gross-note">&sup1; 수수료 손실 = 동일 OOS 구간을 수수료 0으로 가정하고 계산한 수익률
-     (참고용, before-fees) &minus; 실제(net) OOS 수익률. 이 표의 다른 모든 수치는 수수료를 반영한
-     (net) 값입니다.</p>
+  <p class="gross-note">&sup1; 수수료가 없다고 가정했을 때의 수익률에서 실제 수익률을 뺀 값입니다(참고용).
+     이 열을 제외한 모든 숫자는 수수료(편도 0.10%)를 뗀 뒤의 값입니다. PF(Profit Factor)는 이긴 거래의
+     이익 합계를 진 거래의 손실 합계로 나눈 값으로, 1.0이면 본전입니다. 최대 낙폭(MDD)은 고점 대비
+     가장 많이 빠졌던 비율입니다.</p>
 </section>"""
 
 
@@ -556,12 +560,12 @@ def build_index_ko(payload: dict, out_path: str | None = None):
     skipped = sorted(set(config.UPBIT_ASSETS) - {a for a, _tf in order})
     skipped_note = ""
     if skipped:
-        skipped_note = (f'<p class="meta">이번 주 건너뜀(로컬 데이터 파일 없음): '
+        skipped_note = (f'<p class="meta">이번 주에는 시세 데이터를 받지 못해 건너뛴 자산: '
                          f'{html.escape(", ".join(ASSET_LABEL_KO.get(a, a) for a in skipped))}.</p>')
 
     signup_html = ""
     if payload.get("signup_url"):
-        signup_html = f' &middot; <a href="{html.escape(payload["signup_url"])}">주간 소식 받기</a>'
+        signup_html = f' &middot; <a href="{html.escape(payload["signup_url"])}">매주 결과 받아보기</a>'
     repo_html = ""
     if payload.get("repo_url"):
         repo_html = f' &middot; <a href="{html.escape(payload["repo_url"])}">소스 코드</a>'
@@ -579,8 +583,8 @@ def build_index_ko(payload: dict, out_path: str | None = None):
 <header class="top">
   <h1>{html.escape(payload['project_name'])}</h1>
   <p class="tagline">{html.escape(payload.get('tagline') or config.TAGLINE_KO)}</p>
-  <p class="meta">기준일(as_of): <strong>{html.escape(payload['as_of'])}</strong> &middot;
-     생성 시각 {html.escape(payload['generated_at'])} &middot; <a href="../index.html">English</a></p>
+  <p class="meta">기준일 <strong>{html.escape(payload['as_of'])}</strong> &middot;
+     매주 월요일 오전 9시 30분(한국 시간)에 자동으로 다시 계산합니다 &middot; <a href="../index.html">English</a></p>
   <div class="tally">{tally_html}</div>
   {skipped_note}
 </header>
@@ -589,7 +593,7 @@ def build_index_ko(payload: dict, out_path: str | None = None):
   {sections_html}
 </main>
 <footer class="bottom">
-  <div><a href="methodology.html">방법론</a>{repo_html}{signup_html} &middot; <a href="../index.html">English</a></div>
+  <div><a href="methodology.html">어떻게 계산했나</a>{repo_html}{signup_html} &middot; <a href="../index.html">English</a></div>
 </footer>
 {_disclaimer_block_ko()}
 </body>
@@ -601,21 +605,44 @@ def build_index_ko(payload: dict, out_path: str | None = None):
     return out_path
 
 
+RULE_KO = {
+    "sma_cross": "짧은 이동평균이 긴 이동평균 위에 있으면 보유, 아래로 내려오면 현금",
+    "ema_cross": "짧은 지수이동평균이 긴 지수이동평균 위에 있으면 보유, 아래면 현금",
+    "above_sma": "종가가 이동평균선 위에 있으면 보유, 아래면 현금",
+    "donchian": "종가가 최근 N봉 최고가를 넘으면 매수, 최근 M봉 최저가 아래로 내려오면 매도",
+    "vol_breakout": "오늘 시가 + (어제 고가−저가)×k 를 봉 안에서 넘으면 매수, 다음 봉 시가에 매도",
+    "vol_breakout_trend": "위와 같되, 시가가 20봉 이동평균 위에 있을 때만 매수",
+    "rsi_mr": "RSI(14)가 30 아래로 내려가면 매수, 지정한 값 위로 올라오면 매도",
+    "rsi2_connors": "RSI(2)가 10 아래이고 종가가 200봉 이동평균 위이면 매수, 종가가 5봉 이동평균 위로 올라오면 매도",
+    "bb_mr": "종가가 볼린저밴드 아래선 밑으로 내려가면 매수, 가운데선 위로 올라오면 매도",
+    "bb_breakout": "종가가 볼린저밴드 위선을 넘으면 매수, 가운데선 아래로 내려오면 매도",
+    "macd": "MACD선이 시그널선 위에 있으면 보유, 아래면 현금",
+    "supertrend": "슈퍼트렌드(10, 3) 방향이 위이면 보유, 아래면 현금",
+    "tsmom": "지금 종가가 n봉 전 종가보다 높으면 보유, 낮으면 현금",
+    "dip_3down": "종가가 3봉 연속 내리면 매수, 처음 오르는 봉에서 매도",
+    "dip_pct": "한 봉에 5% 이상 떨어지면 다음 봉 시가에 매수, 5봉 뒤 시가에 매도",
+    "dca_weekly": "매주 첫 봉 시가에 같은 금액을 사고 팔지 않음 (참고용)",
+    "buy_and_hold": "구간 첫날 사서 마지막 날까지 들고 있음 (참고용)",
+}
+
+
 def _registry_table_html_ko():
     rows = []
     for entry in reg.REGISTRY:
         params = ", ".join(v["params_str"] for v in entry["variants"])
         name_ko = STRATEGY_NAME_KO.get(entry["id"], entry["name"])
+        rule_ko = RULE_KO.get(entry["id"], entry["rule"])
         rows.append(
             f"<tr><td>{html.escape(entry['id'])}</td><td>{html.escape(name_ko)}</td>"
-            f"<td>{html.escape(entry['type'])}</td><td>{html.escape(entry['rule'])}</td>"
+            f"<td>{html.escape(rule_ko)}</td>"
             f"<td>{html.escape(params)}</td></tr>"
         )
     for entry in reg.REFERENCE:
         name_ko = STRATEGY_NAME_KO.get(entry["id"], entry["name"])
+        rule_ko = RULE_KO.get(entry["id"], entry["rule"])
         rows.append(
             f"<tr class=\"ref-row\"><td>{html.escape(entry['id'])}</td><td>{html.escape(name_ko)}</td>"
-            f"<td>{html.escape(entry['type'])}</td><td>{html.escape(entry['rule'])}</td><td>-</td></tr>"
+            f"<td>{html.escape(rule_ko)}</td><td>-</td></tr>"
         )
     return "\n".join(rows)
 
@@ -634,86 +661,86 @@ def build_methodology_ko(out_path: str | None = None):
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{html.escape(config.PROJECT_NAME)} 방법론</title>
+<title>{html.escape(config.PROJECT_NAME)} — 어떻게 계산했나</title>
 <style>{BASE_CSS}{KO_EXTRA_CSS}</style>
 </head>
 <body>
 {_disclaimer_block_ko()}
 <header class="top">
-  <h1>방법론</h1>
-  <p class="tagline"><a href="index.html">&larr; 결과로 돌아가기</a> &middot;
+  <h1>어떻게 계산했나</h1>
+  <p class="tagline"><a href="index.html">&larr; 결과표로 돌아가기</a> &middot;
      <a href="../methodology.html">English</a></p>
 </header>
 <main>
   <section class="assetblock">
-    <h2>비용 모델</h2>
-    <p>수수료는 편도(one-way)로, 체결가에 반영됩니다: 매수 체결가 = 기준가 &times; (1 + 수수료),
-       매도 체결가 = 기준가 &times; (1 &minus; 수수료). "수수료 손실" 열 하나를 제외한 모든 수치는
-       수수료를 반영한(net) 값이며, 그 열은 수수료 미반영(gross, 참고용)임을 명시합니다.
-       업비트(Upbit) 기준 수수료 0.05% + 슬리피지 0.05% = 편도 0.10%로, 기존 BTC/ETH 자산과 동일한
-       가정을 그대로 사용합니다.</p>
+    <h2>수수료</h2>
+    <p>살 때와 팔 때 각각 0.10%를 뗍니다(업비트 수수료 0.05% + 체결 미끄러짐 0.05%). 매수 체결가는
+       기준가보다 0.10% 비싸게, 매도 체결가는 0.10% 싸게 잡는 방식입니다. 결과표의 모든 숫자는 이
+       수수료를 뗀 뒤의 값이고, "수수료로 사라진 수익" 열 하나만 참고용으로 수수료 전후 차이를 보여줍니다.</p>
     <div class="tablewrap"><table><thead><tr><th>자산</th><th>편도 수수료</th></tr></thead>
     <tbody>{cost_rows}</tbody></table></div>
   </section>
 
   <section class="assetblock">
-    <h2>IS / OOS 롤링 구간</h2>
-    <p>매 실행의 마지막으로 완결된 봉 날짜(<code>as_of</code>) 기준: OOS(표본외) = <code>as_of</code>
-       를 기준으로 최근 {config.OOS_DAYS}일; IS(표본내) = 그 이전 데이터 전체. 매주 파이프라인이
-       재실행될 때마다 이 구간은 한 주씩 앞으로 이동합니다. 지표 워밍업(예: SMA200)은 항상 전체
-       가격 이력을 사용하므로, 룩백 기간이 허용하는 한 IS 구간의 첫 봉부터 신호가 유효합니다.</p>
+    <h2>구간 나누기 — 학습 구간과 시험 구간</h2>
+    <p>마지막으로 완성된 봉의 날짜를 기준일로 잡고, 그날부터 거꾸로 {config.OOS_DAYS}일을
+       <strong>시험 구간(OOS, out-of-sample)</strong>, 그 이전 전체를 <strong>학습 구간(IS,
+       in-sample)</strong>으로 나눕니다. 판정은 시험 구간만 봅니다. 매주 다시 계산할 때마다 이 구간이
+       한 주씩 앞으로 밀립니다. 이동평균 같은 지표는 전체 가격 이력으로 계산하므로, 학습 구간 첫날부터
+       신호가 나옵니다.</p>
   </section>
 
   <section class="assetblock">
-    <h2>체결 규칙</h2>
-    <p>모든 전략 공통: 롱 온리(매수만), 항상 전액 진입 또는 전액 현금(레버리지·공매도·부분 매매
-       없음). "상태형" 전략은 bar t 종가 시점 데이터로 목표 상태(보유/미보유)를 결정하고, bar t+1
-       시가에 체결합니다. "1-bar형" 전략(변동성 돌파 및 추세 필터 버전)은 매 bar 독립적으로 인트라
-       바 돌파 조건을 평가하며 다음 bar 시가에 항상 청산합니다. "보유 N-bar형" 전략(눌림목 매수)은
-       트리거 발생 다음 bar 시가에 진입해 정확히 N bar 뒤 시가에 청산합니다(중간 신호와 무관).</p>
+    <h2>사고파는 규칙</h2>
+    <p>모든 전략이 같은 조건입니다. 매수만 하고(공매도 없음), 살 때는 전액, 팔면 전액 현금입니다.
+       레버리지도, 나눠 사는 것도 없습니다. 판단은 봉이 닫힌 뒤에 하고, 실제 체결은 <em>다음 봉의
+       시가</em>에 합니다 — 봉이 닫히기 전에 미리 아는 척하지 않기 위해서입니다. 변동성 돌파 계열은
+       봉 안에서 돌파선을 넘는 순간 사고, 다음 봉 시가에 무조건 팝니다. 급락 매수 계열은 신호 다음
+       봉 시가에 사서 정해진 봉 수가 지나면 시가에 팝니다.</p>
   </section>
 
   <section class="assetblock">
-    <h2>판정 배지 (OOS, 수수료 반영 후)</h2>
+    <h2>판정 기준 (시험 구간, 수수료 뗀 뒤)</h2>
     <table><tbody>
-      <tr><td><strong>생존 <small>ALIVE</small></strong></td><td>OOS PF &ge; {th['ALIVE_MIN_OOS_PF']} 그리고 OOS 거래수 &ge; {th['ALIVE_MIN_OOS_TRADES']} 그리고 OOS MDD &lt; 동일 기간 매수 후 보유(B&amp;H) MDD</td></tr>
-      <tr><td><strong>약화 <small>FADING</small></strong></td><td>생존 조건 미달, 그러나 OOS PF &ge; {th['FADING_MIN_OOS_PF']} 그리고 OOS 거래수 &ge; {th['FADING_MIN_OOS_TRADES']}</td></tr>
-      <tr><td><strong>사망 <small>DEAD</small></strong></td><td>OOS PF &lt; {th['DEAD_MAX_OOS_PF']} 그리고 OOS 거래수 &ge; {th['FADING_MIN_OOS_TRADES']}</td></tr>
-      <tr><td><strong>표본 부족 <small>TOO FEW TRADES</small></strong></td><td>OOS 거래수 &lt; {th['TOO_FEW_MIN_OOS_TRADES']}</td></tr>
+      <tr><td><strong>생존 <small>ALIVE</small></strong></td><td>PF가 {th['ALIVE_MIN_OOS_PF']} 이상이고, 거래가 {th['ALIVE_MIN_OOS_TRADES']}번 이상이며, 최대 낙폭이 같은 기간 단순 보유보다 작음</td></tr>
+      <tr><td><strong>약화 <small>FADING</small></strong></td><td>생존 조건에는 못 미치지만, PF가 {th['FADING_MIN_OOS_PF']} 이상이고 거래가 {th['FADING_MIN_OOS_TRADES']}번 이상</td></tr>
+      <tr><td><strong>사망 <small>DEAD</small></strong></td><td>PF가 {th['DEAD_MAX_OOS_PF']} 미만(손실)이고 거래가 {th['FADING_MIN_OOS_TRADES']}번 이상</td></tr>
+      <tr><td><strong>표본 부족 <small>TOO FEW TRADES</small></strong></td><td>거래가 {th['TOO_FEW_MIN_OOS_TRADES']}번 미만이라 판단을 보류</td></tr>
     </tbody></table>
-    <p>참고 행(매수 후 보유, 주간 정액 매수)에는 배지가 부여되지 않습니다.</p>
+    <p>참고용 두 줄(단순 보유, 적립 매수)에는 판정을 붙이지 않습니다. 이 기준은 결과를 보기 전에
+       정해 두었고, 결과에 맞춰 바꾸지 않습니다.</p>
   </section>
 
   <section class="assetblock">
-    <h2>엔진 정직성 검증</h2>
-    <p><strong>룩어헤드(미래 참조) 방지 테스트</strong>: 레지스트리의 모든 전략 변형에 대해, 전체
-       가격 시리즈로 계산한 신호와 특정 시점 T에서 잘라낸 데이터로 계산한 신호를 비교하여, T 이전
-       시점의 값이 이후 데이터 존재 여부와 무관하게 완전히 동일한지 확인합니다. <strong>이중 엔진
-       대조</strong>(sma_cross만 해당): 직접 구현한 pandas 엔진과 <code>backtesting.py</code>
-       라이브러리를 동일 데이터·비용으로 비교하여, 거래 횟수는 정확히 일치하고 총수익률은 2% 이내로
-       일치해야 합니다. <strong>정합성 점검</strong>: 수수료 0으로 계산한 결과는 항상 수수료 반영
-       결과 이상이어야 합니다(수수료 0 수치는 이 내부 점검과 "수수료 손실" 열에만 쓰이며, 전략
-       자체의 성과로 제시되지 않습니다).</p>
+    <h2>계산기가 거짓말하지 않는지 확인하는 방법</h2>
+    <p><strong>미래 정보 차단 테스트.</strong> 백테스트에서 가장 흔한 실수는 코드가 실수로 "내일
+       가격"을 보고 오늘 결정하는 것입니다. 이를 막기 위해 모든 전략에 대해, 데이터를 어느 날짜에서
+       잘라도 그 전날까지의 매매 결정이 똑같이 나오는지를 매주 실행 때마다 자동으로 검사합니다. 하나라도
+       다르면 결과를 내보내지 않고 멈춥니다. <strong>다른 엔진과 대조.</strong> 단순이동평균 교차
+       전략은 널리 쓰이는 공개 라이브러리 <code>backtesting.py</code>로도 돌려서 거래 횟수가 정확히
+       같고 수익률 차이가 2% 이내인지 확인했습니다. <strong>부호 점검.</strong> 수수료를 0으로 놓고
+       계산한 결과가 수수료를 뗀 결과보다 항상 좋아야 합니다. 당연한 말이지만, 코드의 부호 실수를
+       잡아내는 검사입니다.</p>
   </section>
 
   <section class="assetblock">
-    <h2>전략 레지스트리</h2>
-    <div class="tablewrap"><table>
-      <thead><tr><th>id</th><th>이름</th><th>유형</th><th>규칙</th><th>파라미터</th></tr></thead>
+    <h2>검사하는 전략 목록</h2>
+    <div class="tablewrap"><table class="regtable">
+      <thead><tr><th>id</th><th>전략</th><th>규칙</th><th>설정값</th></tr></thead>
       <tbody>{_registry_table_html_ko()}</tbody>
     </table></div>
   </section>
 
   <section class="assetblock">
-    <h2>하지 않는 것</h2>
-    <p>파라미터 튜닝, 새 필터 추가, 성과를 본 뒤 전략 변형을 추가하는 일을 하지 않습니다. 이
-       사이트에 나타날 모든 전략과 모든 파라미터 값은 결과 계산 전에 <code>registry.py</code>에
-       미리 고정되어 있으며, 새 항목은 앞으로 사전 등록된 형태로만 추가될 뿐 과거 데이터를
-       소급 재실행해 보기 좋은 구간을 골라내는 데 쓰이지 않습니다.</p>
+    <h2>일부러 하지 않는 것</h2>
+    <p>설정값을 결과가 좋아질 때까지 바꾸는 일, 결과를 본 뒤 조건을 덧붙이는 일은 하지 않습니다.
+       그렇게 하면 과거에만 맞는 전략이 만들어지기 때문입니다. 이 사이트에 있는 모든 전략과 설정값은
+       결과를 계산하기 전에 <code>registry.py</code>에 고정해 두었고, 새 전략을 넣을 때도 같은
+       방식으로 먼저 등록한 뒤에 계산합니다.</p>
   </section>
 </main>
 <footer class="bottom">
-  <div><a href="index.html">&larr; 결과로 돌아가기</a> &middot; <a href="../methodology.html">English</a></div>
+  <div><a href="index.html">&larr; 결과표로 돌아가기</a> &middot; <a href="../methodology.html">English</a></div>
 </footer>
 {_disclaimer_block_ko()}
 </body>
@@ -745,20 +772,20 @@ def build_empty_edition_page_ko(out_path: str | None = None, as_of: str | None =
 <header class="top">
   <h1>{html.escape(config.PROJECT_NAME)}</h1>
   <p class="tagline">{html.escape(config.TAGLINE_KO)}</p>
-  <p class="meta">기준일(as_of): <strong>{html.escape(as_of)}</strong> &middot;
+  <p class="meta">기준일 <strong>{html.escape(as_of)}</strong> &middot;
      <a href="../index.html">English</a></p>
 </header>
 <main>
   <div class="notice-box">
-    <h2>이번 주 데이터 없음</h2>
-    <p>이번 주에는 업비트(Upbit) 시세 데이터를 가져오지 못해 결과표를 만들지 못했습니다.<br>
-       (개발 환경 네트워크 차단, 또는 업비트 서버의 일시적 오류일 수 있습니다.)<br>
-       다음 주 자동 실행 때 다시 시도합니다. 영어판(BTC/ETH, Bitstamp 데이터)은 정상적으로
-       갱신되었습니다 — 위의 English 링크를 확인해 주세요.</p>
+    <h2>이번 주는 결과가 없습니다</h2>
+    <p>업비트에서 시세 데이터를 받아오지 못해 이번 주 결과표를 만들지 못했습니다. 업비트 서버의
+       일시적인 문제일 수 있으며, 다음 주 자동 실행 때 다시 시도합니다.<br>
+       영어판(BTC/ETH, Bitstamp 데이터)은 정상적으로 갱신되었으니 위의 English 링크에서 확인할 수
+       있습니다.</p>
   </div>
 </main>
 <footer class="bottom">
-  <div><a href="methodology.html">방법론</a> &middot; <a href="../index.html">English</a></div>
+  <div><a href="methodology.html">어떻게 계산했나</a> &middot; <a href="../index.html">English</a></div>
 </footer>
 {_disclaimer_block_ko()}
 </body>

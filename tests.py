@@ -346,8 +346,8 @@ def test_korean_page_disclaimer_and_banned_words():
         with open(empty_path, encoding="utf-8") as f:
             empty_html = f.read()
         _assert_page_ok(empty_html, "no-data notice")
-        check("Korean no-data page shows the '이번 주 데이터 없음' notice",
-              "이번 주 데이터 없음" in empty_html)
+        check("Korean no-data page shows the '이번 주는 결과가 없습니다' notice",
+              "이번 주는 결과가 없습니다" in empty_html)
 
         # 2) A full-data page, built from a small synthetic payload (no dependency on real Upbit
         #    data or on run_weekly.py having run yet).

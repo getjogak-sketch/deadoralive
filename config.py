@@ -140,8 +140,8 @@ COST["KRW-ETH"] = 0.0010
 
 # Korean-language site copy (verbatim strings required by this task; kept alongside the English
 # PROJECT_NAME/TAGLINE/LEGAL_DISCLAIMER above rather than overloading those constants).
-PROJECT_TITLE_KO = "Dead or Alive — 인기 매매 전략, 수수료 떼고 매주 재검사"
-TAGLINE_KO = "인기 매매 전략, 수수료 떼고 매주 재검사"
+PROJECT_TITLE_KO = "Dead or Alive — 인기 매매 전략, 수수료 떼고 매주 다시 검사"
+TAGLINE_KO = "사람들이 많이 쓰는 매매 전략 22개를 수수료를 뗀 조건으로 매주 다시 검사해서, 최근 2년에도 통했는지 보여줍니다."
 LEGAL_DISCLAIMER_KO = (
     "본 페이지는 무료로 제공되는 정보·교육 목적의 자료이며, 투자 자문이나 특정 자산의 매수·매도 "
     "권유가 아닙니다. 과거 백테스트 결과는 미래 수익을 보장하지 않으며, 모든 투자 판단과 책임은 "

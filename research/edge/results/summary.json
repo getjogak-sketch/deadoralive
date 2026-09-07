@@ -1,0 +1,79 @@
+{
+  "meta": {
+    "run_date": "2026-09-07",
+    "n_registry_variants": 29,
+    "n_extra_grid": 25,
+    "seed": 20260907,
+    "max_assets": null,
+    "shuffles": 20,
+    "runtime_seconds": 287.9,
+    "assets": [
+      "BTCUSD-1d",
+      "BTCUSD-4h",
+      "ETHUSD-1d",
+      "ETHUSD-4h",
+      "EURUSD-1d",
+      "GLD-1d",
+      "KRW-BTC-1d",
+      "KRW-BTC-4h",
+      "KRW-ETH-1d",
+      "KRW-ETH-4h",
+      "QQQ-1d",
+      "SLV-1d",
+      "SPY-1d",
+      "USDJPY-1d",
+      "USO-1d"
+    ]
+  },
+  "N": 810,
+  "n_universe": 54,
+  "n_datasets": 15,
+  "n_precandidates": 87,
+  "n_survivors": 87,
+  "by_edition": {
+    "n_tested": {
+      "en": 216,
+      "macro": 270,
+      "ko": 216,
+      "stocks": 108
+    },
+    "precandidates": {
+      "en": 20,
+      "macro": 9,
+      "ko": 47,
+      "stocks": 11
+    },
+    "survivors": {
+      "en": 20,
+      "macro": 9,
+      "ko": 47,
+      "stocks": 11
+    }
+  },
+  "placebo_counts": [
+    150,
+    172,
+    150,
+    152,
+    168,
+    176,
+    167,
+    159,
+    166,
+    173,
+    135,
+    177,
+    151,
+    117,
+    145,
+    134,
+    149,
+    137,
+    160,
+    166
+  ],
+  "placebo_mean": 155.2,
+  "placebo_sd": 16.146043999757502,
+  "decision": "NO EVIDENCE OF EDGE",
+  "private_written": false
+}

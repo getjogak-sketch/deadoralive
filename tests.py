@@ -1336,6 +1336,150 @@ def test_registry_page_builds_and_no_banned_korean_words():
 
 
 # ---------------------------------------------------------------------------
+# R2: Strategy Decay Index (decay.py, charts.py, docs/index-history.html)
+# ---------------------------------------------------------------------------
+
+def test_decay_index_computation():
+    import json as _json
+    import tempfile
+    import decay as dc
+    import verdict as vd
+
+    tmp = tempfile.mkdtemp()
+    # Week 1: 20 alive, 30 fading, 40 dead, 10 too-few (n=100) -> decay_index = 40/90.
+    with open(os.path.join(tmp, "2026-08-01.json"), "w") as f:
+        _json.dump({"tally": {vd.ALIVE: 20, vd.FADING: 30, vd.DEAD: 40, vd.TOO_FEW: 10}}, f)
+    # Week 2, Korean edition file naming (ko_<as_of>.json) — must NOT be picked up by the "en"
+    # pattern, and its own all-zero tally must be skipped (no data that week, not "0% dead").
+    with open(os.path.join(tmp, "ko_2026-08-08.json"), "w") as f:
+        _json.dump({"tally": {vd.ALIVE: 0, vd.FADING: 0, vd.DEAD: 0, vd.TOO_FEW: 0}}, f)
+    # Week 3 (en): all TOO FEW (n=5) -> ge10 denominator is 0 -> decay_index must be None, not a
+    # ZeroDivisionError and not silently 0.
+    with open(os.path.join(tmp, "2026-08-08.json"), "w") as f:
+        _json.dump({"tally": {vd.ALIVE: 0, vd.FADING: 0, vd.DEAD: 0, vd.TOO_FEW: 5}}, f)
+    # A non-matching filename must be ignored outright.
+    with open(os.path.join(tmp, "not-a-history-file.txt"), "w") as f:
+        f.write("junk")
+
+    points = dc.compute_index_history("en", history_dir=tmp)
+    check("decay: en pattern ignores the ko_-prefixed file and the .txt file",
+          len(points) == 2, f"got {len(points)}")
+    check("decay: points sorted ascending by as_of",
+          [p["as_of"] for p in points] == ["2026-08-01", "2026-08-08"])
+    p1 = points[0]
+    check("decay: week1 shares (20/30/40/10 of 100)",
+          abs(p1["alive"] - 0.20) < 1e-9 and abs(p1["fading"] - 0.30) < 1e-9
+          and abs(p1["dead"] - 0.40) < 1e-9 and abs(p1["too_few"] - 0.10) < 1e-9
+          and p1["n"] == 100)
+    check("decay: week1 decay_index = dead / (alive+fading+dead) = 40/90",
+          abs(p1["decay_index"] - (40 / 90)) < 1e-9)
+    p2 = points[1]
+    check("decay: week3 (all TOO FEW) has decay_index=None, not 0 or an error", p2["decay_index"] is None)
+
+    ko_points = dc.compute_index_history("ko", history_dir=tmp)
+    check("decay: ko pattern picks up ko_2026-08-08.json, and its all-zero tally is skipped",
+          ko_points == [])
+
+    out_path = dc.write_index_history("en", out_root=os.path.join(tmp, "api"), history_dir=tmp)
+    check("decay: write_index_history writes a file", os.path.exists(out_path))
+    loaded = dc.load_index_history("en", out_root=os.path.join(tmp, "api"))
+    check("decay: load_index_history round-trips what was written", loaded == points)
+
+
+def test_decay_index_page_builds_and_no_banned_korean_words():
+    import tempfile
+    import build_site as bs
+
+    latest_path = os.path.join(config.RESULTS_DIR, "latest.json")
+    if not os.path.exists(latest_path):
+        print("[SKIP] test_decay_index_page_builds_and_no_banned_korean_words: no results/latest.json")
+        return
+
+    orig_docs, orig_docs_ko = config.DOCS_DIR, config.DOCS_DIR_KO
+    tmp = tempfile.mkdtemp()
+    config.DOCS_DIR = tmp
+    config.DOCS_DIR_KO = os.path.join(tmp, "ko")
+    try:
+        import decay as dc
+        dc.write_index_history("en", out_root=os.path.join(tmp, "api", "v1"))
+        dc.write_index_history("ko", out_root=os.path.join(tmp, "api", "v1"))
+        dc.write_index_history("stocks", out_root=os.path.join(tmp, "api", "v1"))
+
+        en_path = bs.build_index_history_page()
+        ko_path = bs.build_index_history_page_ko()
+        check("index-history page: docs/index-history.html written", os.path.exists(en_path))
+        check("index-history page: docs/ko/index-history.html written", os.path.exists(ko_path))
+
+        with open(en_path, encoding="utf-8") as f:
+            en_html = f.read()
+        check("index-history page: has an <svg> chart (en has archived data)", "<svg" in en_html)
+        check("index-history page: mentions both en and stocks edition labels",
+              "English (crypto" in en_html and "Stocks (SPY, QQQ)" in en_html)
+
+        with open(ko_path, encoding="utf-8") as f:
+            ko_html = f.read()
+        banned = ["추천", "수익 보장", "확실", "필승"]
+        for word in banned:
+            check(f"index-history page ko: no banned word '{word}'", word not in ko_html)
+        check("index-history page ko: carries the Korean disclaimer",
+              config.LEGAL_DISCLAIMER_KO in ko_html)
+    finally:
+        config.DOCS_DIR, config.DOCS_DIR_KO = orig_docs, orig_docs_ko
+
+
+def test_seo_pages_sparkline_at_3plus_history_points():
+    """A synthetic 3-week history (distinct OOS PF each week for the same variant) must produce a
+    sparkline on that strategy's page; a synthetic 2-week history must not (task R2's own
+    threshold: ">=3 history points")."""
+    import json as _json
+    import tempfile
+    import seo_pages as sp
+
+    def _fake_payload(as_of, pf):
+        return {
+            "as_of": as_of,
+            "rows": [{
+                "strategy_id": "sma_cross", "strategy_name": "SMA crossover", "params": "10-50",
+                "asset": "BTCUSD", "timeframe": "1d", "type": "state", "verdict": "FADING",
+                "is": {}, "oos": {"profit_factor": pf, "n_trades": 15},
+            }],
+            "popular_combos": [],
+        }
+
+    orig_docs, orig_hist = config.DOCS_DIR, config.HISTORY_DIR
+    tmp = tempfile.mkdtemp()
+    config.DOCS_DIR = tmp
+    config.HISTORY_DIR = os.path.join(tmp, "history")
+    os.makedirs(config.HISTORY_DIR, exist_ok=True)
+    sp.EDITION_OUT_DIR["en"] = config.DOCS_DIR
+    try:
+        for as_of, pf in [("2026-07-01", 1.1), ("2026-07-08", 1.4)]:
+            with open(os.path.join(config.HISTORY_DIR, f"{as_of}.json"), "w") as f:
+                _json.dump(_fake_payload(as_of, pf), f)
+        latest = _fake_payload("2026-07-08", 1.4)
+        with open(os.path.join(config.HISTORY_DIR, "2026-07-08.json"), "w") as f:
+            _json.dump(latest, f)
+        manifest = sp.build_all({"en": latest})
+        page_path = os.path.join(config.DOCS_DIR, "s", manifest["en"][0]["filename"])
+        with open(page_path, encoding="utf-8") as f:
+            html_2wk = f.read()
+        check("sparkline: NOT shown with only 2 history points", 'class="sparkline"' not in html_2wk)
+
+        with open(os.path.join(config.HISTORY_DIR, "2026-07-15.json"), "w") as f:
+            _json.dump(_fake_payload("2026-07-15", 1.8), f)
+        latest3 = _fake_payload("2026-07-15", 1.8)
+        manifest3 = sp.build_all({"en": latest3})
+        page_path3 = os.path.join(config.DOCS_DIR, "s", manifest3["en"][0]["filename"])
+        with open(page_path3, encoding="utf-8") as f:
+            html_3wk = f.read()
+        check("sparkline: shown with 3 history points", 'class="sparkline"' in html_3wk)
+        check("sparkline: contains an <svg>", "<svg" in html_3wk)
+    finally:
+        config.DOCS_DIR, config.HISTORY_DIR = orig_docs, orig_hist
+        sp.EDITION_OUT_DIR["en"] = orig_docs
+
+
+# ---------------------------------------------------------------------------
 # S2: weekly digest (digest.py)
 # ---------------------------------------------------------------------------
 
@@ -1606,6 +1750,9 @@ if __name__ == "__main__":
     test_ledger_matches_registry_bijection()
     test_ledger_immutable_against_snapshot()
     test_registry_page_builds_and_no_banned_korean_words()
+    test_decay_index_computation()
+    test_decay_index_page_builds_and_no_banned_korean_words()
+    test_seo_pages_sparkline_at_3plus_history_points()
     test_digest_first_week_and_flips()
     test_digest_build_writes_pages_and_feeds()
     test_publish_no_secrets_exits_zero()

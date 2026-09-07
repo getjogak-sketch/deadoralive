@@ -11,6 +11,8 @@ import os
 import config
 import registry as reg
 import ledger as ldg
+import decay
+import charts
 
 VERDICT_COLORS = {
     "ALIVE": ("var(--alive-bg)", "var(--alive-fg)"),
@@ -278,7 +280,7 @@ def _popular_combos_html(payload: dict, assets: list | None = None, timeframes: 
 def build_index(payload: dict, out_path: str | None = None, assets: list | None = None,
                  timeframes: list | None = None, lang_links: str | None = None,
                  feed_html: str | None = None, places_href: str | None = None,
-                 registry_href: str | None = None):
+                 registry_href: str | None = None, decay_href: str | None = None):
     """spec_v3 §A extension (additive): `assets`/`timeframes`/`lang_links` let a second edition
     (the stocks edition — SPY/QQQ, 1d only) reuse this exact template instead of duplicating it,
     per spec_v3 §A's own instruction ("reuse the English builders with an edition parameter").
@@ -305,6 +307,9 @@ def build_index(payload: dict, out_path: str | None = None, assets: list | None 
     # task R1: same reasoning — the stocks edition has no registry.html of its own (the ledger is
     # edition-agnostic, one shared page), so its call site points back at the main one too.
     registry_href = registry_href if registry_href is not None else "registry.html"
+    # task R2: the stocks edition's Decay Index is shown as its own section on the shared English
+    # docs/index-history.html page (there is no docs/stocks/index-history.html of its own).
+    decay_href = decay_href if decay_href is not None else "index-history.html"
 
     groups = {}
     order = []
@@ -368,6 +373,7 @@ def build_index(payload: dict, out_path: str | None = None, assets: list | None 
 <footer class="bottom">
   <div><a href="methodology.html">Methodology</a>{repo_html}{signup_html}
   &middot; <a href="{html.escape(registry_href)}">Strategy registry</a>
+  &middot; <a href="{html.escape(decay_href)}">Strategy Decay Index</a>
   &middot; <a href="{html.escape(_check_strategy_url())}">Check your own strategy</a>
   &middot; <a href="s/index.html">All strategy pages</a>{feed_html}
   &middot; <a href="{html.escape(places_href)}">Places this is published to</a></div>
@@ -416,12 +422,13 @@ def _popular_combos_table_html() -> str:
 
 def build_methodology(out_path: str | None = None, assets: list | None = None,
                        lang_links: str | None = None, places_href: str | None = None,
-                       registry_href: str | None = None):
+                       registry_href: str | None = None, decay_href: str | None = None):
     """spec_v3 §A extension (additive): `assets`/`lang_links` let the stocks edition reuse this
     template (see build_index's docstring above for the same rationale); both default to exactly
     what this function already hard-coded before spec_v3. `places_href` (task S4): see
     build_index's own docstring — the stocks edition has no places.html of its own.
-    `registry_href` (task R1): same reasoning, for the shared registry.html page."""
+    `registry_href` (task R1) / `decay_href` (task R2): same reasoning, for the shared
+    registry.html / index-history.html pages."""
     out_path = out_path or os.path.join(config.DOCS_DIR, "methodology.html")
     assets = assets if assets is not None else config.ASSETS
     lang_links = lang_links if lang_links is not None else (
@@ -430,6 +437,7 @@ def build_methodology(out_path: str | None = None, assets: list | None = None,
     )
     places_href = places_href if places_href is not None else "places.html"
     registry_href = registry_href if registry_href is not None else "registry.html"
+    decay_href = decay_href if decay_href is not None else "index-history.html"
     # Filtered to `assets` (not all of config.COST) so this page's output is unaffected by the
     # other editions' COST entries added alongside it.
     cost_rows = "".join(
@@ -592,6 +600,7 @@ def build_methodology(out_path: str | None = None, assets: list | None = None,
 <footer class="bottom">
   <div><a href="index.html">&larr; back to results</a>
   &middot; <a href="{html.escape(registry_href)}">Strategy registry</a>
+  &middot; <a href="{html.escape(decay_href)}">Strategy Decay Index</a>
   &middot; <a href="{html.escape(_check_strategy_url())}">Check your own strategy</a>
   &middot; <a href="s/index.html">All strategy pages</a>
   &middot; <a href="{html.escape(places_href)}">Places this is published to</a></div>
@@ -896,6 +905,7 @@ def build_index_ko(payload: dict, out_path: str | None = None):
 <footer class="bottom">
   <div><a href="methodology.html">어떻게 계산했나</a>{repo_html}{signup_html} &middot; <a href="../index.html">English</a> &middot; <a href="../stocks/index.html">Stocks</a>
   &middot; <a href="registry.html">전략 등록부</a>
+  &middot; <a href="index-history.html">전략 쇠퇴 지수</a>
   &middot; <a href="{html.escape(_check_strategy_url())}">내 전략도 검사해 보기</a>
   &middot; <a href="s/index.html">전략별 페이지 전체</a>
   &middot; <a href="feed.xml">RSS</a> &middot; <a href="digest/index.html">주간 요약</a>
@@ -1130,6 +1140,7 @@ def build_methodology_ko(out_path: str | None = None):
 <footer class="bottom">
   <div><a href="index.html">&larr; 결과표로 돌아가기</a> &middot; <a href="../methodology.html">English</a> &middot; <a href="../stocks/methodology.html">Stocks</a>
   &middot; <a href="registry.html">전략 등록부</a>
+  &middot; <a href="index-history.html">전략 쇠퇴 지수</a>
   &middot; <a href="{html.escape(_check_strategy_url())}">내 전략도 검사해 보기</a>
   &middot; <a href="s/index.html">전략별 페이지 전체</a>
   &middot; <a href="places.html">이 엔진이 공개되는 곳</a></div>
@@ -1180,6 +1191,7 @@ def build_empty_edition_page_ko(out_path: str | None = None, as_of: str | None =
 <footer class="bottom">
   <div><a href="methodology.html">어떻게 계산했나</a> &middot; <a href="../index.html">English</a> &middot; <a href="../stocks/index.html">Stocks</a>
   &middot; <a href="registry.html">전략 등록부</a>
+  &middot; <a href="index-history.html">전략 쇠퇴 지수</a>
   &middot; <a href="{html.escape(_check_strategy_url())}">내 전략도 검사해 보기</a>
   &middot; <a href="s/index.html">전략별 페이지 전체</a>
   &middot; <a href="feed.xml">RSS</a> &middot; <a href="digest/index.html">주간 요약</a>
@@ -1413,6 +1425,7 @@ def build_api_index_html(out_path: str | None = None) -> str:
 <footer class="bottom">
   <div><a href="../index.html">&larr; back to results</a>
   &middot; <a href="../registry.html">Strategy registry</a>
+  &middot; <a href="../index-history.html">Strategy Decay Index</a>
   &middot; <a href="{html.escape(_check_strategy_url())}">Check your own strategy</a>
   &middot; <a href="../s/index.html">All strategy pages</a>
   &middot; <a href="../places.html">Places this is published to</a></div>
@@ -1520,7 +1533,8 @@ table.places thead th {{ background: var(--card-bg); }}
 <footer class="bottom">
   <div><a href="index.html">&larr; back to results</a>
   &middot; <a href="methodology.html">Methodology</a>
-  &middot; <a href="registry.html">Strategy registry</a></div>
+  &middot; <a href="registry.html">Strategy registry</a>
+  &middot; <a href="index-history.html">Strategy Decay Index</a></div>
   <div class="disclaimer">{html.escape(config.LEGAL_DISCLAIMER)}</div>
 </footer>
 {config.ANALYTICS_SNIPPET}
@@ -1618,7 +1632,8 @@ table.places thead th {{ background: var(--card-bg); }}
 <footer class="bottom">
   <div><a href="index.html">&larr; 결과표로 돌아가기</a>
   &middot; <a href="methodology.html">어떻게 계산했나</a>
-  &middot; <a href="registry.html">전략 등록부</a></div>
+  &middot; <a href="registry.html">전략 등록부</a>
+  &middot; <a href="index-history.html">전략 쇠퇴 지수</a></div>
 </footer>
 {_disclaimer_block_ko()}
 {config.ANALYTICS_SNIPPET}
@@ -1729,6 +1744,7 @@ table.ledger td, table.ledger th {{ text-align: left; white-space: normal; }}
 <footer class="bottom">
   <div><a href="index.html">&larr; back to results</a>
   &middot; <a href="methodology.html">Methodology</a>
+  &middot; <a href="index-history.html">Strategy Decay Index</a>
   &middot; <a href="{html.escape(places_href)}">Places this is published to</a></div>
   <div class="disclaimer">{html.escape(config.LEGAL_DISCLAIMER)}</div>
 </footer>
@@ -1797,6 +1813,164 @@ table.ledger td, table.ledger th {{ text-align: left; white-space: normal; }}
 <footer class="bottom">
   <div><a href="index.html">&larr; 결과표로 돌아가기</a> &middot; <a href="../registry.html">English</a>
   &middot; <a href="methodology.html">어떻게 계산했나</a>
+  &middot; <a href="index-history.html">전략 쇠퇴 지수</a>
+  &middot; <a href="places.html">이 엔진이 공개되는 곳</a></div>
+</footer>
+{_disclaimer_block_ko()}
+{config.ANALYTICS_SNIPPET}
+</body>
+</html>
+"""
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    with open(out_path, "w") as f:
+        f.write(doc)
+    return out_path
+
+
+# ===========================================================================
+# task R2: Strategy Decay Index. Purely a rendering of docs/api/v1/<edition>/index_history.json
+# (written by decay.py, itself read-only bookkeeping over results/history/*.json's already-computed
+# `tally` field — see decay.py's own docstring); this module computes nothing new here either.
+# ===========================================================================
+
+_DECAY_EXPLAINER_EN = (
+    "The Decay Index is the share of textbook-registry rows with at least 10 out-of-sample trades "
+    "that are currently badged DEAD (dead &divide; (alive + fading + dead)). It only ever grows "
+    "week by week, as this pipeline runs and archives another snapshot to "
+    "results/history/&lt;as_of&gt;.json &mdash; nobody, including us, can go back and add last "
+    "year's snapshot after the fact. With only a week or two of history the chart below will be "
+    "short; that is expected, not a bug, and its value compounds precisely because it can't be "
+    "reconstructed retroactively."
+)
+_DECAY_EXPLAINER_KO = (
+    "쇠퇴 지수(Decay Index)는 표본외 거래가 10회 이상인 표준 지표(textbook) 전략 중, 현재 사망(DEAD) "
+    "판정을 받은 비율입니다(사망 &divide; (생존 + 약화 + 사망)). 이 값은 매주 파이프라인이 실행되어 "
+    "results/history/&lt;as_of&gt;.json에 그 주의 스냅샷을 새로 남길 때만 늘어나며, 지난 주 이전의 "
+    "기록을 나중에 되돌려 채워 넣을 방법은 없습니다. 아직 한두 주 치 기록밖에 없다면 아래 그래프가 "
+    "짧은 게 정상입니다 — 이 값은 나중에 재구성할 수 없기 때문에 매주 조금씩 쌓여 의미가 커집니다."
+)
+
+_EDITION_LABEL_EN = {"en": "English (crypto: BTCUSD, ETHUSD)", "stocks": "Stocks (SPY, QQQ)",
+                      "ko": "한국어 (Upbit KRW-BTC, KRW-ETH)"}
+
+
+def _decay_section_html(edition_key: str, lang: str) -> str:
+    points = decay.load_index_history(edition_key)
+    label = _EDITION_LABEL_EN.get(edition_key, edition_key)
+    if not points:
+        no_data = ("이번 주까지 이 에디션에는 기록된 스냅샷이 없습니다." if lang == "ko"
+                    else "No archived snapshots yet for this edition.")
+        return f'<section class="assetblock"><h2>{html.escape(label)}</h2><p class="meta">{no_data}</p></section>'
+
+    chart_points = [(p["as_of"], p["decay_index"]) for p in points]
+    chart = charts.line_chart_svg(chart_points, y_max=1.0)
+    if lang == "ko":
+        head = "<tr><th>기준일</th><th>생존</th><th>약화</th><th>사망</th><th>표본 부족</th><th>쇠퇴 지수</th><th>표본 수</th></tr>"
+    else:
+        head = "<tr><th>as_of</th><th>ALIVE</th><th>FADING</th><th>DEAD</th><th>TOO FEW</th><th>Decay Index</th><th>n</th></tr>"
+
+    def pct(v):
+        return "-" if v is None else f"{v * 100:.1f}%"
+
+    rows = "".join(
+        f"<tr><td>{html.escape(p['as_of'])}</td><td>{pct(p['alive'])}</td><td>{pct(p['fading'])}</td>"
+        f"<td>{pct(p['dead'])}</td><td>{pct(p['too_few'])}</td><td>{pct(p['decay_index'])}</td>"
+        f"<td>{p['n']}</td></tr>"
+        for p in points
+    )
+    return f"""<section class="assetblock">
+    <h2>{html.escape(label)}</h2>
+    <div class="chartwrap">{chart}</div>
+    <div class="tablewrap"><table><thead>{head}</thead><tbody>{rows}</tbody></table></div>
+  </section>"""
+
+
+def build_index_history_page(out_path: str | None = None, editions: list | None = None,
+                              lang_links: str | None = None, places_href: str | None = None,
+                              registry_href: str | None = None) -> str:
+    out_path = out_path or os.path.join(config.DOCS_DIR, "index-history.html")
+    editions = editions if editions is not None else ["en", "stocks"]
+    lang_links = lang_links if lang_links is not None else (
+        '<a href="ko/index-history.html">한국어 (Korean)</a>'
+    )
+    places_href = places_href if places_href is not None else "places.html"
+    registry_href = registry_href if registry_href is not None else "registry.html"
+    sections = "".join(_decay_section_html(ed, "en") for ed in editions)
+    doc = f"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Strategy Decay Index &mdash; {html.escape(config.PROJECT_NAME)}</title>
+<meta name="description" content="What share of pre-registered strategies are currently badged DEAD, tracked week over week since this pipeline started archiving snapshots.">
+<style>{BASE_CSS}
+.chartwrap {{ overflow-x: auto; margin: 0.5rem 0 1rem; }}
+.chartwrap svg {{ display: block; }}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Strategy Decay Index</h1>
+  <p class="tagline">What share of pre-registered strategies are currently badged DEAD, tracked
+     week over week.</p>
+  <p class="meta"><a href="index.html">&larr; back to results</a> &middot; {lang_links}</p>
+</header>
+<main>
+  <section class="assetblock">
+    <p>{_DECAY_EXPLAINER_EN}</p>
+  </section>
+  {sections}
+</main>
+<footer class="bottom">
+  <div><a href="index.html">&larr; back to results</a>
+  &middot; <a href="methodology.html">Methodology</a>
+  &middot; <a href="{html.escape(registry_href)}">Strategy registry</a>
+  &middot; <a href="{html.escape(places_href)}">Places this is published to</a></div>
+  <div class="disclaimer">{html.escape(config.LEGAL_DISCLAIMER)}</div>
+</footer>
+{config.ANALYTICS_SNIPPET}
+</body>
+</html>
+"""
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    with open(out_path, "w") as f:
+        f.write(doc)
+    return out_path
+
+
+def build_index_history_page_ko(out_path: str | None = None) -> str:
+    out_path = out_path or os.path.join(config.DOCS_DIR_KO, "index-history.html")
+    sections = _decay_section_html("ko", "ko")
+    doc = f"""<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>전략 쇠퇴 지수 &mdash; {html.escape(config.PROJECT_NAME)}</title>
+<meta name="description" content="사전 등록된 전략 중 현재 사망(DEAD) 판정을 받은 비율을, 이 파이프라인이 스냅샷을 기록하기 시작한 뒤로 매주 추적합니다.">
+<style>{BASE_CSS}{KO_EXTRA_CSS}
+.chartwrap {{ overflow-x: auto; margin: 0.5rem 0 1rem; }}
+.chartwrap svg {{ display: block; }}
+</style>
+</head>
+<body>
+{_disclaimer_block_ko()}
+<header class="top">
+  <h1>전략 쇠퇴 지수</h1>
+  <p class="tagline">사전 등록된 전략 중 현재 사망(DEAD) 판정을 받은 비율을 매주 추적합니다.</p>
+  <p class="meta"><a href="index.html">&larr; 결과표로 돌아가기</a> &middot;
+     <a href="../index-history.html">English</a></p>
+</header>
+<main>
+  <section class="assetblock">
+    <p>{_DECAY_EXPLAINER_KO}</p>
+  </section>
+  {sections}
+</main>
+<footer class="bottom">
+  <div><a href="index.html">&larr; 결과표로 돌아가기</a> &middot; <a href="../index-history.html">English</a>
+  &middot; <a href="methodology.html">어떻게 계산했나</a>
+  &middot; <a href="registry.html">전략 등록부</a>
   &middot; <a href="places.html">이 엔진이 공개되는 곳</a></div>
 </footer>
 {_disclaimer_block_ko()}

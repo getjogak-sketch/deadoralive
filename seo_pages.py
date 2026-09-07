@@ -20,6 +20,7 @@ import re
 import config
 import registry as reg
 import build_site as bs
+import charts
 
 # ---------------------------------------------------------------------------
 # Per-edition output roots and URL bases (config.PAGES_URL is the one placeholder GitHub Pages
@@ -209,6 +210,53 @@ def _history_line(hist_map: dict, strategy_id, params, asset, timeframe, lang: s
     return f"{prefix} ({timeframe}): " + " &rarr; ".join(html.escape(p) for p in parts)
 
 
+def _history_pf_index(edition_key: str) -> dict:
+    """task R2: same walk as _history_index above, but capturing each as_of's OOS profit factor
+    instead of its verdict — used only for the sparkline, never for anything that affects a
+    verdict. A separate pass (rather than folding into _history_index) so that function's existing
+    {as_of: verdict} value shape — already relied on by _history_line above — is untouched."""
+    pat = _HIST_FILE_RE[edition_key]
+    out: dict = {}
+    if not os.path.isdir(config.HISTORY_DIR):
+        return out
+    for fn in sorted(os.listdir(config.HISTORY_DIR)):
+        m = pat.match(fn)
+        if not m:
+            continue
+        as_of = m.group(1)
+        try:
+            with open(os.path.join(config.HISTORY_DIR, fn), encoding="utf-8") as f:
+                snap = json.load(f)
+        except (OSError, json.JSONDecodeError):
+            continue
+        for r in _all_variant_rows(snap):
+            k = (r["strategy_id"], r["params"], r["asset"], r["timeframe"])
+            pf = (r.get("oos") or {}).get("profit_factor")
+            pf = pf if isinstance(pf, (int, float)) else None
+            out.setdefault(k, {})[as_of] = pf
+    return out
+
+
+def _pf_sparkline_html(hist_pf_map: dict, strategy_id, params, asset, timeframe, lang: str) -> str:
+    """task R2: a tiny inline-SVG sparkline of OOS profit factor over time, shown only once at
+    least 3 history points exist (fewer than that isn't a trend, it's noise) — matches the task's
+    own threshold. Never rendered at all below that, same "say nothing rather than something
+    misleading" convention _history_line already follows for a first-week strategy."""
+    key = (strategy_id, params, asset, timeframe)
+    entries = sorted((hist_pf_map.get(key) or {}).items())
+    if len(entries) < 3:
+        return ""
+    values = [v for _as_of, v in entries]
+    svg = charts.sparkline_svg(values)
+    if not svg:
+        return ""
+    label = "OOS PF trend" if lang != "ko" else "표본외 순손익비 추이"
+    latest = values[-1]
+    latest_str = bs._fmt_num(latest) if latest is not None else "n/a"
+    return (f'<span class="sparkline" title="{html.escape(", ".join(f"{a}: {bs._fmt_num(v)}" for a, v in entries))}">'
+            f'{label} {svg} ({latest_str})</span>')
+
+
 # ---------------------------------------------------------------------------
 # Small HTML fragments reused by every page.
 # ---------------------------------------------------------------------------
@@ -222,6 +270,8 @@ EXTRA_CSS = """
 .interp { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.1rem; margin: 1rem 0; }
 .histline { font-size: 0.82rem; color: var(--muted); }
 .tfblock { margin: 1.5rem 0; }
+.sparkline { display: inline-flex; align-items: center; gap: 0.3rem; margin-left: 0.5rem; }
+.sparkline svg { vertical-align: middle; }
 """
 
 
@@ -379,7 +429,8 @@ def _page_head(title, description, canonical, alt_links, lang):
 
 
 def _build_one_page(edition_key: str, lang: str, strategy_id: str, params: str, asset: str,
-                     tf_rows: dict, payload: dict, hist_map: dict, alt_edition_url: str | None):
+                     tf_rows: dict, payload: dict, hist_map: dict, alt_edition_url: str | None,
+                     hist_pf_map: dict | None = None):
     entry = _ENTRIES.get(strategy_id, {})
     rule_en = entry.get("rule", "")
     out_dir = os.path.join(EDITION_OUT_DIR[edition_key], "s")
@@ -472,12 +523,13 @@ def _build_one_page(edition_key: str, lang: str, strategy_id: str, params: str, 
         r = tf_rows[tf]
         badge = bs._badge_html_ko(r["verdict"]) if lang == "ko" else bs._badge_html(r["verdict"])
         hist = _history_line(hist_map, strategy_id, params, asset, tf, lang)
+        sparkline = _pf_sparkline_html(hist_pf_map or {}, strategy_id, params, asset, tf, lang)
         tf_sections.append(f"""
 <div class="tfblock">
   <h2>{html.escape(tf_label_map.get(tf, tf))} &mdash; {verdict_label}: {badge}</h2>
   {_scorecard_html(r, lang)}
   {_robustness_html(r, lang)}
-  <p class="histline">{hist}</p>
+  <p class="histline">{hist} {sparkline}</p>
 </div>""")
 
     doc = _page_head(title, description, canonical, alt_links, lang) + f"""
@@ -585,12 +637,14 @@ def build_all(payloads: dict) -> dict:
     # Pass 1: gather groups per edition.
     per_edition_groups = {}
     hist_maps = {}
+    hist_pf_maps = {}
     for edition_key, payload in payloads.items():
         order, groups = ([], {})
         if payload and _all_variant_rows(payload):
             order, groups = _group_by_strategy_asset(payload)
         per_edition_groups[edition_key] = (order, groups)
         hist_maps[edition_key] = _history_index(edition_key)
+        hist_pf_maps[edition_key] = _history_pf_index(edition_key)
 
     # Pass 2: build a std-key index so en/ko pages of "the same coin, same strategy+params" can
     # link to each other via hreflang (spec S1).
@@ -623,7 +677,7 @@ def build_all(payloads: dict) -> dict:
                     alt_url = std_index.get((sid, params, std_asset), {}).get(other_edition)
             page = _build_one_page(edition_key, lang, sid, params, asset,
                                     groups[(sid, params, asset)], payload, hist_maps[edition_key],
-                                    alt_url)
+                                    alt_url, hist_pf_maps[edition_key])
             page_entries.append(page)
         _s_index_page(edition_key, lang, page_entries, payload)
         manifest[edition_key] = page_entries

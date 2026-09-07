@@ -430,6 +430,22 @@ def main():
     print(f"Wrote {os.path.join(config.DOCS_DIR_KO, 'registry.html')}")
 
     # -------------------------------------------------------------------------------------------
+    # Strategy Decay Index (task R2) — read-only bookkeeping over results/history/*.json's own
+    # `tally` field (see decay.py's docstring), written for every edition every run so this week's
+    # snapshot is added even on a week where that edition itself had no fresh data (the archive is
+    # exactly the set of files already on disk; nothing here recomputes a past week's numbers).
+    # -------------------------------------------------------------------------------------------
+    import decay as decay_mod
+    for edition_key in ("en", "ko", "stocks"):
+        decay_mod.write_index_history(edition_key)
+    build_site.build_index_history_page()
+    build_site.build_index_history_page_ko()
+    print(f"Wrote {os.path.join(config.DOCS_DIR, 'api', 'v1', '<edition>', 'index_history.json')} "
+          f"(en/ko/stocks)")
+    print(f"Wrote {os.path.join(config.DOCS_DIR, 'index-history.html')}")
+    print(f"Wrote {os.path.join(config.DOCS_DIR_KO, 'index-history.html')}")
+
+    # -------------------------------------------------------------------------------------------
     # Programmatic SEO pages, sitemap, robots.txt (this task's §S1) — additive, read-only over the
     # payloads already assembled above. `payload` here is the English edition's own payload dict,
     # already in scope from this function's top half.
@@ -449,6 +465,8 @@ def main():
         (config.PAGES_URL.rstrip("/") + "/places.html", payload["as_of"]),
         (config.PAGES_URL.rstrip("/") + "/registry.html", payload["as_of"]),
         (config.PAGES_URL.rstrip("/") + "/ko/registry.html", payload["as_of"]),
+        (config.PAGES_URL.rstrip("/") + "/index-history.html", payload["as_of"]),
+        (config.PAGES_URL.rstrip("/") + "/ko/index-history.html", payload["as_of"]),
     ]
     # docs/ko/places.html is always written above regardless of whether Upbit had data this run,
     # so it always belongs in the sitemap — falling back to the English as_of for its <lastmod>
@@ -704,13 +722,14 @@ def _run_stocks_edition():
                             lang_links=('<a href="../index.html">English (crypto)</a> &middot; '
                                         '<a href="../ko/index.html">한국어</a>'),
                             feed_html="", places_href="../places.html",
-                            registry_href="../registry.html")
+                            registry_href="../registry.html", decay_href="../index-history.html")
     build_site.build_methodology(out_path=os.path.join(out_dir, "methodology.html"),
                                   assets=assets,
                                   lang_links=('<a href="../methodology.html">English (crypto)</a> '
                                               '&middot; <a href="../ko/methodology.html">한국어</a>'),
                                   places_href="../places.html",
-                                  registry_href="../registry.html")
+                                  registry_href="../registry.html",
+                                  decay_href="../index-history.html")
     print(f"Wrote {os.path.join(out_dir, 'index.html')}")
     print(f"Wrote {os.path.join(out_dir, 'methodology.html')}")
 

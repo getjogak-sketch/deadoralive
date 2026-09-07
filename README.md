@@ -336,3 +336,18 @@ changes; a correction is always a new, separately dated entry.
 - `.github/ISSUE_TEMPLATE/propose-strategy.yml`: a queue (not automated) for readers to propose a
   strategy — rule text, params, source. An accepted proposal is registered, dated, before any
   backtest runs for it, exactly like every other entry.
+
+## Strategy Decay Index
+
+`decay.py` turns each edition's already-computed `results/history/<...>.json` `tally` field (no
+recomputation — `run_weekly.py`'s own `vd.tally(...)` call already counts exactly this) into a
+weekly time series per edition: `alive`/`fading`/`dead`/`too_few` as shares of that week's textbook
+rows, plus a scalar **Decay Index** = share DEAD among rows with &ge;10 OOS trades
+(`dead / (alive+fading+dead)`, `None` when that denominator is 0). Written to
+`docs/api/v1/<edition>/index_history.json` every run. `docs/index-history.html` (en, covering the
+`en`+`stocks` editions) and `docs/ko/index-history.html` (ko) render it as a small inline-SVG line
+chart (`charts.py`, no external JS — the same "no external resource loads" rule as the rest of this
+site) plus a table, with an explicit note that the chart's value only ever grows week by week and
+can't be reconstructed retroactively by re-running anything. `charts.py`'s sparkline primitive is
+also used on every SEO strategy page (`seo_pages.py`) to show OOS profit factor over time, once
+&ge;3 history points exist for that (strategy, params, asset, timeframe).

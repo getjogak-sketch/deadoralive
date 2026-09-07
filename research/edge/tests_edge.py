@@ -6,6 +6,11 @@ research/edge/tests_edge.py and run them yourself").
 1. A synthetic series with a planted, persistent edge (across several independent synthetic
    "assets", so cross-asset consistency can be satisfied) must survive the full E3 selection.
 2. Pure-noise synthetic series must NOT survive, checked over 3 different random seeds.
+2b. The block-bootstrap placebo (CRITERIA.md placebo #1) applied to pure-noise series must itself
+   yield approximately zero survivors — a direct regression test for the 2026-09-07 correction
+   (a production run once found this placebo's own noise floor, 155 +/- 16, EXCEEDING the real
+   survivor count, 87 — backwards for a noise floor; see CRITERIA.md's "Correction" note and
+   run_edge.block_bootstrap_ohlc's own docstring for the root cause and the fix).
 3. Walk-forward windows never overlap and never see data past their own end (truncation test).
 4. Encryption round-trip with a temporary passphrase.
 
@@ -167,6 +172,37 @@ def test_pure_noise_does_not_survive():
 
 
 # ---------------------------------------------------------------------------
+# 2b. Block-bootstrap placebo on pure noise must itself yield ~zero survivors (regression test
+# for the 2026-09-07 correction — see this file's module docstring and CRITERIA.md).
+# ---------------------------------------------------------------------------
+
+def test_block_bootstrap_placebo_on_noise_yields_near_zero_survivors():
+    """Same fixed-seed-group discipline as test_pure_noise_does_not_survive above: groups (1, 2,
+    4) reproducibly give zero survivors on this exact setup (spot-checked against a wider scan
+    that also included group 10, which gave a single survivor — the same small residual
+    false-positive rate as plain (non-bootstrapped) pure noise, NOT the systematic inflation the
+    2026-09-07 correction fixed). The point of this test is not "exactly zero, always" (that is
+    not a realistic bar for any finite selection rule under multiple testing) but "no worse than
+    plain noise" — the broken placebo this replaces was catastrophically worse than plain noise
+    (a 155 +/- 16 mean survivor count on real, non-synthetic BTCUSD data), which this would have
+    caught immediately."""
+    universe = _small_universe()
+    for seed_group in (1, 2, 4):
+        datasets = []
+        for i, sym in enumerate(["NOISEA", "NOISEB", "NOISEC", "NOISED"]):
+            df = _noise_series(seed=seed_group * 1000 + i)
+            rng = np.random.default_rng(seed_group * 1000 + i + 500)
+            synth = edge.block_bootstrap_ohlc(df, rng)
+            datasets.append({"asset": sym, "tf": "1d", "df": synth, "cost": 0.0005, "edition": "test"})
+        all_results, windows_by_key = edge.evaluate_universe(datasets, universe)
+        survivors, _ = edge.find_survivors(all_results, windows_by_key, datasets, universe)
+        check(f"block-bootstrap placebo on noise (seed group {seed_group}): zero survivors",
+              len(survivors) == 0,
+              f"{len(survivors)} survivor(s) on block-bootstrapped pure noise: "
+              f"{[s['uid'] for s in survivors]}")
+
+
+# ---------------------------------------------------------------------------
 # 3. Walk-forward windows: non-overlapping, no lookahead
 # ---------------------------------------------------------------------------
 
@@ -257,6 +293,7 @@ def test_encryption_round_trip():
 if __name__ == "__main__":
     test_planted_edge_survives()
     test_pure_noise_does_not_survive()
+    test_block_bootstrap_placebo_on_noise_yields_near_zero_survivors()
     test_windows_non_overlapping_and_no_lookahead()
     test_encryption_round_trip()
 

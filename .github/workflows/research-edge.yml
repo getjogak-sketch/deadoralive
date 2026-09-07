@@ -8,7 +8,11 @@ on:
         required: false
         default: ""
       shuffles:
-        description: "placebo shuffle count"
+        description: "block-bootstrap placebo shuffle count (the decision's primary floor)"
+        required: false
+        default: "20"
+      shift_shuffles:
+        description: "circular time-shift placebo shuffle count (secondary sanity check)"
         required: false
         default: "20"
 
@@ -42,6 +46,9 @@ jobs:
           fi
           if [ -n "${{ github.event.inputs.shuffles }}" ]; then
             ARGS="$ARGS --shuffles ${{ github.event.inputs.shuffles }}"
+          fi
+          if [ -n "${{ github.event.inputs.shift_shuffles }}" ]; then
+            ARGS="$ARGS --shift-shuffles ${{ github.event.inputs.shift_shuffles }}"
           fi
           python research/edge/run_edge.py $ARGS 2>&1 | tee research/edge/results/run.log
         env:

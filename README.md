@@ -476,16 +476,27 @@ its output.
   parameters also work on 2+ *other* assets *and* a small parameter neighbourhood around it also
   works (reusing `robustness.py`'s own neighbour-grid idea, walked forward through the same
   windows instead of a single OOS check) — see CRITERIA.md E3 for the exact numbers.
-- **The honest part**: the identical selection process is re-run 20 times against a block-
-  bootstrap-by-month reshuffling of each asset's own returns (an intentionally simple placebo,
-  documented simplifications and a measured limitation both spelled out in CRITERIA.md E3) — this
-  is the *noise floor*: how many "survivors" this exact procedure finds by chance alone, with no
-  real edge, purely from testing many combinations. The real survivor count is only reported as
-  **EDGE FOUND** if it exceeds that noise floor's mean + 1 standard deviation; otherwise the
-  program reports **NO EVIDENCE OF EDGE**, explicitly.
+- **The honest part**: the identical selection process is re-run 20 times against each of TWO
+  independent placebos. #1 (primary, decides EDGE FOUND / NO EVIDENCE): a block bootstrap by
+  calendar month — blocks of *whole real bars* are reordered (each bar keeps its own genuine
+  open/high/low/close shape untouched; only which month-block sits where, and each bar's
+  re-chained open, changes). #2 (secondary sanity check only): a circular time-shift of the whole
+  series by >=1 year — every bar value is completely untouched, only which calendar date it lands
+  on shifts; its survivor count should land close to the *real* count if the selection rule has no
+  hidden time-specific edge. Each placebo's mean survivor count is the *noise floor* it defines —
+  how many "survivors" that exact procedure finds by chance alone, with no real edge, purely from
+  testing many combinations. The real count is only reported **EDGE FOUND** if it exceeds
+  placebo #1's mean + 1 standard deviation; otherwise **NO EVIDENCE OF EDGE**, explicitly.
+  CRITERIA.md's placebo section documents a 2026-09-07 correction: the first version of placebo #1
+  rebuilt a bar's high/low from its *synthetic* close rather than reusing a real bar's own shape,
+  which inflated one-bar/breakout-type strategies (`vol_breakout`) enough that a production run's
+  placebo mean (155 +/- 16) exceeded its real survivor count (87) — backwards for a noise floor.
+  Fixed by never recomputing a bar at all (see `run_edge.block_bootstrap_ohlc`'s own docstring);
+  `tests_edge.py` now has a direct regression test for it.
 - **Public output** — `research/edge/results/SUMMARY.md`: N tested, survivor counts (overall and
-  by edition — en/ko/stocks/macro — never by individual asset or strategy), the placebo mean/sd,
-  and the decision. It never names a strategy, a parameter, or an asset for a specific survivor.
+  by edition — en/ko/stocks/macro — never by individual asset or strategy), both placebos'
+  mean/sd, and the decision. It never names a strategy, a parameter, or an asset for a specific
+  survivor.
 - **Private output** — `research/edge/results/survivors.json.enc`: the full survivor detail
   (strategy id, params, asset, timeframe, per-window numbers), AES-256-CBC-encrypted with
   `EDGE_PASSPHRASE` via `openssl enc -aes-256-cbc -pbkdf2 -salt -pass env:EDGE_PASSPHRASE`. If
@@ -502,18 +513,20 @@ its output.
   (same step `weekly.yml` already runs — `data/*.csv` is gitignored, so a fresh checkout has none
   without this), self-test (`run_edge.py --synthetic`), the real run, commit `results/`.
 - **Runtime**: measured on this dev box (2 asset/timeframe files, the full 54-variant universe,
-  a 2-shuffle placebo) at roughly 5 seconds for the main pass and ~3 seconds per placebo shuffle.
-  Scaled to the full ~15-asset/timeframe production universe with the default 20 shuffles, that
-  extrapolates to well under 10 minutes total — nowhere near the 150-minute soft budget this
-  task set, so `--max-assets` (fixed-seed sampling of asset/timeframe files) exists as a
-  documented safety valve but is not expected to be needed.
+  3 shuffles of each placebo) at roughly 3 seconds for the main pass and ~3 seconds per placebo
+  shuffle (either kind). Scaled to the full ~15-asset/timeframe production universe with the
+  default 20 shuffles of each of the two placebos, that extrapolates to roughly 15 minutes total
+  — nowhere near the 150-minute soft budget this task set, so `--max-assets` (fixed-seed sampling
+  of asset/timeframe files) exists as a documented safety valve but is not expected to be needed.
 - **Tests** — `research/edge/tests_edge.py` (run by the agent that built this program, not wired
   into `tests.py` or any workflow): a planted persistent edge (across several independent
   synthetic assets, so cross-asset consistency can be satisfied) survives the full selection; pure
-  noise does not, over multiple seeds; walk-forward windows never read past their own end
-  (truncation test) and a strategy's signal is unchanged by truncation; an encryption round-trip.
-  See that file's own module docstring and CRITERIA.md's placebo section for a documented finding
-  from building it: a same-bar breakout check (`vol_breakout`) is sensitive to exactly how
-  synthetic OHLC bars are fabricated in a way close-driven strategies are not — confirmed against
-  real BTCUSD data, and the reason the test suite's own small synthetic universe sticks to
-  "state"-type variants.
+  noise does not, over multiple seeds; the block-bootstrap placebo applied to pure noise also
+  yields ~zero survivors (a direct regression test for the 2026-09-07 correction above); walk-
+  forward windows never read past their own end (truncation test) and a strategy's signal is
+  unchanged by truncation; an encryption round-trip. See that file's own module docstring and
+  CRITERIA.md's placebo section for the full account of the correction, including an honest
+  residual found while validating the fix: `vol_breakout` on real BTCUSD still shows a somewhat
+  higher median PF under either placebo than in the real (most-recent-6-years) evaluation window —
+  showing up under the *untouched* time-shift placebo too, this is read as genuine regime
+  heterogeneity in BTC's own history rather than a synthetic-construction artifact.

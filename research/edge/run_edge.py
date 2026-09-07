@@ -396,63 +396,74 @@ def find_survivors(all_results: dict, windows_by_key: dict, datasets: list, univ
 
 
 # ---------------------------------------------------------------------------
-# Placebo (CRITERIA.md E3): block bootstrap by calendar month on log returns, rebuilding a full
-# synthetic OHLC path — documented simplification, see CRITERIA.md E3 for the reasoning.
+# Placebo #1 (CRITERIA.md E3, corrected — see the "Correction" note at the top of that section):
+# block bootstrap by calendar month over WHOLE BARS, preserving each bar's own real geometry.
+#
+# The FIRST implementation of this function rebuilt high/low as `close +/- range/2` — a symmetric
+# band around the SYNTHETIC close, decoupled from that bar's own open. A production run found this
+# gives one-bar/breakout-type strategies (vol_breakout) a placebo baseline so inflated it exceeded
+# the REAL data's own survivor count (87 real vs. 155 +/- 16 placebo) — the opposite of a noise
+# floor. Root cause (confirmed empirically against real BTCUSD, and now covered by
+# tests_edge.py): a bar's high is tautologically >= its close, so anchoring high to the *rebuilt*
+# close (rather than to that bar's own real open) systematically favours a same-bar breakout check
+# in a way real bars — whose high/low relate to THEIR OWN open through genuine, varied intrabar
+# price action, not a fixed formula — do not.
+#
+# Fix: never recompute a bar's shape at all. Each bar keeps its own REAL open-relative ratios
+# (high/open, low/open, close/open) — an authentic historical bar, unchanged — and only the
+# SEQUENCE of bars is shuffled (a permutation of calendar-month blocks, each block's own bar order
+# kept intact), with opens re-chained across the new block order (bar t's open = bar t-1's new
+# close) so the reassembled series has no artificial gaps. Every synthetic bar is therefore a real
+# bar's real shape at a re-chained price level — nothing about any individual bar is invented.
 # ---------------------------------------------------------------------------
 
 def block_bootstrap_ohlc(df: pd.DataFrame, rng: np.random.Generator) -> pd.DataFrame:
     n = len(df)
-    close = df["close"].to_numpy(dtype=float)
+    if n < 2:
+        return df.copy()
+    open_ = df["open"].to_numpy(dtype=float)
     high = df["high"].to_numpy(dtype=float)
     low = df["low"].to_numpy(dtype=float)
+    close = df["close"].to_numpy(dtype=float)
     dates = df["date"]
 
-    if n < 3:
-        return df.copy()
-
-    log_ret = np.diff(np.log(close))  # log_ret[i] = log(close[i+1]/close[i]), i in [0, n-2]
+    # Each bar's own real shape, relative to its own open — untouched, just carried along.
     with np.errstate(divide="ignore", invalid="ignore"):
-        rel_range = np.where(close != 0, (high - low) / close, 0.0)
-    rel_range = np.nan_to_num(rel_range, nan=0.0, posinf=0.0, neginf=0.0)
+        ratio_h = np.where(open_ != 0, high / open_, 1.0)
+        ratio_l = np.where(open_ != 0, low / open_, 1.0)
+        ratio_c = np.where(open_ != 0, close / open_, 1.0)
+    ratio_h = np.nan_to_num(ratio_h, nan=1.0, posinf=1.0, neginf=1.0)
+    ratio_l = np.nan_to_num(ratio_l, nan=1.0, posinf=1.0, neginf=1.0)
+    ratio_c = np.nan_to_num(ratio_c, nan=1.0, posinf=1.0, neginf=1.0)
 
-    # Blocks = calendar-month groups of RETURN positions (position i+1, the bar each return
-    # lands on) — each block's own internal order is kept, only the order of blocks is shuffled.
-    month_key = dates.dt.to_period("M").iloc[1:].to_numpy()
-    positions = np.arange(1, n)
-    block_df = pd.DataFrame({"pos": positions, "month": month_key})
+    # Blocks = calendar-month groups of WHOLE BARS (every position, not just returns). Permute
+    # the ORDER of blocks (each block used exactly once — a true permutation, not a with-
+    # replacement resample); each block's own internal bar order is kept.
+    month_key = dates.dt.to_period("M").to_numpy()
+    block_df = pd.DataFrame({"pos": np.arange(n), "month": month_key})
     blocks = [g["pos"].to_numpy() for _, g in block_df.groupby("month", sort=True)]
     if not blocks:
         return df.copy()
 
-    target_len = n - 1
-    picked, total_len, guard = [], 0, 0
-    while total_len < target_len and guard < 20000:
-        b = blocks[rng.integers(0, len(blocks))]
-        picked.append(b)
-        total_len += len(b)
-        guard += 1
-    src_positions = np.concatenate(picked)[:target_len] if picked else np.array([], dtype=int)
-    if len(src_positions) < target_len:  # defensive only — sum(len(blocks)) == n-1 always
-        pad = np.resize(positions, target_len - len(src_positions))
-        src_positions = np.concatenate([src_positions, pad])
+    order = np.arange(len(blocks))
+    rng.shuffle(order)
+    src_positions = np.concatenate([blocks[i] for i in order])
+    assert len(src_positions) == n
 
-    synth_log_ret = log_ret[src_positions - 1]
-    synth_rel_range = rel_range[src_positions]
-
-    synth_close = np.empty(n, dtype=float)
-    synth_close[0] = close[0]
-    synth_close[1:] = close[0] * np.exp(np.cumsum(synth_log_ret))
+    r_h, r_l, r_c = ratio_h[src_positions], ratio_l[src_positions], ratio_c[src_positions]
 
     synth_open = np.empty(n, dtype=float)
-    synth_open[0] = float(df["open"].iloc[0])
-    synth_open[1:] = synth_close[:-1]   # "open = prev close" per CRITERIA.md E3
+    synth_close = np.empty(n, dtype=float)
+    synth_open[0] = open_[src_positions[0]]  # the shuffled series' own first (real) bar's open
+    for t in range(n):
+        if t > 0:
+            synth_open[t] = synth_close[t - 1]  # re-chain: this bar's open = prior bar's close
+        synth_close[t] = synth_open[t] * r_c[t]
 
-    rr = np.empty(n, dtype=float)
-    rr[0] = rel_range[0]
-    rr[1:] = synth_rel_range
-
-    synth_high = synth_close * (1.0 + rr / 2.0)
-    synth_low = synth_close * (1.0 - rr / 2.0)
+    synth_high = synth_open * r_h
+    synth_low = synth_open * r_l
+    # Safety clip only (should not bind for real ratios, guards float edge cases / a zero-open
+    # source bar's ratio==1.0 fallback above): a bar must contain its own open and close.
     hi_bound = np.maximum(synth_open, synth_close)
     lo_bound = np.minimum(synth_open, synth_close)
     synth_high = np.maximum(synth_high, hi_bound)
@@ -465,25 +476,71 @@ def block_bootstrap_ohlc(df: pd.DataFrame, rng: np.random.Generator) -> pd.DataF
     })
 
 
-def _shuffle_seed(seed: int, s: int, asset: str, tf: str) -> int:
-    h = hashlib.sha256(f"{seed}:{s}:{asset}:{tf}".encode()).hexdigest()
+# ---------------------------------------------------------------------------
+# Placebo #2 (added after the same correction above): circular time-shift, a simpler sanity
+# check. The whole series is rotated by a random offset of >= 1 year — every bar is completely
+# untouched (real values, real neighbours, real sequence) except at the single wrap-around seam —
+# only WHICH calendar dates each real bar's values land on changes. If the selection rule has no
+# hidden time-specific edge (e.g. quietly keying off which years are "recent"), its survivor count
+# on a time-shifted series should land close to the real (unshifted) count — unlike the block
+# bootstrap, this is not expected to produce a low noise floor, only a similar one.
+# ---------------------------------------------------------------------------
+
+def circular_time_shift_ohlc(df: pd.DataFrame, rng: np.random.Generator,
+                              min_shift_days: int = 365) -> pd.DataFrame:
+    n = len(df)
+    if n < 3:
+        return df.copy()
+    dates = df["date"]
+    total_days = int((dates.iloc[-1] - dates.iloc[0]).days)
+    if total_days >= 2 * min_shift_days:
+        shift_days = int(rng.integers(min_shift_days, total_days - min_shift_days + 1))
+        target_date = dates.iloc[0] + pd.Timedelta(days=shift_days)
+        shift = int(np.searchsorted(dates.to_numpy(), np.datetime64(target_date)))
+        shift = max(1, min(shift, n - 1))
+    else:  # not enough history for a >=1y shift on both sides — fall back to any non-trivial shift
+        shift = int(rng.integers(1, n))
+    idx = np.concatenate([np.arange(shift, n), np.arange(0, shift)])
+    rotated = df.iloc[idx].reset_index(drop=True)
+    rotated["date"] = dates.to_numpy()  # bars are untouched; only which date they land on shifts
+    return rotated
+
+
+def _shuffle_seed(seed: int, tag: str, s: int, asset: str, tf: str) -> int:
+    h = hashlib.sha256(f"{seed}:{tag}:{s}:{asset}:{tf}".encode()).hexdigest()
     return int(h[:8], 16)
 
 
-def run_placebo(datasets: list, universe: list, n_shuffles: int = N_SHUFFLES, seed: int = SEED,
-                 verbose: bool = False) -> list:
+def _run_placebo_generic(datasets: list, universe: list, transform_fn, tag: str,
+                          n_shuffles: int, seed: int, verbose: bool) -> list:
     counts = []
     for s in range(n_shuffles):
         shuffled = []
         for ds in datasets:
-            rng = np.random.default_rng(_shuffle_seed(seed, s, ds["asset"], ds["tf"]))
-            shuffled.append({**ds, "df": block_bootstrap_ohlc(ds["df"], rng)})
+            rng = np.random.default_rng(_shuffle_seed(seed, tag, s, ds["asset"], ds["tf"]))
+            shuffled.append({**ds, "df": transform_fn(ds["df"], rng)})
         all_results, windows_by_key = evaluate_universe(shuffled, universe)
         survivors, _ = find_survivors(all_results, windows_by_key, shuffled, universe)
         counts.append(len(survivors))
         if verbose:
-            print(f"[edge] placebo shuffle {s + 1}/{n_shuffles}: {len(survivors)} survivor(s)")
+            print(f"[edge] placebo[{tag}] shuffle {s + 1}/{n_shuffles}: {len(survivors)} survivor(s)")
     return counts
+
+
+def run_placebo_block_bootstrap(datasets: list, universe: list, n_shuffles: int = N_SHUFFLES,
+                                 seed: int = SEED, verbose: bool = False) -> list:
+    """CRITERIA.md E3's PRIMARY placebo (used for the EDGE FOUND / NO EVIDENCE decision) — block
+    bootstrap by month over whole bars, see block_bootstrap_ohlc's own docstring."""
+    return _run_placebo_generic(datasets, universe, block_bootstrap_ohlc, "block", n_shuffles,
+                                 seed, verbose)
+
+
+def run_placebo_time_shift(datasets: list, universe: list, n_shuffles: int = N_SHUFFLES,
+                            seed: int = SEED, verbose: bool = False) -> list:
+    """CRITERIA.md E3's SECONDARY placebo (sanity check only, never used for the decision) —
+    circular time-shift, see circular_time_shift_ohlc's own docstring."""
+    return _run_placebo_generic(datasets, universe, circular_time_shift_ohlc, "shift", n_shuffles,
+                                 seed, verbose)
 
 
 # ---------------------------------------------------------------------------
@@ -500,10 +557,15 @@ def encrypt_file(in_path: str, out_path: str, passphrase_env: str = "EDGE_PASSPH
 
 
 def write_results(N: int, datasets: list, universe: list, survivors: list, precandidates: list,
-                   placebo_counts: list, meta: dict):
+                   placebo_counts: list, shift_placebo_counts: list, meta: dict):
+    """placebo_counts = the block-bootstrap placebo (CRITERIA.md E3's PRIMARY floor — used for the
+    decision). shift_placebo_counts = the circular time-shift placebo (secondary sanity check,
+    reported alongside but never used for the decision — see circular_time_shift_ohlc)."""
     os.makedirs(OUT_DIR, exist_ok=True)
     placebo_mean = float(np.mean(placebo_counts)) if placebo_counts else 0.0
     placebo_sd = float(np.std(placebo_counts, ddof=1)) if len(placebo_counts) > 1 else 0.0
+    shift_mean = float(np.mean(shift_placebo_counts)) if shift_placebo_counts else 0.0
+    shift_sd = float(np.std(shift_placebo_counts, ddof=1)) if len(shift_placebo_counts) > 1 else 0.0
     real_n = len(survivors)
     decision = "EDGE FOUND" if real_n > placebo_mean + placebo_sd else "NO EVIDENCE OF EDGE"
 
@@ -548,20 +610,26 @@ def write_results(N: int, datasets: list, universe: list, survivors: list, preca
                      f"{by_edition_survivors.get(ed, 0)} |")
     lines += [
         "",
-        f"**Placebo** (block-bootstrap-by-month noise floor, {len(placebo_counts)} shuffles): "
-        f"mean {placebo_mean:.2f}, sd {placebo_sd:.2f}, per-shuffle counts {placebo_counts}.",
+        f"**Placebo — block bootstrap by month, whole bars** (PRIMARY, used for the decision "
+        f"below; {len(placebo_counts)} shuffles): mean {placebo_mean:.2f}, sd {placebo_sd:.2f}, "
+        f"per-shuffle counts {placebo_counts}.",
+        f"**Placebo — circular time-shift** (secondary sanity check, NOT used for the decision; "
+        f"{len(shift_placebo_counts)} shuffles): mean {shift_mean:.2f}, sd {shift_sd:.2f}, "
+        f"per-shuffle counts {shift_placebo_counts}. If the selection rule has no hidden "
+        f"time-specific edge, this should land close to the real count ({real_n}), not near the "
+        f"block-bootstrap floor above.",
         "", f"## Decision: {decision}", "",
     ]
     band = placebo_mean + placebo_sd
     if decision == "EDGE FOUND":
-        lines.append(f"{real_n} real survivor(s) exceeds the placebo noise floor "
+        lines.append(f"{real_n} real survivor(s) exceeds the block-bootstrap placebo noise floor "
                      f"(mean {placebo_mean:.2f} + 1 sd {placebo_sd:.2f} = {band:.2f}). Full "
                      f"identity kept private — see below.")
     else:
-        lines.append(f"{real_n} real survivor(s) does not exceed the placebo noise floor "
-                     f"(mean {placebo_mean:.2f} + 1 sd {placebo_sd:.2f} = {band:.2f}) — this many "
-                     f"'survivors' would be expected by chance alone from testing this many "
-                     f"combinations, even with no real edge.")
+        lines.append(f"{real_n} real survivor(s) does not exceed the block-bootstrap placebo "
+                     f"noise floor (mean {placebo_mean:.2f} + 1 sd {placebo_sd:.2f} = {band:.2f}) "
+                     f"— this many 'survivors' would be expected by chance alone from testing "
+                     f"this many combinations, even with no real edge.")
     lines += [
         "", "## Private record",
         ("`results/survivors.json.enc` written (AES-256-CBC via openssl, `EDGE_PASSPHRASE`) — see "
@@ -585,7 +653,10 @@ def write_results(N: int, datasets: list, universe: list, survivors: list, preca
             "n_precandidates": len(precandidates), "n_survivors": real_n,
             "by_edition": {"n_tested": by_edition_n, "precandidates": by_edition_pre,
                           "survivors": by_edition_survivors},
-            "placebo_counts": placebo_counts, "placebo_mean": placebo_mean, "placebo_sd": placebo_sd,
+            "placebo_block_counts": placebo_counts, "placebo_block_mean": placebo_mean,
+            "placebo_block_sd": placebo_sd,
+            "placebo_shift_counts": shift_placebo_counts, "placebo_shift_mean": shift_mean,
+            "placebo_shift_sd": shift_sd,
             "decision": decision, "private_written": private_written,
         }, f, indent=2)
 
@@ -636,13 +707,50 @@ def run_synthetic():
     for w in build_windows(cut):
         assert w["end"] <= cut["date"].iloc[-1], "window extends past the truncated series' own end"
 
-    # block bootstrap: shape, date alignment, finiteness, internal OHLC sanity
+    # block bootstrap: shape, date alignment, finiteness, internal OHLC sanity, AND — the actual
+    # point of the correction — every synthetic bar's own open-relative shape must match some
+    # REAL bar's own open-relative shape exactly (bars are reused whole, never recomputed).
     synth = block_bootstrap_ohlc(df_trend, np.random.default_rng(1))
     assert len(synth) == len(df_trend)
     assert (synth["date"].to_numpy() == df_trend["date"].to_numpy()).all()
     assert np.isfinite(synth[["open", "high", "low", "close"]].to_numpy()).all()
     assert (synth["high"] >= synth["low"]).all()
-    print("[edge] self-test: block bootstrap OK")
+    real_ratio_c = set(np.round((df_trend["close"] / df_trend["open"]).to_numpy(), 8))
+    synth_ratio_c = np.round((synth["close"] / synth["open"]).to_numpy(), 8)
+    assert all(r in real_ratio_c for r in synth_ratio_c), \
+        "a synthetic bar's own open->close ratio is not any real bar's ratio — bar geometry was recomputed, not reused"
+    print("[edge] self-test: block bootstrap OK (whole-bar geometry preserved)")
+
+    # circular time-shift: shape, date alignment (dates untouched), and every synthetic bar's
+    # full OHLC row is some real bar's row, verbatim (values are only reassigned to a different
+    # date, never altered).
+    shifted = circular_time_shift_ohlc(df_trend, np.random.default_rng(2))
+    assert len(shifted) == len(df_trend)
+    assert (shifted["date"].to_numpy() == df_trend["date"].to_numpy()).all()
+    real_closes = set(np.round(df_trend["close"].to_numpy(), 6))
+    assert all(round(c, 6) in real_closes for c in shifted["close"].to_numpy()[:50]), \
+        "a time-shifted bar's close is not any real bar's close — values were altered, not just moved"
+    assert not (shifted["close"].to_numpy() == df_trend["close"].to_numpy()).all(), \
+        "time shift produced no shift at all"
+    print("[edge] self-test: circular time-shift OK (bars untouched, only dates reassigned)")
+
+    # placebo on pure noise (no real edge) should find close to zero survivors under EITHER
+    # placebo transform — this is the same property tests_edge.py checks at full E3-selection
+    # scale; here it's just a quick, lightweight sanity pass over the mechanics.
+    noise_close = 100.0 * np.exp(np.cumsum(rng.normal(0.0, 0.018, n)))
+    noise_open = np.roll(noise_close, 1)
+    df_noise = pd.DataFrame({"date": idx, "open": noise_open, "high": noise_close * 1.005,
+                              "low": noise_close * 0.995, "close": noise_close, "volume": 1.0})
+    df_noise.loc[0, "open"] = df_noise.loc[0, "close"]
+    noise_block = block_bootstrap_ohlc(df_noise, np.random.default_rng(3))
+    noise_shift = circular_time_shift_ohlc(df_noise, np.random.default_rng(4))
+    for label, synth_noise in [("block-bootstrap", noise_block), ("time-shift", noise_shift)]:
+        wres_noise = run_signal_on_windows(trend_variant["type"], compute_signal(trend_variant, synth_noise),
+                                            trend_variant["hold_n"], synth_noise, build_windows(synth_noise),
+                                            cost=0.0005)
+        agg_noise = aggregate(wres_noise)
+        print(f"[edge] self-test: placebo[{label}] on pure noise -> hit_rate={agg_noise['hit_rate']:.2f} "
+              f"median_pf={agg_noise['median_pf']}")
 
     ok = _encryption_self_test()
     print(f"[edge] self-test: encryption round-trip {'OK' if ok else 'SKIPPED (no openssl found)'}")
@@ -678,7 +786,10 @@ def main() -> int:
     ap.add_argument("--max-assets", type=int, default=None,
                      help="sample this many asset/timeframe files (fixed seed) instead of the "
                           "full universe — a safety valve if a run approaches the runtime budget")
-    ap.add_argument("--shuffles", type=int, default=N_SHUFFLES, help="placebo shuffle count")
+    ap.add_argument("--shuffles", type=int, default=N_SHUFFLES,
+                     help="block-bootstrap placebo shuffle count (the decision's primary floor)")
+    ap.add_argument("--shift-shuffles", type=int, default=N_SHUFFLES,
+                     help="circular time-shift placebo shuffle count (secondary sanity check)")
     ap.add_argument("--seed", type=int, default=SEED)
     args = ap.parse_args()
 
@@ -707,19 +818,25 @@ def main() -> int:
           f"pre-candidates={len(precandidates)} survivors={len(survivors)}")
 
     t1 = time.time()
-    placebo_counts = run_placebo(datasets, universe, n_shuffles=args.shuffles, seed=args.seed,
-                                  verbose=True)
-    print(f"[edge] placebo done in {time.time() - t1:.0f}s: counts={placebo_counts}")
+    placebo_counts = run_placebo_block_bootstrap(datasets, universe, n_shuffles=args.shuffles,
+                                                  seed=args.seed, verbose=True)
+    print(f"[edge] block-bootstrap placebo done in {time.time() - t1:.0f}s: counts={placebo_counts}")
+
+    t2 = time.time()
+    shift_placebo_counts = run_placebo_time_shift(datasets, universe, n_shuffles=args.shift_shuffles,
+                                                   seed=args.seed, verbose=True)
+    print(f"[edge] time-shift placebo done in {time.time() - t2:.0f}s: counts={shift_placebo_counts}")
 
     meta = {
         "run_date": str(date.today()), "n_registry_variants": n_registry,
         "n_extra_grid": len(universe) - n_registry, "seed": args.seed,
         "max_assets": args.max_assets, "shuffles": args.shuffles,
+        "shift_shuffles": args.shift_shuffles,
         "runtime_seconds": round(time.time() - t0, 1),
         "assets": [f"{d['asset']}-{d['tf']}" for d in datasets],
     }
     decision, private_written = write_results(N, datasets, universe, survivors, precandidates,
-                                              placebo_counts, meta)
+                                              placebo_counts, shift_placebo_counts, meta)
     print(f"[edge] decision: {decision} (private survivors file written: {private_written})")
     print(f"[edge] total runtime: {time.time() - t0:.0f}s")
     return 0

@@ -105,55 +105,79 @@ A combination **survives** only if **all** of:
 
 **Placebo (the honest part)**: the identical selection process — E1 universe, E2 windows and
 aggregates, every E3(a)-(e) filter, unchanged — is re-run against **20** independently reshuffled
-versions of the data, each built as a **block bootstrap by calendar month on log returns**:
+versions of the data, via **two** placebo constructions. The first is the PRIMARY floor the
+decision is based on; the second is a sanity check only.
 
-1. Split each asset's log close-to-close returns into blocks by calendar month (each block keeps
-   its own bars' internal order — this preserves within-month serial correlation/vol clustering,
-   only destroys correlation *across* months).
-2. Resample blocks *with replacement* until there are enough to cover the series' full length, in
-   a fresh random order per shuffle (seeded, reproducible), then truncate to the exact original
-   length.
-3. Rebuild a full synthetic OHLC path from the resampled return sequence: `close[0]` = the real
-   first close; every later `close[t]` = `close[t-1] * exp(shuffled log return[t])`; `open[t]` =
-   the *previous* synthetic close (per this task's own instruction); `high[t]`/`low[t]` = the
-   synthetic `close[t]` offset by the **source bar's own high-low range, expressed as a fraction
-   of that source bar's close** (not the source bar's raw dollar/₩ range — BTC's 2012 cent-level
-   range applied as an absolute number to a 2021 five-figure close would be nonsensical; using the
-   *relative* range and re-applying it around the new close level is the "scaled" in this task's
-   own wording, made concrete). Dates are left exactly as the real series' dates — only the price
-   path is synthetic — so the same window-splitting code runs unmodified. This is a documented
-   simplification, not a claim that it reproduces every real market microstructure property
-   (autocorrelation *within* a calendar month, and any relationship between a bar's true range and
-   its own return, are both discarded).
+### Correction, 2026-09-07 (same day, after a production run)
 
-   **A measured consequence, worth flagging explicitly rather than leaving implicit**: rebuilding
-   `high`/`low` as `close ± range/2` makes a bar's own high sit a near-fixed fraction above ITS OWN
-   close regardless of that bar's open — real bars are not this generous to a same-bar breakout
-   check (confirmed empirically: `vol_breakout` on real BTCUSD shows a walk-forward median OOS PF
-   ~1.0, but on that same series run through the block bootstrap it shows ~1.4-1.8). This inflates
-   the placebo's own baseline for *one-bar* (`vol_breakout`, `vol_breakout_trend`) variants
-   specifically, in the *conservative* direction: it raises the placebo noise floor those variants
-   are compared against, making a genuine one-bar edge *harder*, not easier, to clear the E3 "EDGE
-   FOUND" bar — and E3(d)'s cross-asset filter (needing the same inflation to independently line up
-   on 2+ *other*, differently-shuffled assets for the exact same params) is a further structural
-   check against this manufacturing a false "EDGE FOUND". This does not apply to "state"-type
-   variants (driven by close alone — `sma_cross`, `tsmom`, ... — the large majority of the
-   universe), which never read the synthetic high/low at all.
+The first implementation of the block-bootstrap placebo rebuilt `high[t]`/`low[t]` as
+`close[t] ± range/2` — a band centered on the *synthetic* close, decoupled from that bar's own
+open. A production run over the full universe found this **broke the placebo**: 87 real survivors
+against a placebo mean of 155 ± 16 — the noise floor exceeded the real result, backwards from what
+a noise floor is for. Root cause, confirmed against real BTCUSD: a bar's high is tautologically
+&ge; its close, so anchoring high to the *rebuilt* close (rather than to that bar's own real open)
+systematically favours a same-bar breakout check (`vol_breakout`) in a way real bars — whose
+high/low relate to THEIR OWN open through genuine, varied intrabar price action, not a fixed
+formula — do not (real BTCUSD: walk-forward median OOS PF ~1.0 for `vol_breakout`; the same series
+through the broken placebo: ~1.4-1.8). This was flagged as a "measured consequence" in the first
+version of this file, correctly identified as *conservative-direction*, but under-estimated: it
+was large enough to invert the whole comparison, not just soften it. Fixed below — a corrected
+entry, not a silent rewrite, same discipline as the "Pre-registration ledger" README section.
 
-Report the mean and standard deviation of the placebo's survivor count over the 20 shuffles — this
-is the **noise floor**: how many "survivors" this exact selection process finds by construction,
-in data with no real edge, purely from testing many combinations.
+### Placebo #1 (primary, used for the decision): block bootstrap by month, whole bars
 
-**Decision**: if the real survivor count ≤ placebo mean + 1 standard deviation, the program
+1. Split each asset's own bars into blocks by calendar month (every bar, not just returns — each
+   block keeps its own bars' internal order, only the order of blocks is permuted).
+2. Permute the blocks' order (a true permutation — every block used exactly once, seeded,
+   reproducible per shuffle) and concatenate.
+3. Rebuild the series from this new block order WITHOUT recomputing any bar: every bar keeps its
+   own real `high/open`, `low/open`, and `close/open` ratios exactly as historically observed —
+   genuine intrabar shape, untouched. Only `open[t]` is re-chained, to the *previous* (new-order)
+   bar's synthetic close (`open[t] = close[t-1]`, per this task's own instruction — removes the
+   artificial gap at each block boundary; `close[t]`/`high[t]`/`low[t]` then follow from `open[t]`
+   times that bar's own real ratios). Dates are left exactly as the real series' dates — only
+   *which* real bar's shape sits at each date changes.
+
+This is still a documented simplification (autocorrelation *within* a calendar month IS preserved;
+correlation *across* months is destroyed; a bar's shape is real but is now paired with a different
+neighbourhood than it actually occurred in) — but no bar's own OHLC relationship is ever invented.
+
+### Placebo #2 (secondary, sanity check only — never used for the decision): circular time-shift
+
+The whole series is rotated by a random offset of &ge; 1 year (bar values are **completely
+untouched** — real values, real neighbours, real sequence — only *which calendar date* each real
+bar's values land on shifts, via a single wrap-around seam). If the selection rule has no hidden
+time-specific edge, its survivor count here should land close to the REAL (unshifted) count, not
+near placebo #1's noise floor — a large gap between "real" and "time-shifted real" would mean the
+selection rule itself is somehow keying off which years are "recent", independent of any
+synthetic-data question entirely.
+
+**An honest residual, found while validating this fix**: even after the correction, `vol_breakout`
+on real BTCUSD run through EITHER placebo (block bootstrap AND the untouched time-shift) still
+shows somewhat higher median OOS PF than the real, most-recent-6-years evaluation window (~1.0-1.5
+vs. ~0.96). Because this shows up on time-shift too — which touches no bar value at all — it is
+best read as genuine regime heterogeneity in BTC's own history (older stretches were kinder to
+trend/breakout strategies than the most recent one) rather than a synthetic-construction artifact;
+exactly the distinction having two independent placebo mechanisms is for. It is reported, not
+hidden, and is a reason to read a borderline "EDGE FOUND" for a one-bar-type strategy with extra
+scepticism even after this fix.
+
+Report the mean and standard deviation of each placebo's survivor count over its 20 shuffles.
+Placebo #1's mean + 1 sd is the **noise floor**: how many "survivors" this exact selection process
+finds by construction, in data with no real edge, purely from testing many combinations.
+
+**Decision**: if the real survivor count ≤ placebo #1's mean + 1 standard deviation, the program
 reports **"NO EVIDENCE OF EDGE"** — the real result is not distinguishable from what the same
 procedure finds in known-noise data. Only a real count *above* that band is reported as **"EDGE
-FOUND"**, and even then only as a count, per E4.
+FOUND"**, and even then only as a count, per E4. Placebo #2 is reported alongside for context but
+never changes this decision.
 
 ## E4. Output & secrecy
 
 - **Public** — `research/edge/results/SUMMARY.md`: `N` tested, survivor count (overall and broken
   down by `config.EDITIONS` edition — en/ko/stocks/macro — never by individual asset or strategy),
-  placebo mean ± sd, the decision, and edition-level aggregate stats (combinations tested,
+  BOTH placebos' mean ± sd (block bootstrap, the primary floor the decision uses; time-shift, the
+  secondary sanity check), the decision, and edition-level aggregate stats (combinations tested,
   pre-candidates before the cross-asset/neighbour filters, etc.). **Never** a strategy id,
   parameter value, or asset name attached to a specific survivor.
 - **Private** — `research/edge/results/survivors.json.enc`: the full survivor list (strategy id,
@@ -175,8 +199,13 @@ FOUND"**, and even then only as a count, per E4.
 - A synthetic series with a **planted, persistent** edge (a clear, repeatable trend the walk-
   forward windows can find every time) must survive the full E3 selection.
 - Pure-noise synthetic series must **not** survive, checked over 3 different random seeds.
+- The block-bootstrap placebo (placebo #1) applied to a pure-noise series (no real edge to begin
+  with) must yield approximately zero survivors — a direct regression test for the "155 vs. 87"
+  break the 2026-09-07 correction fixed: a placebo that inflates a noise floor above what a
+  genuine edge would need would show up here first.
 - Walk-forward windows are checked to be non-overlapping and never use data beyond their own end
-  date (truncation test: detection on a truncated series matches the full series on the overlap,
-  same style as `research/attention/run_study.py`'s own lookahead check).
+  date (truncation test: a strategy's signal computed on a truncated series matches the full
+  series exactly on the overlap, same style as `research/attention/run_study.py`'s own lookahead
+  check).
 - Encryption round-trip: write a small JSON, encrypt it with a throwaway passphrase, decrypt it
   back (`openssl enc -d ...`), and check the content matches byte-for-byte.

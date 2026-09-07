@@ -292,7 +292,7 @@
     "params_str": "bb20.2-look120-conf5",
     "source": "popular_combo",
     "registered_on": "2026-09-07",
-    "registered_commit": "ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db",
+    "registered_commit": "266b0b15f5a61186c3989ac6e163d481084c4b1c",
     "rule_text": "bandwidth at/under its own prior 120-bar low ('squeeze') within the last 5 bars AND close > upper band(20,2) -> long; close < middle band -> flat"
   },
   {
@@ -305,7 +305,7 @@
     "params_str": "sostep1.5",
     "source": "bot_template",
     "registered_on": "2026-09-07",
-    "registered_commit": "01aacadd44d86bbf706a47125763709ca7835408",
+    "registered_commit": "8a918ab5bdb729606c343d23c138be76b7dbf74f",
     "rule_text": "base order = 10% of capital at the next deal's open; up to 5 safety orders, each 1.5x the previous order's size, spaced so_step_pct apart (compounding) below the base order's own fill price, filling when the bar's low reaches their level (a safety order the remaining capital cannot fund is skipped); take-profit sells the whole deal when the bar's high reaches 1.5% above the average entry price; no stop-loss; a new deal starts the moment none is open"
   },
   {
@@ -318,7 +318,7 @@
     "params_str": "sostep2.5",
     "source": "bot_template",
     "registered_on": "2026-09-07",
-    "registered_commit": "01aacadd44d86bbf706a47125763709ca7835408",
+    "registered_commit": "8a918ab5bdb729606c343d23c138be76b7dbf74f",
     "rule_text": "base order = 10% of capital at the next deal's open; up to 5 safety orders, each 1.5x the previous order's size, spaced so_step_pct apart (compounding) below the base order's own fill price, filling when the bar's low reaches their level (a safety order the remaining capital cannot fund is skipped); take-profit sells the whole deal when the bar's high reaches 1.5% above the average entry price; no stop-loss; a new deal starts the moment none is open"
   },
   {
@@ -332,7 +332,7 @@
     "params_str": "sostep2.5-sl15",
     "source": "bot_template",
     "registered_on": "2026-09-07",
-    "registered_commit": "01aacadd44d86bbf706a47125763709ca7835408",
+    "registered_commit": "8a918ab5bdb729606c343d23c138be76b7dbf74f",
     "rule_text": "same as the DCA bot above (so_step_pct=2.5 only), plus a -15% stop-loss on the average entry price that sells the whole deal when the bar's low reaches it"
   },
   {
@@ -345,7 +345,7 @@
     "params_str": "ema200-macd12.26.9",
     "source": "popular_combo",
     "registered_on": "2026-09-07",
-    "registered_commit": "ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db",
+    "registered_commit": "266b0b15f5a61186c3989ac6e163d481084c4b1c",
     "rule_text": "close > EMA200 AND MACD(12,26,9) line > signal -> long; MACD line < signal OR close < EMA200 -> flat"
   },
   {
@@ -359,7 +359,7 @@
     "params_str": "9-21",
     "source": "popular_combo",
     "registered_on": "2026-09-07",
-    "registered_commit": "ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db",
+    "registered_commit": "266b0b15f5a61186c3989ac6e163d481084c4b1c",
     "rule_text": "EMA9 > EMA21 -> long, else flat"
   },
   {
@@ -373,7 +373,7 @@
     "params_str": "range10-grid20",
     "source": "bot_template",
     "registered_on": "2026-09-07",
-    "registered_commit": "01aacadd44d86bbf706a47125763709ca7835408",
+    "registered_commit": "8a918ab5bdb729606c343d23c138be76b7dbf74f",
     "rule_text": "20 fixed grid levels spanning +/-range_pct around the price at activation (and after every reset); each level below the activation price is funded with capital/20 and buys when the bar's low reaches it, then sells (and re-arms) when the bar's high reaches one grid step above; if the close ever exits the grid's range, every open lot is liquidated at that close and the grid re-activates, re-centered on that close, the next bar"
   },
   {
@@ -387,7 +387,7 @@
     "params_str": "range20-grid20",
     "source": "bot_template",
     "registered_on": "2026-09-07",
-    "registered_commit": "01aacadd44d86bbf706a47125763709ca7835408",
+    "registered_commit": "8a918ab5bdb729606c343d23c138be76b7dbf74f",
     "rule_text": "20 fixed grid levels spanning +/-range_pct around the price at activation (and after every reset); each level below the activation price is funded with capital/20 and buys when the bar's low reaches it, then sells (and re-arms) when the bar's high reaches one grid step above; if the close ever exits the grid's range, every open lot is liquidated at that close and the grid re-activates, re-centered on that close, the next bar"
   },
   {
@@ -401,7 +401,7 @@
     "params_str": "range30-grid20",
     "source": "bot_template",
     "registered_on": "2026-09-07",
-    "registered_commit": "01aacadd44d86bbf706a47125763709ca7835408",
+    "registered_commit": "8a918ab5bdb729606c343d23c138be76b7dbf74f",
     "rule_text": "20 fixed grid levels spanning +/-range_pct around the price at activation (and after every reset); each level below the activation price is funded with capital/20 and buys when the bar's low reaches it, then sells (and re-arms) when the bar's high reaches one grid step above; if the close ever exits the grid's range, every open lot is liquidated at that close and the grid re-activates, re-centered on that close, the next bar"
   },
   {
@@ -414,7 +414,7 @@
     "params_str": "conf2",
     "source": "popular_combo",
     "registered_on": "2026-09-07",
-    "registered_commit": "ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db",
+    "registered_commit": "266b0b15f5a61186c3989ac6e163d481084c4b1c",
     "rule_text": "2 consecutive HA close > HA open -> long; first HA close < HA open -> flat"
   },
   {
@@ -425,7 +425,7 @@
     "params_str": "9-26-52",
     "source": "popular_combo",
     "registered_on": "2026-09-07",
-    "registered_commit": "ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db",
+    "registered_commit": "266b0b15f5a61186c3989ac6e163d481084c4b1c",
     "rule_text": "close > cloud top -> long; close < cloud bottom -> flat (cloud shifted +26 bars, no lookahead)"
   },
   {
@@ -438,7 +438,7 @@
     "params_str": "rsi14-sma200",
     "source": "popular_combo",
     "registered_on": "2026-09-07",
-    "registered_commit": "ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db",
+    "registered_commit": "266b0b15f5a61186c3989ac6e163d481084c4b1c",
     "rule_text": "RSI(14) < 30 AND close > SMA200 -> long; RSI(14) > 70 OR close < SMA200 -> flat"
   },
   {
@@ -451,7 +451,7 @@
     "params_str": "st10.3-ema200",
     "source": "popular_combo",
     "registered_on": "2026-09-07",
-    "registered_commit": "ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db",
+    "registered_commit": "266b0b15f5a61186c3989ac6e163d481084c4b1c",
     "rule_text": "Supertrend(10,3) up AND close > EMA200 -> long; Supertrend flips down -> flat"
   }
 ]

@@ -292,7 +292,7 @@
     "params_str": "bb20.2-look120-conf5",
     "source": "popular_combo",
     "registered_on": "2026-09-07",
-    "registered_commit": "ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db",
+    "registered_commit": "266b0b15f5a61186c3989ac6e163d481084c4b1c",
     "rule_text": "bandwidth at/under its own prior 120-bar low ('squeeze') within the last 5 bars AND close > upper band(20,2) -> long; close < middle band -> flat"
   },
   {
@@ -305,7 +305,7 @@
     "params_str": "ema200-macd12.26.9",
     "source": "popular_combo",
     "registered_on": "2026-09-07",
-    "registered_commit": "ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db",
+    "registered_commit": "266b0b15f5a61186c3989ac6e163d481084c4b1c",
     "rule_text": "close > EMA200 AND MACD(12,26,9) line > signal -> long; MACD line < signal OR close < EMA200 -> flat"
   },
   {
@@ -319,7 +319,7 @@
     "params_str": "9-21",
     "source": "popular_combo",
     "registered_on": "2026-09-07",
-    "registered_commit": "ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db",
+    "registered_commit": "266b0b15f5a61186c3989ac6e163d481084c4b1c",
     "rule_text": "EMA9 > EMA21 -> long, else flat"
   },
   {
@@ -332,7 +332,7 @@
     "params_str": "conf2",
     "source": "popular_combo",
     "registered_on": "2026-09-07",
-    "registered_commit": "ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db",
+    "registered_commit": "266b0b15f5a61186c3989ac6e163d481084c4b1c",
     "rule_text": "2 consecutive HA close > HA open -> long; first HA close < HA open -> flat"
   },
   {
@@ -343,7 +343,7 @@
     "params_str": "9-26-52",
     "source": "popular_combo",
     "registered_on": "2026-09-07",
-    "registered_commit": "ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db",
+    "registered_commit": "266b0b15f5a61186c3989ac6e163d481084c4b1c",
     "rule_text": "close > cloud top -> long; close < cloud bottom -> flat (cloud shifted +26 bars, no lookahead)"
   },
   {
@@ -356,7 +356,7 @@
     "params_str": "rsi14-sma200",
     "source": "popular_combo",
     "registered_on": "2026-09-07",
-    "registered_commit": "ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db",
+    "registered_commit": "266b0b15f5a61186c3989ac6e163d481084c4b1c",
     "rule_text": "RSI(14) < 30 AND close > SMA200 -> long; RSI(14) > 70 OR close < SMA200 -> flat"
   },
   {
@@ -369,7 +369,7 @@
     "params_str": "st10.3-ema200",
     "source": "popular_combo",
     "registered_on": "2026-09-07",
-    "registered_commit": "ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db",
+    "registered_commit": "266b0b15f5a61186c3989ac6e163d481084c4b1c",
     "rule_text": "Supertrend(10,3) up AND close > EMA200 -> long; Supertrend flips down -> flat"
   }
 ]

@@ -14,7 +14,7 @@ exists to enforce.
 must never be regenerated from git history again after first publication, otherwise a rebase/
 squash of unrelated history could silently change a "registered_on" date):
 
-    ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db  2026-09-07  Add "Popular combos" registry group
+    266b0b15f5a61186c3989ac6e163d481084c4b1c  2026-09-07  Add "Popular combos" registry group
     c65f546c8f50da968e744821efe3ce1b99dace77  2026-09-06  Dead or Alive v0: weekly after-fees...
 
 registry.py has exactly these two commits in its history, and each one added exactly one of the
@@ -31,7 +31,7 @@ hash that added `BOT_TEMPLATES` to registry.py via a small follow-up commit (the
 known before the commit that introduces it exists — see this task's own instruction), exactly the
 same chicken-and-egg step the original two commits above were already through once:
 
-    01aacadd44d86bbf706a47125763709ca7835408  2026-09-07  Add BOT_TEMPLATES registry group
+    8a918ab5bdb729606c343d23c138be76b7dbf74f  2026-09-07  Add BOT_TEMPLATES registry group
 """
 from __future__ import annotations
 import json
@@ -43,14 +43,16 @@ import registry as reg
 LEDGER_PATH = os.path.join(config.BASE_DIR, "registry_ledger.json")
 SNAPSHOT_PATH = os.path.join(config.BASE_DIR, "registry_ledger.snapshot.json")
 
+# NOTE: commit hashes are the ones on origin/main (github.com/getjogak-sketch/deadoralive);
+# local hashes differed because commits were rebased when pushed from another machine.
 _TEXTBOOK_COMMIT = "c65f546c8f50da968e744821efe3ce1b99dace77"
 _TEXTBOOK_DATE = "2026-09-06"
-_POPULAR_COMBO_COMMIT = "ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db"
+_POPULAR_COMBO_COMMIT = "266b0b15f5a61186c3989ac6e163d481084c4b1c"
 _POPULAR_COMBO_DATE = "2026-09-07"
 # Filled in by a small follow-up commit right after the commit that adds BOT_TEMPLATES to
 # registry.py (see this module's own docstring) — set to that commit's real hash, never rerun from
 # git history automatically.
-_BOT_TEMPLATE_COMMIT = "01aacadd44d86bbf706a47125763709ca7835408"
+_BOT_TEMPLATE_COMMIT = "8a918ab5bdb729606c343d23c138be76b7dbf74f"
 _BOT_TEMPLATE_DATE = "2026-09-07"
 
 

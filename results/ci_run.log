@@ -3,8 +3,8 @@ Running tests.py as a hard gate before producing results...
 [PASS] robustness above_sma: 1 numeric param -> at most 3 grid points
 [PASS] robustness bb_mr: no numeric params -> empty grid (nothing to vary)
 [PASS] robustness: computing the grid never mutates the registered params dict it was given
-[PASS] robustness runtime btc/1d: full registry grid well under the 10-minute CI budget (0.22s)
-[PASS] robustness runtime btc/4h: full registry grid well under the 10-minute CI budget (0.36s)
+[PASS] robustness runtime btc/1d: full registry grid well under the 10-minute CI budget (0.20s)
+[PASS] robustness runtime btc/4h: full registry grid well under the 10-minute CI budget (0.34s)
 [PASS] check_issue: good input accepted (sma_cross, 'n_fast=10, n_slow=50')
 [PASS] check_issue: good input accepted (vol_breakout, 'k=0.5')
 [PASS] check_issue: good input accepted (macd, '')

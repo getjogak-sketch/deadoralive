@@ -309,6 +309,158 @@ def test_no_lookahead_reference_rows():
         check(f"no-lookahead dca_weekly {asset}/{tf} T={T}", same)
 
 
+# ---------------------------------------------------------------------------
+# task B1 "Bot templates" — additive extension, nothing above this line is modified.
+#
+# 1. No-lookahead: bot_engine.py's simulators only ever read a bar's own OHLC and state carried
+#    forward from strictly earlier bars (see bot_engine.py's own module docstring) — checked here
+#    via the same truncation-invariance property every other simulator in this repo is checked
+#    against: bar-by-bar state before T must be identical whether or not bars after T exist.
+# 2. Sanity checks (task B2): a synthetic oscillating price must make grid_bot profitable before
+#    fees and show the fee drag; a monotone crash must trigger the reset and lose; a V-shaped DCA
+#    price path must close the deal at take-profit.
+# ---------------------------------------------------------------------------
+
+def _synthetic_ohlc(closes: list, pad_frac: float = 0.003) -> pd.DataFrame:
+    """Build a minimal OHLC DataFrame from a list of close prices: open[t] = close[t-1] (open[0] =
+    close[0]), high/low pad symmetrically around [open, close] by `pad_frac` so a bar's own
+    intrabar range is well-defined without claiming any particular real market's bar shape."""
+    n = len(closes)
+    opens = [closes[0]] + closes[:-1]
+    dates = pd.date_range("2020-01-01", periods=n, freq="D")
+    highs, lows = [], []
+    for o, c in zip(opens, closes):
+        lo, hi = min(o, c), max(o, c)
+        pad = hi * pad_frac
+        highs.append(hi + pad)
+        lows.append(lo - pad)
+    return pd.DataFrame({"date": dates, "open": opens, "high": highs, "low": lows,
+                          "close": closes, "volume": [0.0] * n})
+
+
+def test_no_lookahead_bot_templates():
+    import bot_engine as bots
+    import registry as _reg
+
+    for asset, tf in [("btc", "1d"), ("btc", "4h")]:
+        if resolve_path(asset, tf) is None:
+            print(f"[SKIP] {asset} {tf}: no data file"); continue
+        df = load_raw(asset, tf)
+        n = len(df)
+        Ts = sorted(set([n // 3, n // 2, (2 * n) // 3]))
+        cost = COST[asset]
+        for sid, _sname, _stype, variant in _reg.iter_bot_template_variants():
+            mask_full = pd.Series(True, index=df.index)
+            _trades_full, eq_full = bots.run(sid, variant["params"], df, mask_full, cost)
+            for T in Ts:
+                if T < 30:
+                    continue
+                df_trunc = df.iloc[:T].reset_index(drop=True)
+                mask_trunc = pd.Series(True, index=df_trunc.index)
+                _trades_t, eq_t = bots.run(sid, variant["params"], df_trunc, mask_trunc, cost)
+                # The truncated run's OWN last bar (index T-1) is, by construction, always the
+                # last bar of ITS period — the same period-boundary forced-liquidation/reset rule
+                # every bot here applies at any period's last bar (see bot_engine.py's module
+                # docstring), regardless of whether more data exists. That is a legitimate,
+                # intentional boundary effect (not a lookahead bug) and necessarily differs from
+                # the full run's bar T-1, which is NOT that run's last bar. So the no-lookahead
+                # property is checked on bars strictly BEFORE the truncation boundary, [:T-1].
+                same_eq = np.allclose(eq_full["equity"].to_numpy()[:T - 1],
+                                        eq_t["equity"].to_numpy()[:T - 1],
+                                        rtol=1e-9, atol=1e-12)
+                same_pos = np.array_equal(eq_full["position"].to_numpy()[:T - 1],
+                                            eq_t["position"].to_numpy()[:T - 1])
+                check(f"no-lookahead {sid} params={variant['params_str']} {asset}/{tf} T={T} "
+                      f"(equity)", same_eq, "equity path before T changed with future data added")
+                check(f"no-lookahead {sid} params={variant['params_str']} {asset}/{tf} T={T} "
+                      f"(position)", same_pos)
+
+
+def test_grid_bot_oscillation_profitable_before_fees():
+    """B2: a synthetic price oscillating inside the grid's range must make grid_bot profitable
+    before fees, and show the fee drag (net return < gross/zero-cost return)."""
+    import bot_engine as bots
+
+    base = 100.0
+    closes = [base]
+    # 15 full down/up cycles, each leg 20 bars, spanning the full +/-10% range around 100 (well
+    # inside a range_pct=10 grid's [90, 110] bounds) -> many buy-low/sell-high round trips.
+    for _cycle in range(15):
+        for i in range(1, 21):
+            closes.append(100.0 - 10.0 * (i / 20.0))       # 100 -> 90
+        for i in range(1, 21):
+            closes.append(90.0 + 20.0 * (i / 20.0))        # 90 -> 110
+        for i in range(1, 21):
+            closes.append(110.0 - 20.0 * (i / 20.0))       # 110 -> 90
+        for i in range(1, 21):
+            closes.append(90.0 + 10.0 * (i / 20.0))        # 90 -> 100
+    df = _synthetic_ohlc(closes)
+    mask = pd.Series(True, index=df.index)
+
+    trades_gross, eq_gross = bots.simulate_grid_bot(df, mask, 0.0, 10, 20)
+    trades_net, eq_net = bots.simulate_grid_bot(df, mask, 0.0010, 10, 20)
+
+    gross_return = float(eq_gross["equity"].iloc[-1] - 1.0)
+    net_return = float(eq_net["equity"].iloc[-1] - 1.0)
+
+    check("grid_bot oscillation: many completed round trips (grid actually traded)",
+          len(trades_gross) >= 10, f"got {len(trades_gross)} trades")
+    check("grid_bot oscillation: profitable before fees (gross return > 0)",
+          gross_return > 0, f"gross_return={gross_return}")
+    check("grid_bot oscillation: net (with cost) return is lower than gross (fee drag is visible)",
+          net_return < gross_return, f"net={net_return} gross={gross_return}")
+
+
+def test_grid_bot_monotone_crash_triggers_reset_and_loses():
+    """B2: a monotone crash (price only ever falling) must eventually push the close outside the
+    grid's range, trigger the reset-and-liquidate-at-a-loss cycle, and lose money overall."""
+    import bot_engine as bots
+
+    n = 250
+    closes = [100.0 * (0.992 ** i) for i in range(n)]   # ~0.8%/bar compounding decline
+    df = _synthetic_ohlc(closes, pad_frac=0.004)
+    mask = pd.Series(True, index=df.index)
+
+    trades, eq = bots.simulate_grid_bot(df, mask, 0.0010, 10, 20)
+    net_return = float(eq["equity"].iloc[-1] - 1.0)
+
+    check("grid_bot monotone crash: at least one completed (losing) round trip/liquidation "
+          "occurred (the reset fired)", len(trades) >= 1, f"got {len(trades)} trades")
+    check("grid_bot monotone crash: some recorded trade actually lost money "
+          "(bought above, sold/liquidated below)",
+          any(tr["return"] < 0 for tr in trades),
+          f"trade returns: {[round(tr['return'], 4) for tr in trades]}")
+    check("grid_bot monotone crash: net result over the whole crash is a loss",
+          net_return < 0, f"net_return={net_return}")
+
+
+def test_dca_bot_v_shape_closes_at_take_profit():
+    """B2: a V-shaped price path (a dip deep enough to fill a couple of safety orders, then a
+    sharp recovery) must close the DCA bot's deal at take-profit, profitably."""
+    import bot_engine as bots
+
+    # Deal starts at bar0's open (=100, since open[0]=close[0]). so_step_pct=1.5 -> SO1 level
+    # 100*0.985=98.5, SO2 level 100*0.985^2~=97.02, SO3 level ~=95.57. Three down bars reach past
+    # all three; a sharp rally bar then clears the resulting averaged-down take-profit level. The
+    # window ends exactly on that rally bar, so no second deal starts afterward (a bar AFTER the
+    # exit would immediately open — and, being the window's last bar, force-close — a second
+    # deal, per spec's "a new deal starts whenever none is open").
+    closes = [100.0, 98.0, 96.5, 96.0, 150.0]
+    df = _synthetic_ohlc(closes, pad_frac=0.006)
+    mask = pd.Series(True, index=df.index)
+
+    trades, eq = bots.simulate_dca_bot(df, mask, 0.0010, 1.5)
+
+    check("dca_bot V-shape: exactly one deal closed within this short window",
+          len(trades) == 1, f"got {len(trades)} trades")
+    if trades:
+        check("dca_bot V-shape: the closed deal is profitable (take-profit, net of cost)",
+              trades[0]["return"] > 0, f"return={trades[0]['return']}")
+        check("dca_bot V-shape: safety orders actually filled before the exit "
+              "(entry_price reflects an averaged-down cost basis below the base order's own price)",
+              trades[0]["entry_price"] < 100.0, f"entry_price={trades[0]['entry_price']}")
+
+
 def test_indicator_spot_checks():
     import indicators as ind
 
@@ -693,6 +845,26 @@ def test_robustness_runtime_on_local_btc_data():
         dt = time.time() - t0
         check(f"robustness runtime {asset}/{tf}: full registry grid well under the 10-minute "
               f"CI budget ({dt:.2f}s)", dt < 60.0, f"took {dt:.2f}s")
+
+
+def test_bot_templates_runtime_on_local_btc_data():
+    """task B1's own runtime-budget requirement, mirroring test_robustness_runtime_on_local_btc_data
+    above: full IS+OOS+gross bot-template row-building (all 6 variants, real BTC 1d+4h data) must
+    stay well inside a 15-minute total weekly-pipeline budget."""
+    import time
+    import run_weekly as rw
+
+    for asset, tf in [("btc", "1d"), ("btc", "4h")]:
+        if resolve_path(asset, tf) is None:
+            print(f"[SKIP] {asset} {tf}: no data file"); continue
+        df = load_raw(asset, tf)
+        cost = COST[asset]
+        bars_per_year = 365 if tf == "1d" else 365 * 6
+        t0 = time.time()
+        rw._build_bot_template_rows_impl("BTCUSD", tf, df, cost, bars_per_year)
+        dt = time.time() - t0
+        check(f"bot templates runtime {asset}/{tf}: well under the 15-minute pipeline budget "
+              f"({dt:.2f}s)", dt < 120.0, f"took {dt:.2f}s")
 
 
 def test_write_api_v1():
@@ -1415,7 +1587,8 @@ def test_seo_pages_strategy_page_count_and_shape():
     try:
         manifest = sp.build_all({"en": payload, "ko": None, "stocks": None})
         n_assets = len({r["asset"] for r in payload["rows"]})
-        expected = (_reg.count_variants() + _reg.count_popular_combo_variants()) * n_assets
+        expected = (_reg.count_variants() + _reg.count_popular_combo_variants()
+                    + _reg.count_bot_template_variants()) * n_assets
         check("seo_pages: one page per (strategy variant incl. popular combos, asset)",
               len(manifest["en"]) == expected, f"got {len(manifest['en'])}, expected {expected}")
         check("seo_pages: ko/stocks produce zero pages when they have no data this run",
@@ -1476,7 +1649,7 @@ def test_seo_pages_no_banned_korean_words():
         payload = _json.load(f)
     ko_payload = copy.deepcopy(payload)
     ko_payload["edition"] = "ko"
-    for r in ko_payload["rows"] + ko_payload["popular_combos"]:
+    for r in ko_payload["rows"] + ko_payload["popular_combos"] + ko_payload.get("bot_templates", []):
         r["asset"] = "KRW-BTC" if r["asset"] == "BTCUSD" else r["asset"]
         r["edition"] = "ko"
 
@@ -1533,9 +1706,13 @@ def test_seo_lead_phrases_mapping():
           and sp._seo_lead_phrase("supertrend", "USO") is None)
     check("seo lead: asset-level match wins over a strategy-level match when both would apply",
           sp._seo_lead_phrase("bb_mr", "QQQ") == "QQQ strategy")
-    check("seo lead: 'grid bot'/'pionex' (bot_templates keywords) are intentionally NOT mapped yet",
-          not any("grid bot" in v.lower() or "pionex" in v.lower()
-                  for v in list(sp.ASSET_LEAD_EN.values()) + list(sp.STRATEGY_LEAD_EN.values())))
+    # task B1: bot_templates are now strategies this site tests, so "grid bot"/"pionex"/"dca bot"
+    # get lead phrases (see seo_pages.py's own comment on this mapping's history).
+    check("seo lead: grid_bot -> 'Pionex grid bot' (the higher-intent bot-template phrase)",
+          sp._seo_lead_phrase("grid_bot", "BTCUSD") == "Pionex grid bot")
+    check("seo lead: dca_bot / dca_bot_sl -> 'DCA bot strategy'",
+          sp._seo_lead_phrase("dca_bot", "BTCUSD") == "DCA bot strategy"
+          and sp._seo_lead_phrase("dca_bot_sl", "SPY") == "DCA bot strategy")
 
 
 def test_seo_pages_lead_phrase_in_rendered_title():
@@ -1598,6 +1775,9 @@ def test_ledger_matches_registry_bijection():
     } | {
         f"{sid}:{variant['params_str']}"
         for sid, _sname, _stype, variant in _reg.iter_popular_combo_variants()
+    } | {
+        f"{sid}:{variant['params_str']}"
+        for sid, _sname, _stype, variant in _reg.iter_bot_template_variants()
     }
     ledger_entries = _ldg.load_ledger()
     ledger_ids = {e["id"] for e in ledger_entries}
@@ -1614,7 +1794,7 @@ def test_ledger_matches_registry_bijection():
     for e in ledger_entries:
         check(f"ledger {e['id']}: has registered_on/registered_commit/source/rule_text",
               bool(e.get("registered_on")) and bool(e.get("registered_commit"))
-              and e.get("source") in ("textbook", "popular_combo", "community")
+              and e.get("source") in ("textbook", "popular_combo", "bot_template", "community")
               and bool(e.get("rule_text")))
 
 
@@ -1891,7 +2071,8 @@ def test_write_badges_for_payload():
 
     tmp = tempfile.mkdtemp()
     n = bd.write_badges_for_payload("en", payload, out_root=tmp)
-    expected = len([r for r in (payload["rows"] + payload["popular_combos"])
+    expected = len([r for r in (payload["rows"] + payload["popular_combos"]
+                                 + payload.get("bot_templates", []))
                      if r.get("type") != "reference"])
     check("write_badges_for_payload: one badge per non-reference row", n == expected,
           f"got {n}, expected {expected}")
@@ -2184,6 +2365,11 @@ if __name__ == "__main__":
     test_ichimoku_shift_explicit()
     test_heikin_ashi_explicit()
     test_no_lookahead_reference_rows()
+    test_no_lookahead_bot_templates()
+    test_grid_bot_oscillation_profitable_before_fees()
+    test_grid_bot_monotone_crash_triggers_reset_and_loses()
+    test_dca_bot_v_shape_closes_at_take_profit()
+    test_bot_templates_runtime_on_local_btc_data()
     test_indicator_spot_checks()
     test_upbit_parser()
     test_korean_page_disclaimer_and_banned_words()

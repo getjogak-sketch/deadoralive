@@ -30,6 +30,7 @@ import config
 import registry as reg
 import robustness as rb
 import verdict as vd
+import bot_engine as bots
 from data_loader import load_generic, rolling_is_oos_window
 from engine import (
     simulate_ma_cross, simulate_vol_breakout, simulate_hold_n_bars, simulate_dca_weekly,
@@ -265,6 +266,95 @@ def _build_popular_combo_rows_impl(symbol: str, tf: str, df: pd.DataFrame, cost:
     return as_of, rows, suspicious
 
 
+# =================================================================================================
+# task B1 "Bot templates" — additive extension, nothing above this line is modified. Grid/DCA bots
+# are dispatched through bot_engine.run() (a lot-based simulator — see bot_engine.py's own module
+# docstring for why they need a different engine shape than every "state"/"onebar"/"holdN" row
+# above) rather than through _run_variant/_metrics_for_period, so this group gets its own small
+# row-builder mirroring _build_variant_row's shape (same metrics, verdict rule, robustness
+# diagnostic, fee-drag column, "suspicious" flag) rather than reusing it directly.
+# =================================================================================================
+
+def _build_bot_row(sid, sname, variant, df, is_mask, oos_mask, cost, bars_per_year, as_of,
+                    symbol, tf):
+    params = variant["params"]
+
+    trades_is, eq_is = bots.run(sid, params, df, is_mask, cost)
+    bh_is_return, bh_is_mdd, _ = buy_and_hold(df, is_mask, cost)
+    m_is = compute_metrics(trades_is, eq_is, bh_is_return, bh_is_mdd, bars_per_year, int(is_mask.sum()))
+
+    trades_oos, eq_oos = bots.run(sid, params, df, oos_mask, cost)
+    bh_oos_return, bh_oos_mdd, _ = buy_and_hold(df, oos_mask, cost)
+    m_oos = compute_metrics(trades_oos, eq_oos, bh_oos_return, bh_oos_mdd, bars_per_year,
+                             int(oos_mask.sum()))
+
+    trades_oos_gross, eq_oos_gross = bots.run(sid, params, df, oos_mask, 0.0)
+    gross_oos_return = float(eq_oos_gross["equity"].iloc[-1] - 1.0) if len(eq_oos_gross) else np.nan
+    fee_drag = gross_oos_return - m_oos["total_return"]
+
+    verd = vd.assign_verdict(m_oos["profit_factor"], m_oos["n_trades"], m_oos["mdd"], m_oos["bh_mdd"])
+
+    is_suspicious = (
+        (isinstance(m_oos["profit_factor"], float) and np.isfinite(m_oos["profit_factor"])
+         and m_oos["profit_factor"] > config.SUSPICIOUS_OOS_PF)
+        or (m_oos["sharpe"] > config.SUSPICIOUS_OOS_SHARPE)
+    )
+    suspicious_entry = None
+    if is_suspicious:
+        suspicious_entry = {
+            "strategy_id": sid, "params": variant["params_str"], "asset": symbol, "tf": tf,
+            "oos_pf": m_oos["profit_factor"], "oos_sharpe": m_oos["sharpe"],
+        }
+
+    robustness = bots.compute_bot_robustness(sid, params, df, oos_mask, cost)
+
+    row = {
+        "strategy_id": sid, "strategy_name": sname, "type": "lotsim",
+        "params": variant["params_str"], "asset": symbol, "timeframe": tf,
+        "as_of": str(as_of.date()),
+        "verdict": verd,
+        "is": _clean_metrics(m_is),
+        "oos": {**_clean_metrics(m_oos), "fee_drag": None if np.isnan(fee_drag) else fee_drag},
+        "suspicious": bool(is_suspicious),
+        "robustness": robustness,
+        "group": "bot_templates",
+    }
+    return row, suspicious_entry
+
+
+def build_bot_template_rows_for_asset_tf(symbol: str, tf: str, df: pd.DataFrame):
+    """spec_v3-style extension, task B1: the "Bot templates" registry group's rows for one
+    (asset, timeframe), for the crypto editions. Delegates to _build_bot_template_rows_impl (see
+    that function for the row-building details and why cost/bars_per_year are looked up here
+    rather than passed by the stocks/macro editions' own call sites)."""
+    cost = config.COST[symbol]
+    bars_per_year = config.BARS_PER_YEAR[tf]
+    return _build_bot_template_rows_impl(symbol, tf, df, cost, bars_per_year)
+
+
+def _build_bot_template_rows_impl(symbol: str, tf: str, df: pd.DataFrame, cost: float,
+                                   bars_per_year: float):
+    """task B1: the "Bot templates" registry group's rows for one (asset, timeframe) — same row
+    shape, metrics, verdict rule, and robustness diagnostic as _build_rows_for_asset_tf_impl/
+    _build_popular_combo_rows_impl above, over registry.iter_bot_template_variants() instead,
+    dispatched through bot_engine.run() instead of engine.py's state/onebar/holdN simulators. A
+    separate function for the same reason _build_popular_combo_rows_impl is: this group is
+    rendered as its own separate table on every page, and it has no reference rows of its own.
+    Returns (as_of, rows, suspicious) — same shape as the other two row-builders."""
+    as_of, is_mask, oos_mask = rolling_is_oos_window(df, config.OOS_DAYS)
+
+    rows = []
+    suspicious = []
+    for sid, sname, _stype, variant in reg.iter_bot_template_variants():
+        row, suspicious_entry = _build_bot_row(
+            sid, sname, variant, df, is_mask, oos_mask, cost, bars_per_year, as_of, symbol, tf)
+        rows.append(row)
+        if suspicious_entry is not None:
+            suspicious.append(suspicious_entry)
+
+    return as_of, rows, suspicious
+
+
 def _nan_to_none(x):
     return None if (isinstance(x, float) and np.isnan(x)) else x
 
@@ -292,6 +382,7 @@ def main():
     all_rows = []
     all_suspicious = []
     all_combo_rows = []
+    all_bot_rows = []
     run_as_of = None
 
     for symbol in config.ASSETS:
@@ -313,10 +404,13 @@ def main():
             _, combo_rows, combo_suspicious = build_popular_combo_rows_for_asset_tf(symbol, tf, df)
             all_combo_rows.extend(combo_rows)
             all_suspicious.extend(combo_suspicious)
+            _, bot_rows, bot_suspicious = build_bot_template_rows_for_asset_tf(symbol, tf, df)
+            all_bot_rows.extend(bot_rows)
+            all_suspicious.extend(bot_suspicious)
             run_as_of = as_of if run_as_of is None else max(run_as_of, as_of)
             print(f"[run_weekly] {symbol} {tf}: as_of={as_of.date()}, {len(rows)} rows "
                   f"({reg.count_variants()} strategy variants + 2 reference), "
-                  f"{len(combo_rows)} popular-combo rows")
+                  f"{len(combo_rows)} popular-combo rows, {len(bot_rows)} bot-template rows")
 
     if not all_rows:
         print("[run_weekly] No data available for any asset/timeframe — nothing to write.")
@@ -328,8 +422,13 @@ def main():
         r["edition"] = "en"
     for r in all_combo_rows:
         r["edition"] = "en"
+    for r in all_bot_rows:
+        r["edition"] = "en"
 
     tally = vd.tally([r["verdict"] for r in all_rows if r["verdict"] is not None])
+    # task B1: bot templates get their own SEPARATE tally, kept out of the textbook `tally` field
+    # above (and out of decay.py's existing textbook Decay Index) on purpose.
+    bot_tally = vd.tally([r["verdict"] for r in all_bot_rows if r["verdict"] is not None])
 
     payload = {
         "project_name": config.PROJECT_NAME,
@@ -340,6 +439,8 @@ def main():
         "tally": tally,
         "rows": all_rows,
         "popular_combos": all_combo_rows,
+        "bot_templates": all_bot_rows,
+        "bot_tally": bot_tally,
         "suspicious": all_suspicious,
         "legal_disclaimer": config.LEGAL_DISCLAIMER,
         "repo_url": config.REPO_URL,
@@ -444,6 +545,7 @@ def main():
     import decay as decay_mod
     for edition_key in ("en", "ko", "stocks", "macro"):
         decay_mod.write_index_history(edition_key)
+        decay_mod.write_bot_index_history(edition_key)
     build_site.build_index_history_page()
     build_site.build_index_history_page_ko()
     print(f"Wrote {os.path.join(config.DOCS_DIR, 'api', 'v1', '<edition>', 'index_history.json')} "
@@ -549,6 +651,7 @@ def _run_ko_edition():
     all_rows = []
     all_suspicious = []
     all_combo_rows = []
+    all_bot_rows = []
     last_price = {}
     run_as_of = None
 
@@ -576,11 +679,16 @@ def _run_ko_edition():
                 r["edition"] = edition_key
             all_combo_rows.extend(combo_rows)
             all_suspicious.extend(combo_suspicious)
+            _, bot_rows, bot_suspicious = build_bot_template_rows_for_asset_tf(symbol, tf, df)
+            for r in bot_rows:
+                r["edition"] = edition_key
+            all_bot_rows.extend(bot_rows)
+            all_suspicious.extend(bot_suspicious)
             last_price[f"{symbol}_{tf}"] = float(df["close"].iloc[-1])
             run_as_of = as_of if run_as_of is None else max(run_as_of, as_of)
             print(f"[run_weekly] [ko] {symbol} {tf}: as_of={as_of.date()}, {len(rows)} rows "
                   f"({reg.count_variants()} strategy variants + 2 reference), "
-                  f"{len(combo_rows)} popular-combo rows")
+                  f"{len(combo_rows)} popular-combo rows, {len(bot_rows)} bot-template rows")
 
     os.makedirs(config.RESULTS_DIR, exist_ok=True)
     os.makedirs(config.HISTORY_DIR, exist_ok=True)
@@ -594,7 +702,8 @@ def _run_ko_edition():
             "project_name": config.PROJECT_NAME, "edition": edition_key, "lang": "ko",
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "as_of": as_of_str, "oos_days": config.OOS_DAYS,
-            "tally": vd.tally([]), "rows": [], "popular_combos": [], "suspicious": [], "last_price": {},
+            "tally": vd.tally([]), "rows": [], "popular_combos": [], "bot_templates": [],
+            "bot_tally": vd.tally([]), "suspicious": [], "last_price": {},
             "legal_disclaimer_ko": config.LEGAL_DISCLAIMER_KO,
             "repo_url": config.REPO_URL, "signup_url": config.SIGNUP_URL,
         }
@@ -613,12 +722,14 @@ def _run_ko_edition():
         return
 
     tally = vd.tally([r["verdict"] for r in all_rows if r["verdict"] is not None])
+    bot_tally = vd.tally([r["verdict"] for r in all_bot_rows if r["verdict"] is not None])
     payload = {
         "project_name": config.PROJECT_NAME, "edition": edition_key, "lang": "ko",
         "tagline": config.TAGLINE_KO,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "as_of": str(run_as_of.date()), "oos_days": config.OOS_DAYS,
         "tally": tally, "rows": all_rows, "popular_combos": all_combo_rows,
+        "bot_templates": all_bot_rows, "bot_tally": bot_tally,
         "suspicious": all_suspicious,
         "last_price": last_price,
         "legal_disclaimer": config.LEGAL_DISCLAIMER,
@@ -678,6 +789,7 @@ def _run_stocks_edition():
     all_rows = []
     all_suspicious = []
     all_combo_rows = []
+    all_bot_rows = []
     run_as_of = None
 
     for symbol in assets:
@@ -706,10 +818,16 @@ def _run_stocks_edition():
                 r["edition"] = "stocks"
             all_combo_rows.extend(combo_rows)
             all_suspicious.extend(combo_suspicious)
+            _, bot_rows, bot_suspicious = _build_bot_template_rows_impl(
+                symbol, tf, df, cost, config.STOCKS_BARS_PER_YEAR)
+            for r in bot_rows:
+                r["edition"] = "stocks"
+            all_bot_rows.extend(bot_rows)
+            all_suspicious.extend(bot_suspicious)
             run_as_of = as_of if run_as_of is None else max(run_as_of, as_of)
             print(f"[run_weekly] [stocks] {symbol} {tf}: as_of={as_of.date()}, {len(rows)} rows "
                   f"({reg.count_variants()} strategy variants + 2 reference), "
-                  f"{len(combo_rows)} popular-combo rows")
+                  f"{len(combo_rows)} popular-combo rows, {len(bot_rows)} bot-template rows")
 
     os.makedirs(config.RESULTS_DIR, exist_ok=True)
     os.makedirs(config.HISTORY_DIR, exist_ok=True)
@@ -721,12 +839,14 @@ def _run_stocks_edition():
         return None
 
     tally = vd.tally([r["verdict"] for r in all_rows if r["verdict"] is not None])
+    bot_tally = vd.tally([r["verdict"] for r in all_bot_rows if r["verdict"] is not None])
     payload = {
         "project_name": config.PROJECT_NAME, "edition": "stocks", "lang": "en",
         "tagline": config.TAGLINE,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "as_of": str(run_as_of.date()), "oos_days": config.OOS_DAYS,
         "tally": tally, "rows": all_rows, "popular_combos": all_combo_rows,
+        "bot_templates": all_bot_rows, "bot_tally": bot_tally,
         "suspicious": all_suspicious,
         "legal_disclaimer": config.LEGAL_DISCLAIMER,
         "repo_url": config.REPO_URL, "signup_url": config.SIGNUP_URL,
@@ -804,6 +924,7 @@ def _run_macro_edition():
     all_rows = []
     all_suspicious = []
     all_combo_rows = []
+    all_bot_rows = []
     run_as_of = None
 
     for symbol in assets:
@@ -832,10 +953,16 @@ def _run_macro_edition():
                 r["edition"] = "macro"
             all_combo_rows.extend(combo_rows)
             all_suspicious.extend(combo_suspicious)
+            _, bot_rows, bot_suspicious = _build_bot_template_rows_impl(
+                symbol, tf, df, cost, config.MACRO_BARS_PER_YEAR)
+            for r in bot_rows:
+                r["edition"] = "macro"
+            all_bot_rows.extend(bot_rows)
+            all_suspicious.extend(bot_suspicious)
             run_as_of = as_of if run_as_of is None else max(run_as_of, as_of)
             print(f"[run_weekly] [macro] {symbol} {tf}: as_of={as_of.date()}, {len(rows)} rows "
                   f"({reg.count_variants()} strategy variants + 2 reference), "
-                  f"{len(combo_rows)} popular-combo rows")
+                  f"{len(combo_rows)} popular-combo rows, {len(bot_rows)} bot-template rows")
 
     os.makedirs(config.RESULTS_DIR, exist_ok=True)
     os.makedirs(config.HISTORY_DIR, exist_ok=True)
@@ -850,7 +977,8 @@ def _run_macro_edition():
             "tagline": config.TAGLINE_MACRO,
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "as_of": as_of_str, "oos_days": config.OOS_DAYS,
-            "tally": vd.tally([]), "rows": [], "popular_combos": [], "suspicious": [],
+            "tally": vd.tally([]), "rows": [], "popular_combos": [], "bot_templates": [],
+            "bot_tally": vd.tally([]), "suspicious": [],
             "legal_disclaimer": config.LEGAL_DISCLAIMER,
             "repo_url": config.REPO_URL, "signup_url": config.SIGNUP_URL,
         }
@@ -880,12 +1008,14 @@ def _run_macro_edition():
         return None
 
     tally = vd.tally([r["verdict"] for r in all_rows if r["verdict"] is not None])
+    bot_tally = vd.tally([r["verdict"] for r in all_bot_rows if r["verdict"] is not None])
     payload = {
         "project_name": config.PROJECT_NAME, "edition": "macro", "lang": "en",
         "tagline": config.TAGLINE_MACRO,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "as_of": str(run_as_of.date()), "oos_days": config.OOS_DAYS,
         "tally": tally, "rows": all_rows, "popular_combos": all_combo_rows,
+        "bot_templates": all_bot_rows, "bot_tally": bot_tally,
         "suspicious": all_suspicious,
         "legal_disclaimer": config.LEGAL_DISCLAIMER,
         "repo_url": config.REPO_URL, "signup_url": config.SIGNUP_URL,

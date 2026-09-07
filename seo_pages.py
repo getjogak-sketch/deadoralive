@@ -65,7 +65,7 @@ def strategy_page_filename(strategy_id: str, params: str, asset: str) -> str:
 
 def _registry_entries_by_id() -> dict:
     out = {}
-    for e in reg.REGISTRY + reg.POPULAR_COMBOS:
+    for e in reg.REGISTRY + reg.POPULAR_COMBOS + reg.BOT_TEMPLATES:
         out[e["id"]] = e
     return out
 
@@ -101,6 +101,13 @@ PARAMS_DISPLAY_EN = {
     ("ichimoku_cloud", "9-26-52"): "(9, 26, 52)",
     ("heikin_ashi_trend", "conf2"): "(2-bar confirm)",
     ("supertrend_ema200", "st10.3-ema200"): "(10, 3; EMA200 filter)",
+    # task B1 "Bot templates" — additive.
+    ("grid_bot", "range10-grid20"): "(±10% range, 20 grids)",
+    ("grid_bot", "range20-grid20"): "(±20% range, 20 grids)",
+    ("grid_bot", "range30-grid20"): "(±30% range, 20 grids)",
+    ("dca_bot", "sostep1.5"): "(1.5% safety-order step)",
+    ("dca_bot", "sostep2.5"): "(2.5% safety-order step)",
+    ("dca_bot_sl", "sostep2.5-sl15"): "(2.5% safety-order step, -15% stop-loss)",
 }
 PARAMS_DISPLAY_KO = {
     ("sma_cross", "10-50"): "(10, 50)", ("sma_cross", "20-100"): "(20, 100)",
@@ -126,6 +133,13 @@ PARAMS_DISPLAY_KO = {
     ("ichimoku_cloud", "9-26-52"): "(9, 26, 52)",
     ("heikin_ashi_trend", "conf2"): "(2봉 확인)",
     ("supertrend_ema200", "st10.3-ema200"): "(10, 3; EMA200 필터)",
+    # task B1 "Bot templates" — additive.
+    ("grid_bot", "range10-grid20"): "(±10% 범위, 20격자)",
+    ("grid_bot", "range20-grid20"): "(±20% 범위, 20격자)",
+    ("grid_bot", "range30-grid20"): "(±30% 범위, 20격자)",
+    ("dca_bot", "sostep1.5"): "(안전주문 1.5% 간격)",
+    ("dca_bot", "sostep2.5"): "(안전주문 2.5% 간격)",
+    ("dca_bot_sl", "sostep2.5-sl15"): "(안전주문 2.5% 간격, 손절 -15%)",
 }
 
 
@@ -148,8 +162,14 @@ def _params_display(strategy_id: str, params: str, lang: str) -> str:
 #
 # Deliberately conservative: only phrases this repo has actual keyword-pool evidence for are
 # mapped here (see research/demand/results/RESULTS.md, produced by a separate study, once it has
-# run) — "grid bot" / "pionex" (bot_templates) are not strategies this site tests yet and are
-# intentionally absent, per this task's own instruction to skip them.
+# run).
+#
+# task B1 addition: "grid bot" / "pionex" / "dca bot" (bot_templates) are now strategies this site
+# tests, so they get lead phrases too — "Pionex grid bot:" leads every grid_bot page (the more
+# specific, higher-intent phrase); "Grid bot strategy:" (the more generic phrase this task also
+# names) is woven into the page's own rule sentence instead of the title, so both phrases actually
+# appear on the page rather than only one being able to occupy the single <title> lead slot. "DCA
+# bot strategy:" leads both dca_bot and dca_bot_sl pages.
 # ---------------------------------------------------------------------------
 ASSET_LEAD_EN = {
     "QQQ": "QQQ strategy",
@@ -161,7 +181,14 @@ STRATEGY_LEAD_EN = {
     "bb_breakout": "Bollinger Bands strategy",
     "bb_squeeze": "Bollinger Bands strategy",
     "ichimoku_cloud": "Ichimoku strategy",
+    "grid_bot": "Pionex grid bot",
+    "dca_bot": "DCA bot strategy",
+    "dca_bot_sl": "DCA bot strategy",
 }
+# The secondary bot-template lead phrase (task B1: "Grid bot strategy:") — rendered inline in the
+# page's rule sentence for grid_bot pages only, alongside (not instead of) the STRATEGY_LEAD_EN
+# title lead above.
+_GRID_BOT_SECONDARY_LEAD_EN = "Grid bot strategy"
 
 
 def _seo_lead_phrase(strategy_id: str, asset: str) -> str | None:
@@ -191,7 +218,8 @@ def _ko_asset_short(asset: str) -> str:
 # ---------------------------------------------------------------------------
 
 def _all_variant_rows(payload: dict) -> list:
-    return [r for r in ((payload.get("rows") or []) + (payload.get("popular_combos") or []))
+    return [r for r in ((payload.get("rows") or []) + (payload.get("popular_combos") or [])
+                         + (payload.get("bot_templates") or []))
             if r.get("type") != "reference"]
 
 
@@ -566,6 +594,11 @@ def _build_one_page(edition_key: str, lang: str, strategy_id: str, params: str, 
     alt_links = [("x-default", canonical), ("en" if lang != "ko" else "ko", canonical)]
     if alt_edition_url:
         alt_links.append(("ko" if lang != "ko" else "en", alt_edition_url))
+
+    # task B1: weave in the secondary "Grid bot strategy:" lead phrase for grid_bot pages (English
+    # only) — see _GRID_BOT_SECONDARY_LEAD_EN's own comment for why this isn't in the title too.
+    if lang != "ko" and strategy_id == "grid_bot":
+        rule_text = f"{_GRID_BOT_SECONDARY_LEAD_EN}: {rule_text}"
 
     tf_sections = []
     for tf in tf_order:

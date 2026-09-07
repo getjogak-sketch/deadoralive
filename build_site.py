@@ -277,6 +277,61 @@ def _popular_combos_html(payload: dict, assets: list | None = None, timeframes: 
 </section>"""
 
 
+# =================================================================================================
+# task B1 "Bot templates" — additive extension, nothing above this line is modified. Same idea as
+# the "Popular combos" section right above (reuses _row_html/_row_html_ko unchanged — the row
+# shape is identical), rendered as its own third table per task B1's own instruction: "a separate
+# table 'Bot templates — grid and DCA bots as commonly configured' on every edition".
+# =================================================================================================
+
+def _bot_templates_html(payload: dict, assets: list | None = None, timeframes: list | None = None) -> str:
+    assets = assets if assets is not None else config.ASSETS
+    timeframes = timeframes if timeframes is not None else config.TIMEFRAMES
+    bot_rows = payload.get("bot_templates") or []
+    if not bot_rows:
+        return ""
+
+    groups = {}
+    order = []
+    for r in bot_rows:
+        key = (r["asset"], r["timeframe"])
+        if key not in groups:
+            groups[key] = []
+            order.append(key)
+    order = [k for k in [(a, tf) for a in assets for tf in timeframes] if k in groups] or order
+    for r in bot_rows:
+        groups[(r["asset"], r["timeframe"])].append(r)
+
+    subsections = "".join(f"""
+  <h3>{html.escape(a)} &middot; {html.escape(tf)}</h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr>
+        <th>Strategy</th><th>Params</th><th>Verdict</th>
+        <th>OOS Return</th><th>OOS PF</th><th>OOS MDD</th><th>OOS Trades</th><th>OOS Win%</th>
+        <th>IS PF</th><th>IS MDD</th>
+        <th>B&amp;H OOS Return</th><th>B&amp;H OOS MDD</th>
+        <th>Fee drag&sup1;</th><th>Robustness&sup2;</th>
+      </tr></thead>
+      <tbody>
+{chr(10).join(_row_html(r) for r in groups[(a, tf)])}
+      </tbody>
+    </table>
+  </div>""" for a, tf in order)
+
+    return f"""
+<section class="assetblock" id="bot-templates">
+  <h2>Bot templates &mdash; grid and DCA bots as commonly configured</h2>
+  <p class="meta">Grid bots and DCA (safety-order) bots as they are commonly configured on
+     Pionex / 3Commas, simulated with a separate lot-based engine (many small, independently
+     funded lots, rather than one all-in position) &mdash; see methodology for the exact rules.
+     "Trades" here means completed lot sells (grid bot) or closed deals (DCA bots). Same cost
+     model and verdict thresholds as every strategy above, and pre-registered the same way,
+     before any result was computed.</p>
+  {subsections}
+</section>"""
+
+
 def build_index(payload: dict, out_path: str | None = None, assets: list | None = None,
                  timeframes: list | None = None, lang_links: str | None = None,
                  feed_html: str | None = None, places_href: str | None = None,
@@ -346,6 +401,7 @@ def build_index(payload: dict, out_path: str | None = None, assets: list | None 
 
     sections_html = "".join(_asset_tf_section(a, tf, groups[(a, tf)], payload["as_of"]) for a, tf in order)
     popular_combos_html = _popular_combos_html(payload, assets, timeframes)
+    bot_templates_html = _bot_templates_html(payload, assets, timeframes)
 
     skipped = sorted(set(assets) - {a for a, _tf in order})
     skipped_note = ""
@@ -382,6 +438,7 @@ def build_index(payload: dict, out_path: str | None = None, assets: list | None 
   <nav class="jump">{nav_html}</nav>
   {sections_html}
   {popular_combos_html}
+  {bot_templates_html}
 </main>
 <footer class="bottom">
   <div><a href="methodology.html">Methodology</a>{repo_html}{signup_html}
@@ -424,6 +481,20 @@ def _popular_combos_table_html() -> str:
     registry.POPULAR_COMBOS instead of registry.REGISTRY."""
     rows = []
     for entry in reg.POPULAR_COMBOS:
+        params = ", ".join(v["params_str"] for v in entry["variants"])
+        rows.append(
+            f"<tr><td>{html.escape(entry['id'])}</td><td>{html.escape(entry['name'])}</td>"
+            f"<td>{html.escape(entry['type'])}</td><td>{html.escape(entry['rule'])}</td>"
+            f"<td>{html.escape(params)}</td></tr>"
+        )
+    return "\n".join(rows)
+
+
+def _bot_templates_table_html() -> str:
+    """task B1 methodology table — same shape as _registry_table_html/_popular_combos_table_html
+    above, over registry.BOT_TEMPLATES instead."""
+    rows = []
+    for entry in reg.BOT_TEMPLATES:
         params = ", ".join(v["params_str"] for v in entry["variants"])
         rows.append(
             f"<tr><td>{html.escape(entry['id'])}</td><td>{html.escape(entry['name'])}</td>"
@@ -590,6 +661,24 @@ def build_methodology(out_path: str | None = None, assets: list | None = None,
   </section>
 
   <section class="assetblock">
+    <h2>Bot templates &mdash; grid and DCA bots as commonly configured</h2>
+    <p>A third, separately pre-registered group: grid bots and DCA (safety-order) bots as they are
+       commonly configured on Pionex / 3Commas. Long-only spot, no leverage, the same cost model
+       and verdict thresholds as every strategy above &mdash; but simulated with a purpose-built
+       LOT-BASED engine (<code>bot_engine.py</code>) instead of the single-position state machine
+       every other strategy on this page uses, since a grid or DCA bot holds many small,
+       independently funded lots at once rather than one all-in position. "Trades" means completed
+       lot sells for the grid bot, or closed deals for the DCA bots. The robustness map (above)
+       applies only to <code>range_pct</code> (grid bot) and <code>so_step_pct</code> (DCA bots);
+       every other number (grid count, order sizing, take-profit/stop-loss percentages) is a fixed
+       constant, never varied by the grid.</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>id</th><th>Name</th><th>Type</th><th>Rule</th><th>Params</th></tr></thead>
+      <tbody>{_bot_templates_table_html()}</tbody>
+    </table></div>
+  </section>
+
+  <section class="assetblock">
     <h2>Check your own strategy</h2>
     <p>Open a <a href="{html.escape(_check_strategy_url())}">GitHub issue with the "Check my
        strategy" template</a> to run one strategy id/parameter combination through this same
@@ -687,6 +776,10 @@ STRATEGY_NAME_KO = {
     "ichimoku_cloud": "일목균형표 구름대 돌파 (Ichimoku cloud breakout)",
     "heikin_ashi_trend": "헤이킨아시 캔들 색 전환 (Heikin-Ashi colour)",
     "supertrend_ema200": "슈퍼트렌드 + 200일 이동평균 필터 (Supertrend + EMA200 filter)",
+    # task B1 "Bot templates" — additive.
+    "grid_bot": "그리드 봇, 파이오넥스 방식 (Grid bot, Pionex-style spot grid)",
+    "dca_bot": "분할매수 봇, 3커맨스 방식 (DCA bot, 3Commas-style safety orders)",
+    "dca_bot_sl": "손절 포함 분할매수 봇 (DCA bot with stop-loss)",
 }
 
 ASSET_LABEL_KO = {
@@ -854,6 +947,55 @@ def _popular_combos_html_ko(payload: dict) -> str:
 </section>"""
 
 
+def _bot_templates_html_ko(payload: dict) -> str:
+    """Korean edition of _bot_templates_html — task B1's own Korean title: "봇 템플릿 — 그리드·DCA
+    봇의 흔한 설정"."""
+    bot_rows = payload.get("bot_templates") or []
+    if not bot_rows:
+        return ""
+
+    groups = {}
+    order = []
+    for r in bot_rows:
+        key = (r["asset"], r["timeframe"])
+        if key not in groups:
+            groups[key] = []
+            order.append(key)
+    canonical_order = [(a, tf) for a in config.UPBIT_ASSETS for tf in config.TIMEFRAMES]
+    order = [k for k in canonical_order if k in groups] or order
+    for r in bot_rows:
+        groups[(r["asset"], r["timeframe"])].append(r)
+
+    subsections = "".join(f"""
+  <h3>{html.escape(ASSET_LABEL_KO.get(a, a))} &middot; {html.escape(TF_LABEL_KO.get(tf, tf))}</h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr>
+        <th>전략</th><th>설정값</th><th>판정</th>
+        <th>최근 2년 수익률</th><th>PF</th><th>최대 낙폭</th><th>거래 횟수</th><th>승률</th>
+        <th>이전 기간 PF</th><th>이전 기간 최대 낙폭</th>
+        <th>단순 보유 수익률</th><th>단순 보유 최대 낙폭</th>
+        <th>수수료로 사라진 수익</th><th>주변 설정값 안정성</th>
+      </tr></thead>
+      <tbody>
+{chr(10).join(_row_html_ko(r) for r in groups[(a, tf)])}
+      </tbody>
+    </table>
+  </div>""" for a, tf in order)
+
+    return f"""
+<section class="assetblock" id="bot-templates">
+  <h2>봇 템플릿 &mdash; 그리드·DCA 봇의 흔한 설정</h2>
+  <p class="meta">파이오넥스(Pionex)·3커맨스(3Commas)에서 흔히 쓰는 방식대로 설정한 그리드 봇과
+     분할매수(DCA, 안전주문) 봇을, 여러 개의 작은 매수 건을 각각 따로 추적하는 별도 엔진으로
+     계산합니다(전액을 한 번에 진입하는 방식이 아닙니다) — 정확한 규칙은 방법론 페이지를
+     참고하세요. 여기서 "거래 횟수"는 그리드 봇의 경우 완료된 매도 건수, DCA 봇의 경우 종료된
+     거래(deal) 건수를 뜻합니다. 수수료·판정 기준은 위 전략들과 같고, 결과를 보기 전에 미리
+     등록해 두었습니다.</p>
+  {subsections}
+</section>"""
+
+
 def build_index_ko(payload: dict, out_path: str | None = None):
     """Korean edition of build_index — same layout/columns as the English page, all UI text in
     Korean, verbatim disclaimer top and bottom (requirement 4)."""
@@ -889,6 +1031,7 @@ def build_index_ko(payload: dict, out_path: str | None = None):
         _asset_tf_section_ko(a, tf, groups[(a, tf)], payload["as_of"], last_price) for a, tf in order
     )
     popular_combos_html = _popular_combos_html_ko(payload)
+    bot_templates_html = _bot_templates_html_ko(payload)
 
     skipped = sorted(set(config.UPBIT_ASSETS) - {a for a, _tf in order})
     skipped_note = ""
@@ -925,6 +1068,7 @@ def build_index_ko(payload: dict, out_path: str | None = None):
   <nav class="jump">{nav_html}</nav>
   {sections_html}
   {popular_combos_html}
+  {bot_templates_html}
 </main>
 <footer class="bottom">
   <div><a href="methodology.html">어떻게 계산했나</a>{repo_html}{signup_html} &middot; <a href="../index.html">English</a> &middot; <a href="../stocks/index.html">Stocks</a> &middot; <a href="../macro/index.html">Macro</a>
@@ -977,6 +1121,19 @@ RULE_KO = {
     "heikin_ashi_trend": "헤이킨아시 캔들이 2봉 연속 양봉이면 매수, 처음 음봉이 나오면 매도",
     "supertrend_ema200": "슈퍼트렌드(10, 3) 방향이 위이고 종가가 200일 이동평균 위이면 매수, "
                          "슈퍼트렌드 방향이 아래로 바뀌는 순간 매도",
+    # task B1 "Bot templates" — additive.
+    "grid_bot": "활성화 시점 가격을 중심으로 위아래 range_pct% 범위에 20개 격자를 고정 배치. "
+               "가격보다 낮은 격자는 자본의 1/20씩 매수 대기하다가 저가가 닿으면 매수하고, "
+               "고가가 한 칸 위 격자에 닿으면 매도한 뒤 다시 매수 대기 상태로 돌아감. 종가가 "
+               "범위를 벗어나면 그 시점에 보유 물량을 전부 청산하고, 다음 봉부터 그 종가를 "
+               "중심으로 격자를 다시 구성함",
+    "dca_bot": "기본 주문(자본의 10%)을 다음 거래(deal) 시작 시 매수. 이후 안전주문을 최대 "
+              "5회까지, 이전 주문의 1.5배 크기로, 기본 주문 체결가 기준 so_step_pct%씩 벌어진 "
+              "가격에 저가가 닿을 때마다 매수(남은 자본으로 감당 못 하는 안전주문은 건너뜀). "
+              "평균 매입가 대비 고가가 1.5% 위에 닿으면 보유 물량 전부를 매도해 거래를 종료. "
+              "손절매 없음. 거래가 끝나면 바로 다음 거래가 시작됨",
+    "dca_bot_sl": "위 분할매수 봇과 같음(so_step_pct=2.5 고정)에 더해, 평균 매입가 대비 저가가 "
+                 "15% 아래로 내려오면 보유 물량 전부를 매도하는 손절매 추가",
 }
 
 
@@ -1004,6 +1161,20 @@ def _registry_table_html_ko():
 def _popular_combos_table_html_ko() -> str:
     rows = []
     for entry in reg.POPULAR_COMBOS:
+        params = ", ".join(v["params_str"] for v in entry["variants"])
+        name_ko = STRATEGY_NAME_KO.get(entry["id"], entry["name"])
+        rule_ko = RULE_KO.get(entry["id"], entry["rule"])
+        rows.append(
+            f"<tr><td>{html.escape(entry['id'])}</td><td>{html.escape(name_ko)}</td>"
+            f"<td>{html.escape(rule_ko)}</td>"
+            f"<td>{html.escape(params)}</td></tr>"
+        )
+    return "\n".join(rows)
+
+
+def _bot_templates_table_html_ko() -> str:
+    rows = []
+    for entry in reg.BOT_TEMPLATES:
         params = ", ".join(v["params_str"] for v in entry["variants"])
         name_ko = STRATEGY_NAME_KO.get(entry["id"], entry["name"])
         rule_ko = RULE_KO.get(entry["id"], entry["rule"])
@@ -1129,6 +1300,22 @@ def build_methodology_ko(out_path: str | None = None):
     <div class="tablewrap"><table class="regtable">
       <thead><tr><th>id</th><th>전략</th><th>규칙</th><th>설정값</th></tr></thead>
       <tbody>{_popular_combos_table_html_ko()}</tbody>
+    </table></div>
+  </section>
+
+  <section class="assetblock">
+    <h2>봇 템플릿 &mdash; 그리드·DCA 봇의 흔한 설정</h2>
+    <p>세 번째로 별도 사전 등록된 그룹입니다 — 파이오넥스·3커맨스에서 흔히 쓰는 방식대로 설정한
+       그리드 봇과 분할매수(DCA, 안전주문) 봇입니다. 매수만 하고 레버리지가 없으며 수수료·판정
+       기준은 위 전략들과 같지만, 여러 개의 작은 매수 건을 각각 따로 추적하는 별도 엔진
+       (<code>bot_engine.py</code>)으로 계산합니다 — 위의 다른 모든 전략처럼 전액을 한 번에
+       진입·청산하는 방식이 아니기 때문입니다. "거래 횟수"는 그리드 봇은 완료된 매도 건수, DCA
+       봇은 종료된 거래(deal) 건수를 뜻합니다. 주변 설정값 안정성 검사는 그리드 봇의
+       <code>range_pct</code>, DCA 봇의 <code>so_step_pct</code>에만 적용하며, 격자 수·주문
+       크기·익절/손절 비율 등 나머지 값은 모두 고정값으로 검사하지 않습니다.</p>
+    <div class="tablewrap"><table class="regtable">
+      <thead><tr><th>id</th><th>전략</th><th>규칙</th><th>설정값</th></tr></thead>
+      <tbody>{_bot_templates_table_html_ko()}</tbody>
     </table></div>
   </section>
 
@@ -1731,10 +1918,12 @@ table.places thead th {{ background: var(--card-bg); }}
 # ===========================================================================
 
 _SOURCE_LABEL_EN = {
-    "textbook": "textbook", "popular_combo": "popular combo", "community": "community",
+    "textbook": "textbook", "popular_combo": "popular combo", "bot_template": "bot template",
+    "community": "community",
 }
 _SOURCE_LABEL_KO = {
-    "textbook": "표준 지표", "popular_combo": "인기 조합", "community": "커뮤니티 제안",
+    "textbook": "표준 지표", "popular_combo": "인기 조합", "bot_template": "봇 템플릿",
+    "community": "커뮤니티 제안",
 }
 
 
@@ -1985,6 +2174,37 @@ def _decay_section_html(edition_key: str, lang: str) -> str:
   </section>"""
 
 
+# task B1: bot templates get their own SEPARATE decay-index tally, kept off the textbook chart
+# above (decay.py's `bot_tally`-keyed index_history_bots.json — see that module's own docstring
+# for why). Rendered as a small, separate table-only block (no chart) further down the page.
+def _bots_decay_section_html(edition_key: str, lang: str) -> str:
+    points = decay.load_bot_index_history(edition_key)
+    label = _EDITION_LABEL_EN.get(edition_key, edition_key)
+    if not points:
+        no_data = ("이번 주까지 이 에디션에는 봇 템플릿 기록이 없습니다." if lang == "ko"
+                    else "No archived bot-template snapshots yet for this edition.")
+        return f'<section class="assetblock"><h3>{html.escape(label)}</h3><p class="meta">{no_data}</p></section>'
+
+    if lang == "ko":
+        head = "<tr><th>기준일</th><th>생존</th><th>약화</th><th>사망</th><th>표본 부족</th><th>쇠퇴 지수</th><th>표본 수</th></tr>"
+    else:
+        head = "<tr><th>as_of</th><th>ALIVE</th><th>FADING</th><th>DEAD</th><th>TOO FEW</th><th>Decay Index</th><th>n</th></tr>"
+
+    def pct(v):
+        return "-" if v is None else f"{v * 100:.1f}%"
+
+    rows = "".join(
+        f"<tr><td>{html.escape(p['as_of'])}</td><td>{pct(p['alive'])}</td><td>{pct(p['fading'])}</td>"
+        f"<td>{pct(p['dead'])}</td><td>{pct(p['too_few'])}</td><td>{pct(p['decay_index'])}</td>"
+        f"<td>{p['n']}</td></tr>"
+        for p in points
+    )
+    return f"""<section class="assetblock">
+    <h3>{html.escape(label)}</h3>
+    <div class="tablewrap"><table><thead>{head}</thead><tbody>{rows}</tbody></table></div>
+  </section>"""
+
+
 def build_index_history_page(out_path: str | None = None, editions: list | None = None,
                               lang_links: str | None = None, places_href: str | None = None,
                               registry_href: str | None = None) -> str:
@@ -1996,6 +2216,7 @@ def build_index_history_page(out_path: str | None = None, editions: list | None 
     places_href = places_href if places_href is not None else "places.html"
     registry_href = registry_href if registry_href is not None else "registry.html"
     sections = "".join(_decay_section_html(ed, "en") for ed in editions)
+    bots_sections = "".join(_bots_decay_section_html(ed, "en") for ed in editions)
     doc = f"""<!doctype html>
 <html lang="en">
 <head>
@@ -2020,6 +2241,12 @@ def build_index_history_page(out_path: str | None = None, editions: list | None 
     <p>{_DECAY_EXPLAINER_EN}</p>
   </section>
   {sections}
+  <section class="assetblock">
+    <h2>Bot templates (separate tally)</h2>
+    <p class="meta">Grid/DCA bot rows are counted here only &mdash; the textbook Decay Index above
+       never includes them.</p>
+    {bots_sections}
+  </section>
 </main>
 <footer class="bottom">
   <div><a href="index.html">&larr; back to results</a>
@@ -2041,6 +2268,7 @@ def build_index_history_page(out_path: str | None = None, editions: list | None 
 def build_index_history_page_ko(out_path: str | None = None) -> str:
     out_path = out_path or os.path.join(config.DOCS_DIR_KO, "index-history.html")
     sections = _decay_section_html("ko", "ko")
+    bots_sections = _bots_decay_section_html("ko", "ko")
     doc = f"""<!doctype html>
 <html lang="ko">
 <head>
@@ -2066,6 +2294,12 @@ def build_index_history_page_ko(out_path: str | None = None) -> str:
     <p>{_DECAY_EXPLAINER_KO}</p>
   </section>
   {sections}
+  <section class="assetblock">
+    <h2>봇 템플릿 (별도 집계)</h2>
+    <p class="meta">그리드·DCA 봇 행은 여기서만 별도로 집계합니다 — 위의 표준 지표 쇠퇴 지수에는
+       포함되지 않습니다.</p>
+    {bots_sections}
+  </section>
 </main>
 <footer class="bottom">
   <div><a href="index.html">&larr; 결과표로 돌아가기</a> &middot; <a href="../index-history.html">English</a>

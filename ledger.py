@@ -24,6 +24,12 @@ the whole file — including REGISTRY and REFERENCE — was created) and every P
 is the second (2026-09-07, when that group was added in one commit on top of the untouched first
 group). Nothing here reruns `git log` at import time; this module is pure static data plus small
 read helpers over `registry_ledger.json`.
+
+Task B1 (2026-09-07) added a third group, BOT_TEMPLATES (grid_bot/dca_bot/dca_bot_sl) — same
+one-time-hard-code convention: `_BOT_TEMPLATE_COMMIT` below is filled in with the actual commit
+hash that added `BOT_TEMPLATES` to registry.py via a small follow-up commit (the hash cannot be
+known before the commit that introduces it exists — see this task's own instruction), exactly the
+same chicken-and-egg step the original two commits above were already through once.
 """
 from __future__ import annotations
 import json
@@ -39,6 +45,11 @@ _TEXTBOOK_COMMIT = "c65f546c8f50da968e744821efe3ce1b99dace77"
 _TEXTBOOK_DATE = "2026-09-06"
 _POPULAR_COMBO_COMMIT = "ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db"
 _POPULAR_COMBO_DATE = "2026-09-07"
+# Filled in by a small follow-up commit right after the commit that adds BOT_TEMPLATES to
+# registry.py (see this module's own docstring) — set to that commit's real hash, never rerun from
+# git history automatically.
+_BOT_TEMPLATE_COMMIT = "PENDING_COMMIT_HASH"
+_BOT_TEMPLATE_DATE = "2026-09-07"
 
 
 def _entry_id(strategy_id: str, params_str: str) -> str:
@@ -76,6 +87,19 @@ def build_ledger_entries() -> list[dict]:
             "source": "popular_combo",
             "registered_on": _POPULAR_COMBO_DATE,
             "registered_commit": _POPULAR_COMBO_COMMIT,
+            "rule_text": entry["rule"],
+        })
+    for sid, sname, _stype, variant in reg.iter_bot_template_variants():
+        entry = next(e for e in reg.BOT_TEMPLATES if e["id"] == sid)
+        entries.append({
+            "id": _entry_id(sid, variant["params_str"]),
+            "strategy_id": sid,
+            "strategy_name": sname,
+            "params": variant["params"],
+            "params_str": variant["params_str"],
+            "source": "bot_template",
+            "registered_on": _BOT_TEMPLATE_DATE,
+            "registered_commit": _BOT_TEMPLATE_COMMIT,
             "rule_text": entry["rule"],
         })
     entries.sort(key=lambda e: (e["registered_on"], e["strategy_id"], e["params_str"]))

@@ -1,7 +1,7 @@
 {
   "project_name": "Dead or Alive",
   "tagline": "Popular trading strategies, re-tested every week \u2014 after fees, out-of-sample.",
-  "generated_at": "2026-09-07T12:51:34.919654+00:00",
+  "generated_at": "2026-09-07T13:43:37.695285+00:00",
   "as_of": "2026-09-05",
   "oos_days": 730,
   "tally": {
@@ -4180,6 +4180,794 @@
       "edition": "en"
     }
   ],
+  "bot_templates": [
+    {
+      "strategy_id": "grid_bot",
+      "strategy_name": "Grid bot (Pionex-style spot grid)",
+      "type": "lotsim",
+      "params": "range10-grid20",
+      "asset": "BTCUSD",
+      "timeframe": "1d",
+      "as_of": "2026-09-05",
+      "verdict": "DEAD",
+      "is": {
+        "total_return": -0.8489258916452983,
+        "cagr": -0.2349367404151843,
+        "bh_return": 12.260049609513961,
+        "n_trades": 3453,
+        "win_rate": 77.96119316536345,
+        "profit_factor": 0.47001179626025785,
+        "mdd": 85.19092048664089,
+        "bh_mdd": 83.4293493046095,
+        "sharpe": -1.4820502645717701,
+        "exposure": 55.39596273291926,
+        "max_consec_loss": 20,
+        "avg_trade_return": -0.010473944527935672
+      },
+      "oos": {
+        "total_return": -0.09944814603098662,
+        "cagr": -0.05095790060590677,
+        "bh_return": 0.37425257290058767,
+        "n_trades": 625,
+        "win_rate": 85.76,
+        "profit_factor": 0.7302315494859998,
+        "mdd": 18.589442112591392,
+        "bh_mdd": 53.0769594637932,
+        "sharpe": -0.5582738791526719,
+        "exposure": 55.677154582763336,
+        "max_consec_loss": 10,
+        "avg_trade_return": -0.003148841953222762,
+        "fee_drag": 0.05769693435551981
+      },
+      "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "range_pct=7.5",
+            "oos_pf": 0.45694003653131726,
+            "oos_n_trades": 908
+          },
+          {
+            "params": "range_pct=10.0",
+            "oos_pf": 0.7302315494859998,
+            "oos_n_trades": 625
+          },
+          {
+            "params": "range_pct=12.5",
+            "oos_pf": 0.7129519805232791,
+            "oos_n_trades": 437
+          }
+        ],
+        "share_pf_ge_1": 0.0,
+        "n_pass": 0,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
+      "group": "bot_templates",
+      "edition": "en"
+    },
+    {
+      "strategy_id": "grid_bot",
+      "strategy_name": "Grid bot (Pionex-style spot grid)",
+      "type": "lotsim",
+      "params": "range20-grid20",
+      "asset": "BTCUSD",
+      "timeframe": "1d",
+      "as_of": "2026-09-05",
+      "verdict": "DEAD",
+      "is": {
+        "total_return": -0.44595637048632275,
+        "cagr": -0.0802663177298113,
+        "bh_return": 12.260049609513961,
+        "n_trades": 1421,
+        "win_rate": 83.6734693877551,
+        "profit_factor": 0.7019475192006492,
+        "mdd": 55.24756823544029,
+        "bh_mdd": 83.4293493046095,
+        "sharpe": -0.4187928024540958,
+        "exposure": 50.34937888198758,
+        "max_consec_loss": 10,
+        "avg_trade_return": -0.007579532130876213
+      },
+      "oos": {
+        "total_return": -0.09269796578705813,
+        "cagr": -0.0474125845797192,
+        "bh_return": 0.37425257290058767,
+        "n_trades": 133,
+        "win_rate": 78.19548872180451,
+        "profit_factor": 0.5371724781560212,
+        "mdd": 16.71406006298045,
+        "bh_mdd": 53.0769594637932,
+        "sharpe": -0.7036267709257074,
+        "exposure": 21.751025991792066,
+        "max_consec_loss": 10,
+        "avg_trade_return": -0.013656790324398123,
+        "fee_drag": 0.01203243358187156
+      },
+      "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "range_pct=15.0",
+            "oos_pf": 0.6414716596868286,
+            "oos_n_trades": 253
+          },
+          {
+            "params": "range_pct=20.0",
+            "oos_pf": 0.5371724781560212,
+            "oos_n_trades": 133
+          },
+          {
+            "params": "range_pct=25.0",
+            "oos_pf": 0.46799863876755143,
+            "oos_n_trades": 107
+          }
+        ],
+        "share_pf_ge_1": 0.0,
+        "n_pass": 0,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
+      "group": "bot_templates",
+      "edition": "en"
+    },
+    {
+      "strategy_id": "grid_bot",
+      "strategy_name": "Grid bot (Pionex-style spot grid)",
+      "type": "lotsim",
+      "params": "range30-grid20",
+      "asset": "BTCUSD",
+      "timeframe": "1d",
+      "as_of": "2026-09-05",
+      "verdict": "FADING",
+      "is": {
+        "total_return": -0.12943653111993103,
+        "cagr": -0.019449036173669554,
+        "bh_return": 12.260049609513961,
+        "n_trades": 771,
+        "win_rate": 84.56549935149157,
+        "profit_factor": 0.9115902061313726,
+        "mdd": 38.33531999900931,
+        "bh_mdd": 83.4293493046095,
+        "sharpe": -0.07966861518556229,
+        "exposure": 48.60248447204969,
+        "max_consec_loss": 10,
+        "avg_trade_return": -0.0027311007239783584
+      },
+      "oos": {
+        "total_return": 0.011627866864664771,
+        "cagr": 0.005789176752214242,
+        "bh_return": 0.37425257290058767,
+        "n_trades": 88,
+        "win_rate": 87.5,
+        "profit_factor": 1.104936838891639,
+        "mdd": 16.38309723334984,
+        "bh_mdd": 53.0769594637932,
+        "sharpe": 0.11278674275372495,
+        "exposure": 47.05882352941176,
+        "max_consec_loss": 10,
+        "avg_trade_return": 0.002821951535321091,
+        "fee_drag": 0.00906249401708803
+      },
+      "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "range_pct=22.5",
+            "oos_pf": 0.6114953270554613,
+            "oos_n_trades": 136
+          },
+          {
+            "params": "range_pct=30.0",
+            "oos_pf": 1.104936838891639,
+            "oos_n_trades": 88
+          },
+          {
+            "params": "range_pct=37.5",
+            "oos_pf": 0.43893926526903393,
+            "oos_n_trades": 41
+          }
+        ],
+        "share_pf_ge_1": 0.3333333333333333,
+        "n_pass": 1,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
+      "group": "bot_templates",
+      "edition": "en"
+    },
+    {
+      "strategy_id": "dca_bot",
+      "strategy_name": "DCA bot (3Commas-style safety orders)",
+      "type": "lotsim",
+      "params": "sostep1.5",
+      "asset": "BTCUSD",
+      "timeframe": "1d",
+      "as_of": "2026-09-05",
+      "verdict": "ALIVE",
+      "is": {
+        "total_return": 9627.572827283904,
+        "cagr": 2.66809886769647,
+        "bh_return": 12.260049609513961,
+        "n_trades": 1743,
+        "win_rate": 100.0,
+        "profit_factor": "inf",
+        "mdd": 40.33769311790939,
+        "bh_mdd": 83.4293493046095,
+        "sharpe": 5.972180767174108,
+        "exposure": 32.33695652173913,
+        "max_consec_loss": 0,
+        "avg_trade_return": 0.013984999999999909
+      },
+      "oos": {
+        "total_return": 2.260856853355568,
+        "cagr": 0.8043249356412454,
+        "bh_return": 0.37425257290058767,
+        "n_trades": 303,
+        "win_rate": 99.66996699669967,
+        "profit_factor": 27.592796881507148,
+        "mdd": 30.750154306211385,
+        "bh_mdd": 53.0769594637932,
+        "sharpe": 2.8223546067543173,
+        "exposure": 58.5499316005472,
+        "max_consec_loss": 1,
+        "avg_trade_return": 0.013433682434144991,
+        "fee_drag": 0.3844902936687986
+      },
+      "suspicious": true,
+      "robustness": {
+        "grid": [
+          {
+            "params": "so_step_pct=1.125",
+            "oos_pf": 25.957734549912974,
+            "oos_n_trades": 297
+          },
+          {
+            "params": "so_step_pct=1.5",
+            "oos_pf": 27.592796881507148,
+            "oos_n_trades": 303
+          },
+          {
+            "params": "so_step_pct=1.875",
+            "oos_pf": 25.857796528250827,
+            "oos_n_trades": 272
+          }
+        ],
+        "share_pf_ge_1": 1.0,
+        "n_pass": 3,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
+      "group": "bot_templates",
+      "edition": "en"
+    },
+    {
+      "strategy_id": "dca_bot",
+      "strategy_name": "DCA bot (3Commas-style safety orders)",
+      "type": "lotsim",
+      "params": "sostep2.5",
+      "asset": "BTCUSD",
+      "timeframe": "1d",
+      "as_of": "2026-09-05",
+      "verdict": "ALIVE",
+      "is": {
+        "total_return": 808.3994610761912,
+        "cagr": 1.5826467532390183,
+        "bh_return": 12.260049609513961,
+        "n_trades": 1833,
+        "win_rate": 100.0,
+        "profit_factor": "inf",
+        "mdd": 19.526496076833066,
+        "bh_mdd": 83.4293493046095,
+        "sharpe": 8.18197447151155,
+        "exposure": 28.843167701863354,
+        "max_consec_loss": 0,
+        "avg_trade_return": 0.013984999999999902
+      },
+      "oos": {
+        "total_return": 0.9647966138108477,
+        "cagr": 0.4010646411330403,
+        "bh_return": 0.37425257290058767,
+        "n_trades": 271,
+        "win_rate": 99.63099630996311,
+        "profit_factor": 27.857668691995073,
+        "mdd": 29.705505886038342,
+        "bh_mdd": 53.0769594637932,
+        "sharpe": 1.7008832644550067,
+        "exposure": 62.927496580027366,
+        "max_consec_loss": 1,
+        "avg_trade_return": 0.01343323112721451,
+        "fee_drag": 0.16048748027991255
+      },
+      "suspicious": true,
+      "robustness": {
+        "grid": [
+          {
+            "params": "so_step_pct=1.875",
+            "oos_pf": 25.857796528250827,
+            "oos_n_trades": 272
+          },
+          {
+            "params": "so_step_pct=2.5",
+            "oos_pf": 27.857668691995073,
+            "oos_n_trades": 271
+          },
+          {
+            "params": "so_step_pct=3.125",
+            "oos_pf": 10.859273601305507,
+            "oos_n_trades": 202
+          }
+        ],
+        "share_pf_ge_1": 1.0,
+        "n_pass": 3,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
+      "group": "bot_templates",
+      "edition": "en"
+    },
+    {
+      "strategy_id": "dca_bot_sl",
+      "strategy_name": "DCA bot with stop-loss (3Commas-style)",
+      "type": "lotsim",
+      "params": "sostep2.5-sl15",
+      "asset": "BTCUSD",
+      "timeframe": "1d",
+      "as_of": "2026-09-05",
+      "verdict": "ALIVE",
+      "is": {
+        "total_return": 158.47152958398698,
+        "cagr": 1.051652417227392,
+        "bh_return": 12.260049609513961,
+        "n_trades": 1859,
+        "win_rate": 99.35449166218397,
+        "profit_factor": 14.269304496740586,
+        "mdd": 23.01089175683596,
+        "bh_mdd": 83.4293493046095,
+        "sharpe": 4.076010041304275,
+        "exposure": 27.833850931677016,
+        "max_consec_loss": 2,
+        "avg_trade_return": 0.01292097633136085
+      },
+      "oos": {
+        "total_return": 1.301518351441867,
+        "cagr": 0.5162108676314172,
+        "bh_return": 0.37425257290058767,
+        "n_trades": 381,
+        "win_rate": 99.21259842519686,
+        "profit_factor": 17.5176695487536,
+        "mdd": 12.268054423381658,
+        "bh_mdd": 53.0769594637932,
+        "sharpe": 4.27178408372144,
+        "exposure": 47.8796169630643,
+        "max_consec_loss": 1,
+        "avg_trade_return": 0.01308283122051521,
+        "fee_drag": 0.2600128541591862
+      },
+      "suspicious": true,
+      "robustness": {
+        "grid": [
+          {
+            "params": "so_step_pct=1.875",
+            "oos_pf": 17.544631215726373,
+            "oos_n_trades": 392
+          },
+          {
+            "params": "so_step_pct=2.5",
+            "oos_pf": 17.5176695487536,
+            "oos_n_trades": 381
+          },
+          {
+            "params": "so_step_pct=3.125",
+            "oos_pf": 15.895663109054228,
+            "oos_n_trades": 346
+          }
+        ],
+        "share_pf_ge_1": 1.0,
+        "n_pass": 3,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
+      "group": "bot_templates",
+      "edition": "en"
+    },
+    {
+      "strategy_id": "grid_bot",
+      "strategy_name": "Grid bot (Pionex-style spot grid)",
+      "type": "lotsim",
+      "params": "range10-grid20",
+      "asset": "BTCUSD",
+      "timeframe": "4h",
+      "as_of": "2026-09-05",
+      "verdict": "DEAD",
+      "is": {
+        "total_return": -0.8045109346446668,
+        "cagr": -0.20648098604294685,
+        "bh_return": 12.260049609513961,
+        "n_trades": 6509,
+        "win_rate": 82.07097864495314,
+        "profit_factor": 0.6120550316353276,
+        "mdd": 81.02490836175133,
+        "bh_mdd": 83.93728308558705,
+        "sharpe": -1.5323115090226773,
+        "exposure": 52.91796066252588,
+        "max_consec_loss": 10,
+        "avg_trade_return": -0.00485258141464152
+      },
+      "oos": {
+        "total_return": -0.11957596428737904,
+        "cagr": -0.0616091258402498,
+        "bh_return": 0.37425257290058767,
+        "n_trades": 888,
+        "win_rate": 84.009009009009,
+        "profit_factor": 0.7325869549388293,
+        "mdd": 23.241442587878,
+        "bh_mdd": 53.56229229923255,
+        "sharpe": -0.8071169224290623,
+        "exposure": 49.72640218878249,
+        "max_consec_loss": 10,
+        "avg_trade_return": -0.0027352898138743734,
+        "fee_drag": 0.08108153788938477
+      },
+      "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "range_pct=7.5",
+            "oos_pf": 0.6229559294844423,
+            "oos_n_trades": 1312
+          },
+          {
+            "params": "range_pct=10.0",
+            "oos_pf": 0.7325869549388293,
+            "oos_n_trades": 888
+          },
+          {
+            "params": "range_pct=12.5",
+            "oos_pf": 0.7651704589673469,
+            "oos_n_trades": 523
+          }
+        ],
+        "share_pf_ge_1": 0.0,
+        "n_pass": 0,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
+      "group": "bot_templates",
+      "edition": "en"
+    },
+    {
+      "strategy_id": "grid_bot",
+      "strategy_name": "Grid bot (Pionex-style spot grid)",
+      "type": "lotsim",
+      "params": "range20-grid20",
+      "asset": "BTCUSD",
+      "timeframe": "4h",
+      "as_of": "2026-09-05",
+      "verdict": "DEAD",
+      "is": {
+        "total_return": -0.027500040369370815,
+        "cagr": -0.00394333592698104,
+        "bh_return": 12.260049609513961,
+        "n_trades": 2157,
+        "win_rate": 86.18451553082986,
+        "profit_factor": 1.0076630831923261,
+        "mdd": 32.89706739679888,
+        "bh_mdd": 83.93728308558705,
+        "sharpe": 0.03186270497848596,
+        "exposure": 52.20626293995859,
+        "max_consec_loss": 10,
+        "avg_trade_return": 0.00013579712275454755
+      },
+      "oos": {
+        "total_return": -0.014914217332936852,
+        "cagr": -0.007474920994099743,
+        "bh_return": 0.37425257290058767,
+        "n_trades": 250,
+        "win_rate": 84.0,
+        "profit_factor": 0.9390603866016152,
+        "mdd": 10.753966371125967,
+        "bh_mdd": 53.56229229923255,
+        "sharpe": -0.07937675905550819,
+        "exposure": 47.01322389420884,
+        "max_consec_loss": 10,
+        "avg_trade_return": -0.001122978013607299,
+        "fee_drag": 0.024958008706629453
+      },
+      "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "range_pct=15.0",
+            "oos_pf": 0.9247350465653309,
+            "oos_n_trades": 393
+          },
+          {
+            "params": "range_pct=20.0",
+            "oos_pf": 0.9390603866016152,
+            "oos_n_trades": 250
+          },
+          {
+            "params": "range_pct=25.0",
+            "oos_pf": 0.6242958411191195,
+            "oos_n_trades": 130
+          }
+        ],
+        "share_pf_ge_1": 0.0,
+        "n_pass": 0,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
+      "group": "bot_templates",
+      "edition": "en"
+    },
+    {
+      "strategy_id": "grid_bot",
+      "strategy_name": "Grid bot (Pionex-style spot grid)",
+      "type": "lotsim",
+      "params": "range30-grid20",
+      "asset": "BTCUSD",
+      "timeframe": "4h",
+      "as_of": "2026-09-05",
+      "verdict": "ALIVE",
+      "is": {
+        "total_return": 0.31847200818804744,
+        "cagr": 0.03995166258353455,
+        "bh_return": 12.260049609513961,
+        "n_trades": 1043,
+        "win_rate": 87.34419942473633,
+        "profit_factor": 1.273702657240482,
+        "mdd": 27.316007909359186,
+        "bh_mdd": 83.93728308558705,
+        "sharpe": 0.3889962229138423,
+        "exposure": 51.721014492753625,
+        "max_consec_loss": 10,
+        "avg_trade_return": 0.006213566858367788
+      },
+      "oos": {
+        "total_return": 0.05769036968724883,
+        "cagr": 0.028401292835618763,
+        "bh_return": 0.37425257290058767,
+        "n_trades": 101,
+        "win_rate": 90.0990099009901,
+        "profit_factor": 1.6201704550001166,
+        "mdd": 8.511590848201278,
+        "bh_mdd": 53.56229229923255,
+        "sharpe": 0.5202511386026607,
+        "exposure": 44.68764249886001,
+        "max_consec_loss": 10,
+        "avg_trade_return": 0.011278502109653548,
+        "fee_drag": 0.010649418888754703
+      },
+      "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "range_pct=22.5",
+            "oos_pf": 0.6231165851312533,
+            "oos_n_trades": 135
+          },
+          {
+            "params": "range_pct=30.0",
+            "oos_pf": 1.6201704550001166,
+            "oos_n_trades": 101
+          },
+          {
+            "params": "range_pct=37.5",
+            "oos_pf": 0.7444747466998449,
+            "oos_n_trades": 53
+          }
+        ],
+        "share_pf_ge_1": 0.3333333333333333,
+        "n_pass": 1,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
+      "group": "bot_templates",
+      "edition": "en"
+    },
+    {
+      "strategy_id": "dca_bot",
+      "strategy_name": "DCA bot (3Commas-style safety orders)",
+      "type": "lotsim",
+      "params": "sostep1.5",
+      "asset": "BTCUSD",
+      "timeframe": "4h",
+      "as_of": "2026-09-05",
+      "verdict": "ALIVE",
+      "is": {
+        "total_return": 43.634695741718375,
+        "cagr": 0.7129563989217942,
+        "bh_return": 12.260049609513961,
+        "n_trades": 889,
+        "win_rate": 99.8875140607424,
+        "profit_factor": 74.03943524333043,
+        "mdd": 65.92876023480119,
+        "bh_mdd": 83.93728308558705,
+        "sharpe": 1.4156220575219238,
+        "exposure": 94.24818840579711,
+        "max_consec_loss": 1,
+        "avg_trade_return": 0.013780595483805159
+      },
+      "oos": {
+        "total_return": 0.27810710161650487,
+        "cagr": 0.13034425817436457,
+        "bh_return": 0.37425257290058767,
+        "n_trades": 143,
+        "win_rate": 99.3006993006993,
+        "profit_factor": 5.927515292826457,
+        "mdd": 41.87402470968923,
+        "bh_mdd": 53.56229229923255,
+        "sharpe": 0.5532151318164455,
+        "exposure": 96.73962608299134,
+        "max_consec_loss": 1,
+        "avg_trade_return": 0.01154436568735853,
+        "fee_drag": 0.14632632325135408
+      },
+      "suspicious": true,
+      "robustness": {
+        "grid": [
+          {
+            "params": "so_step_pct=1.125",
+            "oos_pf": 5.306025965831948,
+            "oos_n_trades": 134
+          },
+          {
+            "params": "so_step_pct=1.5",
+            "oos_pf": 5.927515292826457,
+            "oos_n_trades": 143
+          },
+          {
+            "params": "so_step_pct=1.875",
+            "oos_pf": 5.743405900394808,
+            "oos_n_trades": 140
+          }
+        ],
+        "share_pf_ge_1": 1.0,
+        "n_pass": 3,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
+      "group": "bot_templates",
+      "edition": "en"
+    },
+    {
+      "strategy_id": "dca_bot",
+      "strategy_name": "DCA bot (3Commas-style safety orders)",
+      "type": "lotsim",
+      "params": "sostep2.5",
+      "asset": "BTCUSD",
+      "timeframe": "4h",
+      "as_of": "2026-09-05",
+      "verdict": "ALIVE",
+      "is": {
+        "total_return": 16.98375470975288,
+        "cagr": 0.5059383577042882,
+        "bh_return": 12.260049609513961,
+        "n_trades": 976,
+        "win_rate": 99.89754098360656,
+        "profit_factor": 110.92512440582962,
+        "mdd": 65.61182245616209,
+        "bh_mdd": 83.93728308558705,
+        "sharpe": 1.1470052980062841,
+        "exposure": 93.68530020703933,
+        "max_consec_loss": 1,
+        "avg_trade_return": 0.013844724246624586
+      },
+      "oos": {
+        "total_return": 0.3146041170249445,
+        "cagr": 0.1463473699179585,
+        "bh_return": 0.37425257290058767,
+        "n_trades": 185,
+        "win_rate": 99.45945945945947,
+        "profit_factor": 8.009588570477003,
+        "mdd": 40.9564716123207,
+        "bh_mdd": 53.56229229923255,
+        "sharpe": 0.6361940777801687,
+        "exposure": 95.78203374373005,
+        "max_consec_loss": 1,
+        "avg_trade_return": 0.012172811161766517,
+        "fee_drag": 0.21059487061756643
+      },
+      "suspicious": true,
+      "robustness": {
+        "grid": [
+          {
+            "params": "so_step_pct=1.875",
+            "oos_pf": 5.743405900394808,
+            "oos_n_trades": 140
+          },
+          {
+            "params": "so_step_pct=2.5",
+            "oos_pf": 8.009588570477003,
+            "oos_n_trades": 185
+          },
+          {
+            "params": "so_step_pct=3.125",
+            "oos_pf": 8.581337633340281,
+            "oos_n_trades": 197
+          }
+        ],
+        "share_pf_ge_1": 1.0,
+        "n_pass": 3,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
+      "group": "bot_templates",
+      "edition": "en"
+    },
+    {
+      "strategy_id": "dca_bot_sl",
+      "strategy_name": "DCA bot with stop-loss (3Commas-style)",
+      "type": "lotsim",
+      "params": "sostep2.5-sl15",
+      "asset": "BTCUSD",
+      "timeframe": "4h",
+      "as_of": "2026-09-05",
+      "verdict": "ALIVE",
+      "is": {
+        "total_return": 311.8476276425276,
+        "cagr": 1.2572001390994534,
+        "bh_return": 12.260049609513961,
+        "n_trades": 3262,
+        "win_rate": 99.04966278356837,
+        "profit_factor": 9.973587918297438,
+        "mdd": 39.281949631702254,
+        "bh_mdd": 83.93728308558705,
+        "sharpe": 3.2089650480533094,
+        "exposure": 78.89492753623189,
+        "max_consec_loss": 2,
+        "avg_trade_return": 0.01246321749073002
+      },
+      "oos": {
+        "total_return": 0.310387947888207,
+        "cagr": 0.14451013845328986,
+        "bh_return": 0.37425257290058767,
+        "n_trades": 300,
+        "win_rate": 98.0,
+        "profit_factor": 5.411796393981753,
+        "mdd": 35.9643503041918,
+        "bh_mdd": 53.56229229923255,
+        "sharpe": 0.694509978453892,
+        "exposure": 93.16005471956224,
+        "max_consec_loss": 1,
+        "avg_trade_return": 0.011172813741787923,
+        "fee_drag": 0.30950126294656943
+      },
+      "suspicious": true,
+      "robustness": {
+        "grid": [
+          {
+            "params": "so_step_pct=1.875",
+            "oos_pf": 5.07747450960392,
+            "oos_n_trades": 339
+          },
+          {
+            "params": "so_step_pct=2.5",
+            "oos_pf": 5.411796393981753,
+            "oos_n_trades": 300
+          },
+          {
+            "params": "so_step_pct=3.125",
+            "oos_pf": 6.067289861917632,
+            "oos_n_trades": 333
+          }
+        ],
+        "share_pf_ge_1": 1.0,
+        "n_pass": 3,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
+      "group": "bot_templates",
+      "edition": "en"
+    }
+  ],
+  "bot_tally": {
+    "ALIVE": 7,
+    "FADING": 1,
+    "DEAD": 4,
+    "TOO FEW TRADES": 0
+  },
   "suspicious": [
     {
       "strategy_id": "ichimoku_cloud",
@@ -4190,12 +4978,60 @@
       "oos_sharpe": 1.291970038353527
     },
     {
+      "strategy_id": "dca_bot",
+      "params": "sostep1.5",
+      "asset": "BTCUSD",
+      "tf": "1d",
+      "oos_pf": 27.592796881507148,
+      "oos_sharpe": 2.8223546067543173
+    },
+    {
+      "strategy_id": "dca_bot",
+      "params": "sostep2.5",
+      "asset": "BTCUSD",
+      "tf": "1d",
+      "oos_pf": 27.857668691995073,
+      "oos_sharpe": 1.7008832644550067
+    },
+    {
+      "strategy_id": "dca_bot_sl",
+      "params": "sostep2.5-sl15",
+      "asset": "BTCUSD",
+      "tf": "1d",
+      "oos_pf": 17.5176695487536,
+      "oos_sharpe": 4.27178408372144
+    },
+    {
       "strategy_id": "dip_pct",
       "params": "-5pct-5bar",
       "asset": "BTCUSD",
       "tf": "4h",
       "oos_pf": 13.64100308775583,
       "oos_sharpe": 1.0271808472709134
+    },
+    {
+      "strategy_id": "dca_bot",
+      "params": "sostep1.5",
+      "asset": "BTCUSD",
+      "tf": "4h",
+      "oos_pf": 5.927515292826457,
+      "oos_sharpe": 0.5532151318164455
+    },
+    {
+      "strategy_id": "dca_bot",
+      "params": "sostep2.5",
+      "asset": "BTCUSD",
+      "tf": "4h",
+      "oos_pf": 8.009588570477003,
+      "oos_sharpe": 0.6361940777801687
+    },
+    {
+      "strategy_id": "dca_bot_sl",
+      "params": "sostep2.5-sl15",
+      "asset": "BTCUSD",
+      "tf": "4h",
+      "oos_pf": 5.411796393981753,
+      "oos_sharpe": 0.694509978453892
     }
   ],
   "legal_disclaimer": "Educational / informational content only. This is not investment advice, and nothing here is a recommendation to buy or sell any asset. Past backtested performance, especially net-of-cost historical simulation, does not guarantee future results.",

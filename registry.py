@@ -14,6 +14,7 @@ Every entry's `type` says which engine primitive runs it:
 """
 from __future__ import annotations
 import strategies as strat
+import bot_engine as bots
 
 # ---------------------------------------------------------------------------
 # state-type strategies
@@ -266,3 +267,82 @@ def iter_variants():
 
 def count_variants() -> int:
     return sum(len(entry["variants"]) for entry in REGISTRY)
+
+
+# ===========================================================================
+# task B1 "Bot templates" — additive only, nothing above this line (REGISTRY, REFERENCE,
+# POPULAR_COMBOS, iter_variants, iter_popular_combo_variants) is modified. Grid bots and DCA
+# (safety-order) bots as commonly configured on Pionex / 3Commas — rendered on every page as its
+# own separate table (task B1), never merged into REGISTRY or POPULAR_COMBOS, exactly the same
+# "second/third separate group, second/third separate iterator" shape POPULAR_COMBOS already
+# established above.
+#
+# Every entry's `type` is "lotsim" — dispatched not through engine.py's simulate_ma_cross/
+# simulate_vol_breakout/simulate_hold_n_bars (all of which are single-position, boolean-target-
+# state machines) but through bot_engine.run(), a purpose-built LOT-BASED simulator (many small,
+# independently funded/tracked open lots) — see bot_engine.py's own module docstring for why these
+# strategies need a different engine shape than everything else in this registry. `sim_fn` (rather
+# than REGISTRY's/POPULAR_COMBOS' `signal_fn`) takes (df, mask, cost) directly and returns
+# (trades, equity_df) itself — there is no separate "target state" series for a lot-based bot to
+# precompute, since which lots are open is itself the whole state.
+#
+# Numeric parameters exposed for the robustness grid (task B1's own instruction: "apply to
+# range_pct and so_step only, ±25%"): grid_bot's `range_pct`, dca_bot's/dca_bot_sl's
+# `so_step_pct`. `n_grids` (fixed at 20), the base/safety-order sizing (10%, 1.5x-scaling up to 5
+# orders), the 1.5% take-profit, and dca_bot_sl's -15% stop-loss are all fixed constants, exactly
+# like REGISTRY's own already-fixed recipe numbers (RSI's 14/30/70, Bollinger's 20/2, ...) —
+# reused verbatim from bot_engine.py's own fixed defaults, never varied by the grid.
+# ===========================================================================
+
+_GRID_BOT_VARIANTS = [
+    {"params": {"range_pct": r, "n_grids": 20}, "params_str": f"range{r}-grid20",
+     "sim_fn": (lambda df, mask, cost, r=r: bots.simulate_grid_bot(df, mask, cost, r, 20))}
+    for r in (10, 20, 30)
+]
+
+_DCA_BOT_VARIANTS = [
+    {"params": {"so_step_pct": s}, "params_str": f"sostep{s}",
+     "sim_fn": (lambda df, mask, cost, s=s: bots.simulate_dca_bot(df, mask, cost, s))}
+    for s in (1.5, 2.5)
+]
+
+_DCA_BOT_SL_VARIANTS = [
+    {"params": {"so_step_pct": 2.5, "stop_loss_pct": 0.15}, "params_str": "sostep2.5-sl15",
+     "sim_fn": (lambda df, mask, cost: bots.simulate_dca_bot(df, mask, cost, 2.5,
+                                                              stop_loss_pct=0.15))},
+]
+
+BOT_TEMPLATES = [
+    {"id": "grid_bot", "name": "Grid bot (Pionex-style spot grid)", "type": "lotsim",
+     "rule": ("20 fixed grid levels spanning +/-range_pct around the price at activation "
+              "(and after every reset); each level below the activation price is funded with "
+              "capital/20 and buys when the bar's low reaches it, then sells (and re-arms) when "
+              "the bar's high reaches one grid step above; if the close ever exits the grid's "
+              "range, every open lot is liquidated at that close and the grid re-activates, "
+              "re-centered on that close, the next bar"),
+     "variants": _GRID_BOT_VARIANTS},
+    {"id": "dca_bot", "name": "DCA bot (3Commas-style safety orders)", "type": "lotsim",
+     "rule": ("base order = 10% of capital at the next deal's open; up to 5 safety orders, each "
+              "1.5x the previous order's size, spaced so_step_pct apart (compounding) below the "
+              "base order's own fill price, filling when the bar's low reaches their level (a "
+              "safety order the remaining capital cannot fund is skipped); take-profit sells the "
+              "whole deal when the bar's high reaches 1.5% above the average entry price; no "
+              "stop-loss; a new deal starts the moment none is open"),
+     "variants": _DCA_BOT_VARIANTS},
+    {"id": "dca_bot_sl", "name": "DCA bot with stop-loss (3Commas-style)", "type": "lotsim",
+     "rule": ("same as the DCA bot above (so_step_pct=2.5 only), plus a -15% stop-loss on the "
+              "average entry price that sells the whole deal when the bar's low reaches it"),
+     "variants": _DCA_BOT_SL_VARIANTS},
+]
+
+
+def iter_bot_template_variants():
+    """Same shape as iter_variants()/iter_popular_combo_variants() above, but over BOT_TEMPLATES
+    instead — yields (strategy_id, strategy_name, strategy_type, variant_dict)."""
+    for entry in BOT_TEMPLATES:
+        for variant in entry["variants"]:
+            yield entry["id"], entry["name"], entry["type"], variant
+
+
+def count_bot_template_variants() -> int:
+    return sum(len(entry["variants"]) for entry in BOT_TEMPLATES)

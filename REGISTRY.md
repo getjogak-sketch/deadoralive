@@ -48,6 +48,7 @@ mechanical thing that stops that from happening here, and it only works if it is
 | `textbook` | A standard single-indicator strategy as commonly described in trading textbooks/references (the original `REGISTRY` table — SMA/EMA crossovers, RSI mean reversion, Bollinger Bands, MACD, Supertrend, Donchian/Turtle breakout, etc.). |
 | `popular_combo` | A multi-indicator combination as it is commonly taught in retail trading content on YouTube/TradingView (the `POPULAR_COMBOS` table). |
 | `community` | A strategy proposed by a reader via the "Propose a strategy" issue template (see below), accepted and registered before any result was computed for it. None yet — this row exists in the schema for when the first one is accepted. |
+| `bot_template` | A grid or DCA bot as it is commonly configured out-of-the-box on a retail bot platform (Pionex-style spot grid, 3Commas-style DCA with safety orders) — the `BOT_TEMPLATES` table. Simulated lot-by-lot in `bot_engine.py` rather than by the single-position engine the other three sources share, but pre-registered and verdicted the same way. |
 
 ## Proposing a strategy
 

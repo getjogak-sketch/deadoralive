@@ -65,10 +65,18 @@ def _index_point(as_of: str, tally: dict) -> dict | None:
     }
 
 
-def compute_index_history(edition_key: str, history_dir: str | None = None) -> list[dict]:
+def compute_index_history(edition_key: str, history_dir: str | None = None,
+                           tally_key: str = "tally") -> list[dict]:
     """The full {as_of, alive, fading, dead, too_few, decay_index, n} series for one edition,
     ascending by as_of, read from every results/history/<...>.json snapshot that matches this
-    edition's filename pattern and has at least one textbook row."""
+    edition's filename pattern and has at least one row under `tally_key`.
+
+    `tally_key` (task B1 addition): defaults to "tally" (the existing textbook-registry index,
+    unchanged). Passing "bot_tally" instead reads the SEPARATE bot-templates tally each snapshot
+    also carries (payload["bot_tally"], written by run_weekly.py alongside payload["tally"]) —
+    task B1's own instruction: "decay index includes them only in a separate `bots` tally (do not
+    change the textbook decay index)". A snapshot from before task B1 simply has no "bot_tally" key
+    and is skipped for that key, exactly like a zero-row week already is."""
     history_dir = history_dir or config.HISTORY_DIR
     pat = _HIST_FILE_RE[edition_key]
     points = []
@@ -84,7 +92,7 @@ def compute_index_history(edition_key: str, history_dir: str | None = None) -> l
                 snap = json.load(f)
         except (OSError, json.JSONDecodeError):
             continue
-        point = _index_point(as_of, snap.get("tally") or {})
+        point = _index_point(as_of, snap.get(tally_key) or {})
         if point is not None:
             points.append(point)
     points.sort(key=lambda p: p["as_of"])
@@ -106,9 +114,33 @@ def write_index_history(edition_key: str, out_root: str | None = None,
     return out_path
 
 
+def write_bot_index_history(edition_key: str, out_root: str | None = None,
+                             history_dir: str | None = None) -> str:
+    """task B1: the bot-templates counterpart of write_index_history above, reading `bot_tally`
+    instead of `tally` — a completely separate output file/index so the textbook Decay Index
+    (index_history.json) is never touched by this."""
+    out_root = out_root or os.path.join(config.DOCS_DIR, "api", "v1")
+    out_dir = os.path.join(out_root, edition_key)
+    os.makedirs(out_dir, exist_ok=True)
+    points = compute_index_history(edition_key, history_dir, tally_key="bot_tally")
+    out_path = os.path.join(out_dir, "index_history_bots.json")
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(points, f, indent=2)
+    return out_path
+
+
 def load_index_history(edition_key: str, out_root: str | None = None) -> list[dict]:
     out_root = out_root or os.path.join(config.DOCS_DIR, "api", "v1")
     path = os.path.join(out_root, edition_key, "index_history.json")
+    if not os.path.exists(path):
+        return []
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def load_bot_index_history(edition_key: str, out_root: str | None = None) -> list[dict]:
+    out_root = out_root or os.path.join(config.DOCS_DIR, "api", "v1")
+    path = os.path.join(out_root, edition_key, "index_history_bots.json")
     if not os.path.exists(path):
         return []
     with open(path, encoding="utf-8") as f:
@@ -119,3 +151,5 @@ if __name__ == "__main__":
     for ed in ("en", "ko", "stocks", "macro"):
         p = write_index_history(ed)
         print(f"Wrote {p} ({len(load_index_history(ed))} points)")
+        pb = write_bot_index_history(ed)
+        print(f"Wrote {pb} ({len(load_bot_index_history(ed))} points)")

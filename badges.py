@@ -120,7 +120,8 @@ def summary_badge_svg(alive: int, total: int) -> str:
 
 
 def _badge_rows(payload: dict) -> list:
-    return [r for r in ((payload.get("rows") or []) + (payload.get("popular_combos") or []))
+    return [r for r in ((payload.get("rows") or []) + (payload.get("popular_combos") or [])
+                         + (payload.get("bot_templates") or []))
             if r.get("type") != "reference"]
 
 

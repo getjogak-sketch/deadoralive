@@ -43,7 +43,8 @@ EDITION_LABEL_EN = {"en": "Crypto (BTC/ETH)", "ko": "Korean (Upbit KRW)",
 
 
 def _variant_rows(payload: dict) -> list:
-    return [r for r in ((payload.get("rows") or []) + (payload.get("popular_combos") or []))
+    return [r for r in ((payload.get("rows") or []) + (payload.get("popular_combos") or [])
+                         + (payload.get("bot_templates") or []))
             if r.get("type") != "reference"]
 
 

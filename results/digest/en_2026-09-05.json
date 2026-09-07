@@ -75,149 +75,137 @@
     "edition": "en"
   },
   "best_pf": {
-    "strategy_id": "dip_3down",
-    "strategy_name": "Buy the dip (3 down closes)",
-    "type": "state",
-    "params": "fixed",
+    "strategy_id": "dca_bot",
+    "strategy_name": "DCA bot (3Commas-style safety orders)",
+    "type": "lotsim",
+    "params": "sostep2.5",
     "asset": "BTCUSD",
     "timeframe": "1d",
     "as_of": "2026-09-05",
     "verdict": "ALIVE",
     "is": {
-      "total_return": 0.036292966812087046,
-      "cagr": 0.005064103194843295,
+      "total_return": 808.3994610761912,
+      "cagr": 1.5826467532390183,
       "bh_return": 12.260049609513961,
-      "n_trades": 139,
-      "win_rate": 66.18705035971223,
-      "profit_factor": 1.1050417363878209,
-      "mdd": 52.58195544991979,
+      "n_trades": 1833,
+      "win_rate": 100.0,
+      "profit_factor": "inf",
+      "mdd": 19.526496076833066,
       "bh_mdd": 83.4293493046095,
-      "sharpe": 0.1486046156773267,
-      "exposure": 9.782608695652174,
-      "max_consec_loss": 3,
-      "avg_trade_return": 0.0014396927771288097
+      "sharpe": 8.18197447151155,
+      "exposure": 28.843167701863354,
+      "max_consec_loss": 0,
+      "avg_trade_return": 0.013984999999999902
     },
     "oos": {
-      "total_return": 0.4267639236273244,
-      "cagr": 0.19418189823642273,
+      "total_return": 0.9647966138108477,
+      "cagr": 0.4010646411330403,
       "bh_return": 0.37425257290058767,
-      "n_trades": 52,
-      "win_rate": 65.38461538461539,
-      "profit_factor": 2.149002558588919,
-      "mdd": 13.282704853548156,
+      "n_trades": 271,
+      "win_rate": 99.63099630996311,
+      "profit_factor": 27.857668691995073,
+      "mdd": 29.705505886038342,
       "bh_mdd": 53.0769594637932,
-      "sharpe": 1.0368634813183217,
-      "exposure": 12.585499316005471,
-      "max_consec_loss": 4,
-      "avg_trade_return": 0.0072572184597967425,
-      "fee_drag": 0.1563740299688383
+      "sharpe": 1.7008832644550067,
+      "exposure": 62.927496580027366,
+      "max_consec_loss": 1,
+      "avg_trade_return": 0.01343323112721451,
+      "fee_drag": 0.16048748027991255
     },
-    "suspicious": false,
+    "suspicious": true,
     "robustness": {
-      "grid": [],
-      "share_pf_ge_1": null,
-      "n_pass": null,
-      "n_total": 0,
-      "note": "diagnostic; verdict uses registered params only; this variant has no tunable numeric parameter to vary"
+      "grid": [
+        {
+          "params": "so_step_pct=1.875",
+          "oos_pf": 25.857796528250827,
+          "oos_n_trades": 272
+        },
+        {
+          "params": "so_step_pct=2.5",
+          "oos_pf": 27.857668691995073,
+          "oos_n_trades": 271
+        },
+        {
+          "params": "so_step_pct=3.125",
+          "oos_pf": 10.859273601305507,
+          "oos_n_trades": 202
+        }
+      ],
+      "share_pf_ge_1": 1.0,
+      "n_pass": 3,
+      "n_total": 3,
+      "note": "diagnostic; verdict uses registered params only"
     },
+    "group": "bot_templates",
     "edition": "en"
   },
   "worst_pf": {
-    "strategy_id": "vol_breakout_trend",
-    "strategy_name": "Volatility breakout + trend filter",
-    "type": "onebar",
-    "params": "k0.5-sma20",
+    "strategy_id": "grid_bot",
+    "strategy_name": "Grid bot (Pionex-style spot grid)",
+    "type": "lotsim",
+    "params": "range20-grid20",
     "asset": "BTCUSD",
-    "timeframe": "4h",
+    "timeframe": "1d",
     "as_of": "2026-09-05",
     "verdict": "DEAD",
     "is": {
-      "total_return": -0.9760140123858033,
-      "cagr": -0.41054308410730367,
+      "total_return": -0.44595637048632275,
+      "cagr": -0.0802663177298113,
       "bh_return": 12.260049609513961,
-      "n_trades": 3273,
-      "win_rate": 36.1747632141766,
-      "profit_factor": 0.7845435686618042,
-      "mdd": 98.38890106458918,
-      "bh_mdd": 83.93728308558705,
-      "sharpe": -1.7293956055127062,
-      "exposure": 35.02199792960663,
-      "max_consec_loss": 16,
-      "avg_trade_return": -0.0010537565717974825
+      "n_trades": 1421,
+      "win_rate": 83.6734693877551,
+      "profit_factor": 0.7019475192006492,
+      "mdd": 55.24756823544029,
+      "bh_mdd": 83.4293493046095,
+      "sharpe": -0.4187928024540958,
+      "exposure": 50.34937888198758,
+      "max_consec_loss": 10,
+      "avg_trade_return": -0.007579532130876213
     },
     "oos": {
-      "total_return": -0.813834598901756,
-      "cagr": -0.5680346908663783,
+      "total_return": -0.09269796578705813,
+      "cagr": -0.0474125845797192,
       "bh_return": 0.37425257290058767,
-      "n_trades": 960,
-      "win_rate": 34.6875,
-      "profit_factor": 0.5591805070128135,
-      "mdd": 83.22396051440589,
-      "bh_mdd": 53.56229229923255,
-      "sharpe": -4.129361114994095,
-      "exposure": 35.841313269493845,
-      "max_consec_loss": 14,
-      "avg_trade_return": -0.001708942784792063,
-      "fee_drag": 1.0836618809012855
+      "n_trades": 133,
+      "win_rate": 78.19548872180451,
+      "profit_factor": 0.5371724781560212,
+      "mdd": 16.71406006298045,
+      "bh_mdd": 53.0769594637932,
+      "sharpe": -0.7036267709257074,
+      "exposure": 21.751025991792066,
+      "max_consec_loss": 10,
+      "avg_trade_return": -0.013656790324398123,
+      "fee_drag": 0.01203243358187156
     },
     "suspicious": false,
     "robustness": {
       "grid": [
         {
-          "params": "k=0.4, sma_n=15",
-          "oos_pf": 0.5569680299136023,
-          "oos_n_trades": 1155
+          "params": "range_pct=15.0",
+          "oos_pf": 0.6414716596868286,
+          "oos_n_trades": 253
         },
         {
-          "params": "k=0.4, sma_n=20",
-          "oos_pf": 0.5485830771395592,
-          "oos_n_trades": 1160
+          "params": "range_pct=20.0",
+          "oos_pf": 0.5371724781560212,
+          "oos_n_trades": 133
         },
         {
-          "params": "k=0.4, sma_n=25",
-          "oos_pf": 0.5550156205577225,
-          "oos_n_trades": 1134
-        },
-        {
-          "params": "k=0.5, sma_n=15",
-          "oos_pf": 0.5700068195176899,
-          "oos_n_trades": 949
-        },
-        {
-          "params": "k=0.5, sma_n=20",
-          "oos_pf": 0.5591805070128135,
-          "oos_n_trades": 960
-        },
-        {
-          "params": "k=0.5, sma_n=25",
-          "oos_pf": 0.5655969313158304,
-          "oos_n_trades": 939
-        },
-        {
-          "params": "k=0.6, sma_n=15",
-          "oos_pf": 0.5753024789077738,
-          "oos_n_trades": 809
-        },
-        {
-          "params": "k=0.6, sma_n=20",
-          "oos_pf": 0.5723907578943719,
-          "oos_n_trades": 816
-        },
-        {
-          "params": "k=0.6, sma_n=25",
-          "oos_pf": 0.5839767972467803,
-          "oos_n_trades": 794
+          "params": "range_pct=25.0",
+          "oos_pf": 0.46799863876755143,
+          "oos_n_trades": 107
         }
       ],
       "share_pf_ge_1": 0.0,
       "n_pass": 0,
-      "n_total": 9,
+      "n_total": 3,
       "note": "diagnostic; verdict uses registered params only"
     },
+    "group": "bot_templates",
     "edition": "en"
   },
-  "n_rows": 58,
+  "n_rows": 70,
   "title": "Week of 2026-09-05: 8 alive / 17 fading / 12 dead \u2014 what changed",
-  "markdown": "# Week of 2026-09-05: 8 alive / 17 fading / 12 dead \u2014 what changed\n\n- This run covers 58 strategy/asset/timeframe rows: 8 ALIVE, 17 FADING, 12 DEAD, 7 with too few trades.\n- This is the first recorded week for this edition, so there is no prior run to compare verdicts against.\n- Among rows with at least 30 out-of-sample trades, the highest was 2.15 (Buy the dip (3 down closes) (fixed) on BTCUSD 1d); the lowest was 0.56 (Volatility breakout + trend filter (k0.5-sma20) on BTCUSD 4h).\n\nBiggest fee drag: 214.6% on Larry Williams volatility breakout (k0.7) on BTCUSD 4h.\n\nThis digest restates numbers already published on the site; it is not investment advice.",
-  "html_body": "<ul><li>This run covers 58 strategy/asset/timeframe rows: 8 ALIVE, 17 FADING, 12 DEAD, 7 with too few trades.</li><li>This is the first recorded week for this edition, so there is no prior run to compare verdicts against.</li><li>Among rows with at least 30 out-of-sample trades, the highest was 2.15 (Buy the dip (3 down closes) (fixed) on BTCUSD 1d); the lowest was 0.56 (Volatility breakout + trend filter (k0.5-sma20) on BTCUSD 4h).</li></ul><p><strong>Biggest fee drag:</strong> 214.6% on Larry Williams volatility breakout (k0.7) on BTCUSD 4h.</p>"
+  "markdown": "# Week of 2026-09-05: 8 alive / 17 fading / 12 dead \u2014 what changed\n\n- This run covers 70 strategy/asset/timeframe rows: 8 ALIVE, 17 FADING, 12 DEAD, 7 with too few trades.\n- This is the first recorded week for this edition, so there is no prior run to compare verdicts against.\n- Among rows with at least 30 out-of-sample trades, the highest was 27.86 (DCA bot (3Commas-style safety orders) (sostep2.5) on BTCUSD 1d); the lowest was 0.54 (Grid bot (Pionex-style spot grid) (range20-grid20) on BTCUSD 1d).\n\nBiggest fee drag: 214.6% on Larry Williams volatility breakout (k0.7) on BTCUSD 4h.\n\nThis digest restates numbers already published on the site; it is not investment advice.",
+  "html_body": "<ul><li>This run covers 70 strategy/asset/timeframe rows: 8 ALIVE, 17 FADING, 12 DEAD, 7 with too few trades.</li><li>This is the first recorded week for this edition, so there is no prior run to compare verdicts against.</li><li>Among rows with at least 30 out-of-sample trades, the highest was 27.86 (DCA bot (3Commas-style safety orders) (sostep2.5) on BTCUSD 1d); the lowest was 0.54 (Grid bot (Pionex-style spot grid) (range20-grid20) on BTCUSD 1d).</li></ul><p><strong>Biggest fee drag:</strong> 214.6% on Larry Williams volatility breakout (k0.7) on BTCUSD 4h.</p>"
 }

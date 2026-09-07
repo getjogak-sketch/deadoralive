@@ -3,7 +3,7 @@
   "edition": "macro",
   "lang": "en",
   "tagline": "Gold, silver, oil, EUR/USD, and USD/JPY: popular trading strategies re-tested every week, after fees, out-of-sample.",
-  "generated_at": "2026-09-07T12:51:34.960836+00:00",
+  "generated_at": "2026-09-07T13:43:37.744160+00:00",
   "as_of": "2026-09-07",
   "oos_days": 730,
   "tally": {
@@ -14,6 +14,13 @@
   },
   "rows": [],
   "popular_combos": [],
+  "bot_templates": [],
+  "bot_tally": {
+    "ALIVE": 0,
+    "FADING": 0,
+    "DEAD": 0,
+    "TOO FEW TRADES": 0
+  },
   "suspicious": [],
   "legal_disclaimer": "Educational / informational content only. This is not investment advice, and nothing here is a recommendation to buy or sell any asset. Past backtested performance, especially net-of-cost historical simulation, does not guarantee future results.",
   "repo_url": "https://github.com/getjogak-sketch/deadoralive",

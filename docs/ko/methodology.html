@@ -184,6 +184,24 @@ footer.bottom .disclaimer { margin-top: 0.75rem; }
   </section>
 
   <section class="assetblock">
+    <h2>봇 템플릿 &mdash; 그리드·DCA 봇의 흔한 설정</h2>
+    <p>세 번째로 별도 사전 등록된 그룹입니다 — 파이오넥스·3커맨스에서 흔히 쓰는 방식대로 설정한
+       그리드 봇과 분할매수(DCA, 안전주문) 봇입니다. 매수만 하고 레버리지가 없으며 수수료·판정
+       기준은 위 전략들과 같지만, 여러 개의 작은 매수 건을 각각 따로 추적하는 별도 엔진
+       (<code>bot_engine.py</code>)으로 계산합니다 — 위의 다른 모든 전략처럼 전액을 한 번에
+       진입·청산하는 방식이 아니기 때문입니다. "거래 횟수"는 그리드 봇은 완료된 매도 건수, DCA
+       봇은 종료된 거래(deal) 건수를 뜻합니다. 주변 설정값 안정성 검사는 그리드 봇의
+       <code>range_pct</code>, DCA 봇의 <code>so_step_pct</code>에만 적용하며, 격자 수·주문
+       크기·익절/손절 비율 등 나머지 값은 모두 고정값으로 검사하지 않습니다.</p>
+    <div class="tablewrap"><table class="regtable">
+      <thead><tr><th>id</th><th>전략</th><th>규칙</th><th>설정값</th></tr></thead>
+      <tbody><tr><td>grid_bot</td><td>그리드 봇, 파이오넥스 방식 (Grid bot, Pionex-style spot grid)</td><td>활성화 시점 가격을 중심으로 위아래 range_pct% 범위에 20개 격자를 고정 배치. 가격보다 낮은 격자는 자본의 1/20씩 매수 대기하다가 저가가 닿으면 매수하고, 고가가 한 칸 위 격자에 닿으면 매도한 뒤 다시 매수 대기 상태로 돌아감. 종가가 범위를 벗어나면 그 시점에 보유 물량을 전부 청산하고, 다음 봉부터 그 종가를 중심으로 격자를 다시 구성함</td><td>range10-grid20, range20-grid20, range30-grid20</td></tr>
+<tr><td>dca_bot</td><td>분할매수 봇, 3커맨스 방식 (DCA bot, 3Commas-style safety orders)</td><td>기본 주문(자본의 10%)을 다음 거래(deal) 시작 시 매수. 이후 안전주문을 최대 5회까지, 이전 주문의 1.5배 크기로, 기본 주문 체결가 기준 so_step_pct%씩 벌어진 가격에 저가가 닿을 때마다 매수(남은 자본으로 감당 못 하는 안전주문은 건너뜀). 평균 매입가 대비 고가가 1.5% 위에 닿으면 보유 물량 전부를 매도해 거래를 종료. 손절매 없음. 거래가 끝나면 바로 다음 거래가 시작됨</td><td>sostep1.5, sostep2.5</td></tr>
+<tr><td>dca_bot_sl</td><td>손절 포함 분할매수 봇 (DCA bot with stop-loss)</td><td>위 분할매수 봇과 같음(so_step_pct=2.5 고정)에 더해, 평균 매입가 대비 저가가 15% 아래로 내려오면 보유 물량 전부를 매도하는 손절매 추가</td><td>sostep2.5-sl15</td></tr></tbody>
+    </table></div>
+  </section>
+
+  <section class="assetblock">
     <h2>내 전략도 검사해 보기</h2>
     <p><a href="https://github.com/getjogak-sketch/deadoralive/issues/new?template=check-strategy.yml">"Check my strategy" 이슈 양식</a>으로
        깃허브 이슈를 하나 열면, 이미 저장소에 있는 데이터를 기준으로 같은 엔진·수수료·판정 기준을

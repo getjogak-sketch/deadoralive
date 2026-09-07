@@ -542,6 +542,19 @@ def build_methodology(out_path: str | None = None, assets: list | None = None,
   </section>
 
   <section class="assetblock">
+    <h2>Extended check (paid)</h2>
+    <p>The free check above runs one strategy/parameter combination on one asset and timeframe.
+       Pasting a Gumroad license key into the same issue form's optional field, instead, runs
+       that strategy on <em>every</em> asset and timeframe of the edition you picked, and adds
+       the full out-of-sample trade list, a wider 5&times;5 parameter-neighbourhood robustness
+       grid (&plusmn;25%/&plusmn;50% per parameter, instead of the free check's 3&times;3), and
+       an out-of-sample monthly-returns table. It is still exactly the same engine, cost model,
+       and verdict thresholds as every other number on this site &mdash; software output, not
+       investment advice, and not a signal to act on. Price: see Gumroad. An unrecognized,
+       expired, or refunded key simply falls back to the free check above, with a note saying so.</p>
+  </section>
+
+  <section class="assetblock">
     <h2>What we don't do</h2>
     <p>No parameter tuning, no new filters, no adding a strategy variant after seeing how it
        performs. Every strategy and every parameter value that will ever appear on this site is
@@ -1058,6 +1071,18 @@ def build_methodology_ko(out_path: str | None = None):
   </section>
 
   <section class="assetblock">
+    <h2>확장 검사 (유료)</h2>
+    <p>위의 무료 검사는 전략 하나를 자산·주기 하나에 대해서만 돌립니다. 같은 이슈 양식의 선택 항목에
+       굼로드(Gumroad) 라이선스 키를 함께 적어 내면, 같은 전략을 선택한 에디션의 <em>모든</em>
+       자산·주기에 대해 돌리고, 아웃오브샘플 전체 매매 내역, &plusmn;25%/&plusmn;50%로 넓힌
+       5&times;5 설정값 주변 검사(무료 검사의 3&times;3보다 넓음), 아웃오브샘플 월별 수익률 표를
+       추가로 붙여 드립니다. 이 역시 이 사이트의 다른 모든 숫자와 완전히 같은 엔진·수수료·판정
+       기준을 쓰는 소프트웨어 결과물일 뿐, 투자 자문이나 매매 신호가 아닙니다. 가격은 굼로드
+       페이지를 참고하세요. 키를 알아볼 수 없거나 만료·환불된 경우에는 그 사실을 알리고 무료
+       검사로 대신 진행합니다.</p>
+  </section>
+
+  <section class="assetblock">
     <h2>일부러 하지 않는 것</h2>
     <p>설정값을 결과가 좋아질 때까지 바꾸는 일, 결과를 본 뒤 조건을 덧붙이는 일은 하지 않습니다.
        그렇게 하면 과거에만 맞는 전략이 만들어지기 때문입니다. 이 사이트에 있는 모든 전략과 설정값은
@@ -1385,6 +1410,7 @@ _PLACES_SECRET_EN = [
     ("Mastodon posts", "MASTODON_INSTANCE, MASTODON_TOKEN", "MASTODON_INSTANCE is your instance's base URL, e.g. https://mastodon.social."),
     ("Kaggle dataset", "KAGGLE_USERNAME, KAGGLE_KEY", "From a Kaggle account's Settings -> API -> Create New Token."),
     ("Hugging Face dataset", "HF_TOKEN, HF_DATASET_REPO", "HF_DATASET_REPO is 'account-or-org/dataset-name'; token needs write access."),
+    ("Extended check (paid, Gumroad license)", "GUMROAD_PRODUCT_ID (+ optional GUMROAD_URL)", "Same issue form as the free check; a verified license key runs every asset/timeframe of the edition, the full OOS trade list, a 5&times;5 robustness grid, and OOS monthly returns. Price: see Gumroad."),
 ]
 _PLACES_MANUAL_EN = [
     ("Google Search Console", "Verify the Pages URL as a property, then submit docs/sitemap.xml."),
@@ -1481,6 +1507,7 @@ _PLACES_SECRET_KO = [
     ("마스토돈(Mastodon) 게시", "MASTODON_INSTANCE, MASTODON_TOKEN", "MASTODON_INSTANCE는 인스턴스 주소입니다. 예: https://mastodon.social"),
     ("캐글(Kaggle) 데이터셋", "KAGGLE_USERNAME, KAGGLE_KEY", "Kaggle 계정 설정 -> API -> Create New Token에서 발급합니다."),
     ("허깅페이스(Hugging Face) 데이터셋", "HF_TOKEN, HF_DATASET_REPO", "HF_DATASET_REPO는 '계정 또는 조직/데이터셋이름' 형식이며, 토큰은 쓰기 권한이 필요합니다."),
+    ("확장 검사(유료, 굼로드 라이선스)", "GUMROAD_PRODUCT_ID (선택: GUMROAD_URL)", "무료 검사와 같은 이슈 양식에 라이선스 키를 함께 적으면, 선택한 에디션의 모든 자산·주기, 전체 아웃오브샘플 매매 내역, 5&times;5 설정값 주변 검사, 월별 수익률 표를 추가로 붙여 드립니다. 가격은 굼로드 페이지 참고."),
 ]
 _PLACES_MANUAL_KO = [
     ("구글 서치 콘솔(Google Search Console)", "사이트 소유를 확인한 뒤 docs/sitemap.xml을 제출합니다."),

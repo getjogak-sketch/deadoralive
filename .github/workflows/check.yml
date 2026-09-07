@@ -49,6 +49,12 @@ jobs:
 
       - name: "Parse, validate, and backtest this one issue (dry-run, no GitHub calls yet)"
         id: render
+        # GUMROAD_PRODUCT_ID/GUMROAD_URL are both optional (T2): check_issue.py falls back to the
+        # ordinary free check, with a clear message, whenever GUMROAD_PRODUCT_ID isn't set — so
+        # this step needs no `if:` guard, unlike publish.py's secret-gated steps elsewhere.
+        env:
+          GUMROAD_PRODUCT_ID: ${{ secrets.GUMROAD_PRODUCT_ID }}
+          GUMROAD_URL: ${{ vars.GUMROAD_URL }}
         run: |
           python check_issue.py --body /tmp/issue_body.txt --dry-run > /tmp/comment.md
           if grep -q '<!-- check-issue-status: valid -->' /tmp/comment.md; then

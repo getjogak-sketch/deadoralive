@@ -98,6 +98,20 @@ body:
     validations:
       required: false
 
+  - type: input
+    id: license
+    attributes:
+      label: License key (optional, for extended check)
+      description: >-
+        Optional. If you've bought an extended check, paste your Gumroad license key here to run
+        this strategy on EVERY asset and timeframe of the edition you picked above, with the full
+        OOS trade list, a wider 5x5 robustness grid, and an OOS monthly-returns table. Leave empty
+        (or an invalid/unrecognized key) for the free check above — you'll still get the free
+        result either way, just without the extras.
+      placeholder: "XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX"
+    validations:
+      required: false
+
   - type: checkboxes
     id: confirmation
     attributes:

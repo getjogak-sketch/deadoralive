@@ -926,6 +926,198 @@ def test_check_issue_dry_run_end_to_end():
 
 
 # ---------------------------------------------------------------------------
+# This task's T2: paid "extended check" via Gumroad license keys — fake HTTP responses (valid,
+# refunded, invalid, network error) for verify_gumroad_license, the free-path-unchanged guarantee
+# when no license key is given, the unverified-key note, and the extended-check renderer's extra
+# sections. GUMROAD_PRODUCT_ID/GUMROAD_URL and requests.post are saved/restored around every test
+# so they can never leak into any other test in this file.
+# ---------------------------------------------------------------------------
+
+def _issue_body_with_license(edition, asset, timeframe, strategy, params, license_key="",
+                               checked=True):
+    box = "[x]" if checked else "[ ]"
+    lic = license_key if license_key else "_No response_"
+    return (
+        f"### Edition\n\n{edition}\n\n"
+        f"### Asset\n\n{asset}\n\n"
+        f"### Timeframe\n\n{timeframe}\n\n"
+        f"### Strategy type\n\n{strategy}\n\n"
+        f"### Params\n\n{params}\n\n"
+        f"### License key (optional, for extended check)\n\n{lic}\n\n"
+        f"### Confirmation\n\n"
+        f"- {box} I understand this is an automated educational backtest, not investment advice.\n"
+    )
+
+
+class _FakeGumroadResponse:
+    def __init__(self, status_code, payload):
+        self.status_code = status_code
+        self._payload = payload
+
+    def json(self):
+        return self._payload
+
+
+def test_gumroad_verify_fake_http():
+    import check_issue as ci
+    import requests
+
+    orig_post = requests.post
+    saved_pid = os.environ.pop("GUMROAD_PRODUCT_ID", None)
+    try:
+        # 1. GUMROAD_PRODUCT_ID unset -> unverified with the spec's own clear message, and no
+        #    HTTP call is even attempted (nothing to verify against).
+        calls = []
+        requests.post = lambda *a, **k: (calls.append(1), _FakeGumroadResponse(200, {"success": True}))[1]
+        verified, reason = ci.verify_gumroad_license("ANY-KEY")
+        check("gumroad: GUMROAD_PRODUCT_ID unset -> unverified", verified is False)
+        check("gumroad: GUMROAD_PRODUCT_ID unset -> spec's exact clear message",
+              reason == "extended checks are not enabled yet", reason)
+        check("gumroad: GUMROAD_PRODUCT_ID unset -> no HTTP call made", len(calls) == 0)
+
+        os.environ["GUMROAD_PRODUCT_ID"] = "prod_test123"
+
+        # 2. valid, unrefunded purchase -> verified.
+        requests.post = lambda *a, **k: _FakeGumroadResponse(
+            200, {"success": True, "purchase": {"refunded": False, "chargebacked": False, "disputed": False}})
+        verified, reason = ci.verify_gumroad_license("GOOD-KEY")
+        check("gumroad: valid unrefunded purchase -> verified", verified is True, reason)
+
+        # 3. refunded purchase -> NOT verified even though success: true.
+        requests.post = lambda *a, **k: _FakeGumroadResponse(
+            200, {"success": True, "purchase": {"refunded": True, "chargebacked": False, "disputed": False}})
+        verified, reason = ci.verify_gumroad_license("REFUNDED-KEY")
+        check("gumroad: refunded purchase -> unverified", verified is False)
+
+        # 3b. chargebacked / disputed purchases -> also NOT verified.
+        requests.post = lambda *a, **k: _FakeGumroadResponse(
+            200, {"success": True, "purchase": {"refunded": False, "chargebacked": True, "disputed": False}})
+        v_cb, _ = ci.verify_gumroad_license("CHARGEBACK-KEY")
+        check("gumroad: chargebacked purchase -> unverified", v_cb is False)
+        requests.post = lambda *a, **k: _FakeGumroadResponse(
+            200, {"success": True, "purchase": {"refunded": False, "chargebacked": False, "disputed": True}})
+        v_disp, _ = ci.verify_gumroad_license("DISPUTED-KEY")
+        check("gumroad: disputed purchase -> unverified", v_disp is False)
+
+        # 4. invalid key (Gumroad's own documented failure shape: success: false).
+        requests.post = lambda *a, **k: _FakeGumroadResponse(404, {"success": False, "message": "That license does not exist for the provided product."})
+        verified, reason = ci.verify_gumroad_license("BAD-KEY")
+        check("gumroad: invalid key (success: false, HTTP 404) -> unverified", verified is False)
+
+        # 5. network error -> unverified, never a crash.
+        def raise_conn_error(*a, **k):
+            raise requests.exceptions.ConnectionError("simulated network failure")
+        requests.post = raise_conn_error
+        verified, reason = ci.verify_gumroad_license("ANY-KEY")
+        check("gumroad: network error -> unverified, no exception propagates", verified is False)
+    finally:
+        requests.post = orig_post
+        if saved_pid is None:
+            os.environ.pop("GUMROAD_PRODUCT_ID", None)
+        else:
+            os.environ["GUMROAD_PRODUCT_ID"] = saved_pid
+
+
+def test_check_issue_license_free_path_unchanged():
+    """spec's own requirement: 'free path unchanged byte-for-byte when no key'."""
+    import check_issue as ci
+
+    body_no_license_field = _issue_body("en", "en:BTCUSD", "1d", "sma_cross", "n_fast=10, n_slow=50")
+    body_with_empty_license = _issue_body_with_license(
+        "en", "en:BTCUSD", "1d", "sma_cross", "n_fast=10, n_slow=50", license_key="")
+
+    comment_a, valid_a = ci.build_comment(body_no_license_field)
+    comment_b, valid_b = ci.build_comment(body_with_empty_license)
+    check("check_issue: free-check comment is byte-for-byte identical whether the license field "
+          "is absent entirely or present-but-empty",
+          valid_a and valid_b and comment_a == comment_b)
+    check("check_issue: free-check comment (no key) has no license/extended-check mention",
+          "License key" not in comment_a and "Extended check (licensed)" not in comment_a)
+
+
+def test_check_issue_license_unverified_note():
+    import check_issue as ci
+
+    saved_pid = os.environ.pop("GUMROAD_PRODUCT_ID", None)
+    saved_url = os.environ.pop("GUMROAD_URL", None)
+    try:
+        body = _issue_body_with_license("en", "en:BTCUSD", "1d", "sma_cross",
+                                          "n_fast=10, n_slow=50", license_key="SOME-KEY")
+        comment_md, is_valid = ci.build_comment(body)
+        check("check_issue: an unverifiable license key still runs (and returns) the free check",
+              is_valid)
+        check("check_issue: unverified-key comment still has the free-check scorecard",
+              "**Verdict:**" in comment_md)
+        check("check_issue: unverified-key comment names the 'not enabled yet' reason "
+              "(GUMROAD_PRODUCT_ID unset in this test)",
+              "Extended checks are not enabled yet" in comment_md, comment_md)
+        check("check_issue: unverified-key note says the free check ran instead",
+              "ran the free check instead" in comment_md)
+        check("check_issue: unverified-key comment has NO extended-check header",
+              "Extended check (licensed)" not in comment_md)
+        check("check_issue: with GUMROAD_URL unset, the note has no dangling 'Keys are sold at'",
+              "Keys are sold at" not in comment_md)
+
+        os.environ["GUMROAD_URL"] = "https://example.gumroad.com/l/netcheck-extended"
+        comment_md2, _ = ci.build_comment(body)
+        check("check_issue: GUMROAD_URL, when set, is included in the unverified-key note",
+              "https://example.gumroad.com/l/netcheck-extended" in comment_md2)
+    finally:
+        if saved_pid is None:
+            os.environ.pop("GUMROAD_PRODUCT_ID", None)
+        else:
+            os.environ["GUMROAD_PRODUCT_ID"] = saved_pid
+        if saved_url is None:
+            os.environ.pop("GUMROAD_URL", None)
+        else:
+            os.environ["GUMROAD_URL"] = saved_url
+
+
+def test_check_issue_extended_check_sections():
+    import check_issue as ci
+    import requests
+
+    orig_post = requests.post
+    saved_pid = os.environ.pop("GUMROAD_PRODUCT_ID", None)
+    try:
+        os.environ["GUMROAD_PRODUCT_ID"] = "prod_test123"
+        requests.post = lambda *a, **k: _FakeGumroadResponse(
+            200, {"success": True, "purchase": {"refunded": False, "chargebacked": False, "disputed": False}})
+
+        body = _issue_body_with_license("en", "en:BTCUSD", "1d", "sma_cross",
+                                          "n_fast=10, n_slow=50", license_key="GOOD-KEY")
+        comment_md, is_valid = ci.build_comment(body)
+        check("check_issue: extended check with a verified license key succeeds",
+              is_valid, comment_md[:400])
+        check("check_issue: extended comment states 'Extended check (licensed)' at the top",
+              comment_md.lstrip().startswith("## Extended check (licensed)"), comment_md[:80])
+        check("check_issue: extended check covers BTCUSD 1d (the committed data)",
+              "### BTCUSD 1d" in comment_md)
+        check("check_issue: extended check covers BTCUSD 4h too (ALL timeframes, not just the "
+              "one selected on the issue form)", "### BTCUSD 4h" in comment_md)
+        check("check_issue: extended check notes ETHUSD was skipped (no local data in this dev env)",
+              "ETHUSD" in comment_md and "Skipped" in comment_md)
+        check("check_issue: extended check includes the full OOS trade list (collapsible)",
+              "Full OOS trade list" in comment_md and "<details>" in comment_md)
+        check("check_issue: extended check includes an OOS monthly-returns table",
+              "OOS monthly returns" in comment_md)
+        check("check_issue: extended check uses the wider 5x5 robustness grid, not the weekly "
+              "page's 3x3", "Robustness map (5x5" in comment_md)
+        check("check_issue: extended comment still carries the valid-status marker",
+              "check-issue-status: valid" in comment_md)
+        check("check_issue: extended comment keeps the same legal disclaimer as the free check",
+              config.LEGAL_DISCLAIMER in comment_md)
+        check("check_issue: extended comment links to methodology",
+              config.PAGES_URL + "/methodology.html" in comment_md)
+    finally:
+        requests.post = orig_post
+        if saved_pid is None:
+            os.environ.pop("GUMROAD_PRODUCT_ID", None)
+        else:
+            os.environ["GUMROAD_PRODUCT_ID"] = saved_pid
+
+
+# ---------------------------------------------------------------------------
 # S1: programmatic SEO pages (seo_pages.py) — exercised against the real BTCUSD payload this dev
 # box already has in results/latest.json (produced by an earlier run_weekly.py run), the same
 # pattern test_stocks_edition_pipeline uses above.
@@ -1307,6 +1499,10 @@ if __name__ == "__main__":
     test_robustness_runtime_on_local_btc_data()
     test_check_issue_parser_validator()
     test_check_issue_dry_run_end_to_end()
+    test_gumroad_verify_fake_http()
+    test_check_issue_license_free_path_unchanged()
+    test_check_issue_license_unverified_note()
+    test_check_issue_extended_check_sections()
     test_seo_pages_strategy_page_count_and_shape()
     test_seo_pages_no_banned_korean_words()
     test_digest_first_week_and_flips()

@@ -1480,6 +1480,111 @@ def test_seo_pages_sparkline_at_3plus_history_points():
 
 
 # ---------------------------------------------------------------------------
+# R3: embeddable verdict badges (badges.py)
+# ---------------------------------------------------------------------------
+
+def test_badge_svg_shape_and_no_endorsement_language():
+    import badges as bd
+
+    svg = bd.verdict_badge_svg("ALIVE", 1.5512)
+    check("badge: is an <svg>...</svg>", svg.startswith("<svg") and svg.rstrip().endswith("</svg>"))
+    check("badge: subject label is the fixed 'Dead or Alive'", "Dead or Alive" in svg)
+    check("badge: value segment states verdict + rounded PF", "ALIVE (PF 1.55)" in svg)
+    check("badge: uses a concrete hex colour, not an unresolvable var(--...) reference",
+          "#2ea44f" in svg and "var(--" not in svg)
+    banned_en = ["recommend", "buy now", "sure thing", "guarantee", "should buy", "should sell"]
+    check("badge: no endorsement/advice language in the rendered text",
+          not any(w in svg.lower() for w in banned_en))
+
+    svg_ref = bd.verdict_badge_svg(None, None)
+    check("badge: a reference row (verdict=None) renders 'no verdict', not a crash",
+          "no verdict" in svg_ref)
+
+    svg_inf = bd.verdict_badge_svg("DEAD", "inf")
+    check("badge: an 'inf' OOS PF renders as n/a rather than crashing on the format spec",
+          "n/a" in svg_inf)
+
+
+def test_badge_colors_distinct_per_verdict():
+    import badges as bd
+
+    seen_bg = set()
+    for v in ("ALIVE", "FADING", "DEAD", "TOO FEW TRADES"):
+        bg, fg = bd.VERDICT_BADGE_COLORS[v]
+        check(f"badge colour {v}: bg/fg are 6-digit hex", bg.startswith("#") and len(bg) == 7
+              and fg.startswith("#") and len(fg) == 7)
+        seen_bg.add(bg)
+    check("badge colour: all four verdicts get a visually distinct background", len(seen_bg) == 4)
+
+
+def test_badge_filename_matches_task_r3_naming():
+    import badges as bd
+
+    fn = bd.badge_filename("ema200_macd", "ema200-macd12.26.9", "BTCUSD", "1d")
+    check("badge filename: <id>-<params-slug>-<asset>-<tf>.svg, dots slugged out of params only",
+          fn == "ema200_macd-ema200-macd12-26-9-BTCUSD-1d.svg", fn)
+
+
+def test_write_badges_for_payload():
+    import json as _json
+    import tempfile
+    import badges as bd
+
+    latest_path = os.path.join(config.RESULTS_DIR, "latest.json")
+    if not os.path.exists(latest_path):
+        print("[SKIP] test_write_badges_for_payload: no results/latest.json")
+        return
+    with open(latest_path, encoding="utf-8") as f:
+        payload = _json.load(f)
+
+    tmp = tempfile.mkdtemp()
+    n = bd.write_badges_for_payload("en", payload, out_root=tmp)
+    expected = len([r for r in (payload["rows"] + payload["popular_combos"])
+                     if r.get("type") != "reference"])
+    check("write_badges_for_payload: one badge per non-reference row", n == expected,
+          f"got {n}, expected {expected}")
+
+    out_dir = os.path.join(tmp, "en")
+    files = set(os.listdir(out_dir))
+    check("write_badges_for_payload: file count matches (+1 for summary.svg)",
+          len(files) == expected + 1, f"got {len(files)}")
+    check("write_badges_for_payload: summary.svg was written", "summary.svg" in files)
+
+    sample = next(r for r in payload["rows"] if r.get("type") != "reference")
+    sample_fn = bd.badge_filename(sample["strategy_id"], sample["params"], sample["asset"],
+                                   sample["timeframe"])
+    check("write_badges_for_payload: a known row's expected filename exists on disk",
+          sample_fn in files, sample_fn)
+    with open(os.path.join(out_dir, sample_fn), encoding="utf-8") as f:
+        sample_svg = f.read()
+    check("write_badges_for_payload: that badge's verdict string appears in its own SVG",
+          sample["verdict"] in sample_svg)
+
+    with open(os.path.join(out_dir, "summary.svg"), encoding="utf-8") as f:
+        summary_svg = f.read()
+    tally = payload["tally"]
+    check("write_badges_for_payload: summary.svg states 'N alive / total'",
+          f"{tally['ALIVE']} alive / {sum(tally.values())}" in summary_svg)
+
+    check("write_badges_for_payload: payload=None (e.g. ko/stocks with no data) writes nothing",
+          bd.write_badges_for_payload("ko", None, out_root=tmp) == 0)
+
+
+def test_registry_page_documents_badge_embedding():
+    import tempfile
+    import build_site as bs
+
+    tmp = tempfile.mkdtemp()
+    en_path = bs.build_registry_page(out_path=os.path.join(tmp, "registry.html"))
+    with open(en_path, encoding="utf-8") as f:
+        en_html = f.read()
+    check("registry page: shows the badges/<edition>/... path convention",
+          "badges/en/" in en_html)
+    check("registry page: states the badge is not an endorsement",
+          "endorsement" in en_html.lower())
+
+
+# ---------------------------------------------------------------------------
 # S2: weekly digest (digest.py)
 # ---------------------------------------------------------------------------
 
@@ -1753,6 +1858,11 @@ if __name__ == "__main__":
     test_decay_index_computation()
     test_decay_index_page_builds_and_no_banned_korean_words()
     test_seo_pages_sparkline_at_3plus_history_points()
+    test_badge_svg_shape_and_no_endorsement_language()
+    test_badge_colors_distinct_per_verdict()
+    test_badge_filename_matches_task_r3_naming()
+    test_write_badges_for_payload()
+    test_registry_page_documents_badge_embedding()
     test_digest_first_week_and_flips()
     test_digest_build_writes_pages_and_feeds()
     test_publish_no_secrets_exits_zero()

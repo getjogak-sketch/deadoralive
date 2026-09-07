@@ -446,6 +446,21 @@ def main():
     print(f"Wrote {os.path.join(config.DOCS_DIR_KO, 'index-history.html')}")
 
     # -------------------------------------------------------------------------------------------
+    # Embeddable verdict badges (task R3) — one flat SVG per (strategy variant, asset, timeframe)
+    # non-reference row, plus one edition-wide summary.svg, under docs/badges/<edition>/. Purely
+    # read-only over each edition's payload already assembled above; nothing here changes a number.
+    # -------------------------------------------------------------------------------------------
+    import badges
+    n_badges_en = badges.write_badges_for_payload("en", payload)
+    n_badges_ko = badges.write_badges_for_payload("ko", payload_ko)
+    n_badges_stocks = badges.write_badges_for_payload("stocks", payload_stocks)
+    print(f"Wrote {n_badges_en} badge(s) + summary.svg to {os.path.join(config.DOCS_DIR, 'badges', 'en')}")
+    print(f"Wrote {n_badges_ko} badge(s) (+ summary.svg if ko had data) to "
+          f"{os.path.join(config.DOCS_DIR, 'badges', 'ko')}")
+    print(f"Wrote {n_badges_stocks} badge(s) (+ summary.svg if stocks had data) to "
+          f"{os.path.join(config.DOCS_DIR, 'badges', 'stocks')}")
+
+    # -------------------------------------------------------------------------------------------
     # Programmatic SEO pages, sitemap, robots.txt (this task's §S1) — additive, read-only over the
     # payloads already assembled above. `payload` here is the English edition's own payload dict,
     # already in scope from this function's top half.

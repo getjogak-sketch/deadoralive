@@ -351,3 +351,16 @@ site) plus a table, with an explicit note that the chart's value only ever grows
 can't be reconstructed retroactively by re-running anything. `charts.py`'s sparkline primitive is
 also used on every SEO strategy page (`seo_pages.py`) to show OOS profit factor over time, once
 &ge;3 history points exist for that (strategy, params, asset, timeframe).
+
+## Verdict badges
+
+`badges.py` writes one flat, shields.io-style SVG badge per (strategy variant, asset, timeframe)
+non-reference row — `docs/badges/<edition>/<strategy_id>-<params-slug>-<asset>-<tf>.svg`, e.g.
+`docs/badges/en/sma_cross-10-50-BTCUSD-1d.svg` — reading "Dead or Alive | FADING (PF 2.35)" in
+verdict colours, plus one edition-wide `docs/badges/<edition>/summary.svg` reading "Dead or Alive |
+8 alive / 44". Colours are a small local hex palette (`badges.VERDICT_BADGE_COLORS`), deliberately
+**not** `build_site.VERDICT_COLORS` — that palette is `var(--alive-fg)`-style CSS custom-property
+references that only resolve inside this site's own stylesheet, and a badge is served and embedded
+on its own (a README, a third-party page) with no access to it. A badge states only that week's
+automated, out-of-sample, net-of-cost verdict — never an endorsement or advice language; see
+`docs/registry.html`'s "Embed a badge" section for the markdown embed snippet shown to readers.

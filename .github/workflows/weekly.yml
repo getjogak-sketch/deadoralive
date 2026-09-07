@@ -33,10 +33,21 @@ jobs:
           ls -la data/ >> results/ci_fetch.log
 
       - name: Run tests (hard gate)
-        run: python tests.py
+        id: tests
+        continue-on-error: true
+        run: |
+          mkdir -p results
+          set -o pipefail
+          python tests.py 2>&1 | tail -n 200 | tee results/ci_tests.log
+
+      - name: Stop here if tests failed (results are only published from a verified engine)
+        if: steps.tests.outcome == 'failure'
+        run: |
+          echo "tests.py failed — see results/ci_tests.log"; cat results/ci_tests.log | grep -v PASS | tail -n 60
 
       - name: Run weekly pipeline
         id: pipeline
+        if: steps.tests.outcome == 'success'
         continue-on-error: true
         run: |
           mkdir -p results
@@ -87,12 +98,15 @@ jobs:
           exit 1
 
       - name: Report failure as an issue (logs are not downloadable from our dev box)
-        if: always() && (steps.pipeline.outcome == 'failure' || steps.commit.outcome == 'failure' || steps.fetch.outcome == 'failure')
+        if: always() && (steps.tests.outcome == 'failure' || steps.pipeline.outcome == 'failure' || steps.commit.outcome == 'failure' || steps.fetch.outcome == 'failure')
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           {
             echo "Run: ${{ github.run_id }}"
+            echo; echo "## tests (results/ci_tests.log, non-PASS lines)"; echo '```'
+            grep -v PASS results/ci_tests.log 2>/dev/null | tail -n 80 || echo "(no log)"
+            echo '```'
             echo; echo "## fetch (results/ci_fetch.log)"; echo '```'
             tail -n 40 results/ci_fetch.log 2>/dev/null || echo "(no log)"
             echo '```'

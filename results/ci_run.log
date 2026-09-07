@@ -3,8 +3,8 @@ Running tests.py as a hard gate before producing results...
 [PASS] robustness above_sma: 1 numeric param -> at most 3 grid points
 [PASS] robustness bb_mr: no numeric params -> empty grid (nothing to vary)
 [PASS] robustness: computing the grid never mutates the registered params dict it was given
-[PASS] robustness runtime btc/1d: full registry grid well under the 10-minute CI budget (0.20s)
-[PASS] robustness runtime btc/4h: full registry grid well under the 10-minute CI budget (0.34s)
+[PASS] robustness runtime btc/1d: full registry grid well under the 10-minute CI budget (0.21s)
+[PASS] robustness runtime btc/4h: full registry grid well under the 10-minute CI budget (0.36s)
 [PASS] check_issue: good input accepted (sma_cross, 'n_fast=10, n_slow=50')
 [PASS] check_issue: good input accepted (vol_breakout, 'k=0.5')
 [PASS] check_issue: good input accepted (macd, '')
@@ -75,41 +75,19 @@ Wrote /home/runner/work/deadoralive/deadoralive/docs/api/v1/ko/latest.json (spec
 [stocks] Wrote 48 rows to /home/runner/work/deadoralive/deadoralive/results/latest_stocks.json
 Wrote /home/runner/work/deadoralive/deadoralive/results/history/stocks_2026-09-04.json
 Wrote /home/runner/work/deadoralive/deadoralive/docs/stocks/latest.json
-[stocks] Verdict tally: {'ALIVE': 0, 'FADING': 4, 'DEAD': 0, 'TOO FEW TRADES': 40}
+[stocks] Verdict tally: {'ALIVE': 4, 'FADING': 15, 'DEAD': 1, 'TOO FEW TRADES': 24}
 
 [stocks] SUSPICIOUS RESULTS (OOS PF > 5.0 or Sharpe > 4.0) — treat as a possible bug, per spec_v2 §6:
-  - {'strategy_id': 'sma_cross', 'params': '10-50', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
-  - {'strategy_id': 'sma_cross', 'params': '20-100', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
-  - {'strategy_id': 'sma_cross', 'params': '50-200', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
-  - {'strategy_id': 'ema_cross', 'params': '12-26', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
-  - {'strategy_id': 'above_sma', 'params': 'n200', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
-  - {'strategy_id': 'above_sma', 'params': 'n50', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
-  - {'strategy_id': 'donchian', 'params': '20-10', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
-  - {'strategy_id': 'donchian', 'params': '55-20', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
-  - {'strategy_id': 'bb_breakout', 'params': '20-2', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
-  - {'strategy_id': 'supertrend', 'params': '10-3', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
-  - {'strategy_id': 'tsmom', 'params': 'n30', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
-  - {'strategy_id': 'tsmom', 'params': 'n90', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
-  - {'strategy_id': 'dip_pct', 'params': '-5pct-5bar', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(6.997893027229655)}
-  - {'strategy_id': 'ema_9_21', 'params': '9-21', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
-  - {'strategy_id': 'ichimoku_cloud', 'params': '9-26-52', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
-  - {'strategy_id': 'supertrend_ema200', 'params': 'st10.3-ema200', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
-  - {'strategy_id': 'sma_cross', 'params': '10-50', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.098892657854887)}
-  - {'strategy_id': 'sma_cross', 'params': '20-100', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.098892657854887)}
-  - {'strategy_id': 'sma_cross', 'params': '50-200', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.098892657854887)}
-  - {'strategy_id': 'ema_cross', 'params': '12-26', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.098892657854887)}
-  - {'strategy_id': 'above_sma', 'params': 'n200', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.098892657854887)}
-  - {'strategy_id': 'above_sma', 'params': 'n50', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.098892657854887)}
-  - {'strategy_id': 'donchian', 'params': '20-10', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.098892657854887)}
-  - {'strategy_id': 'donchian', 'params': '55-20', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.098892657854887)}
-  - {'strategy_id': 'rsi2_connors', 'params': 'fixed', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(4.740080168535479)}
-  - {'strategy_id': 'supertrend', 'params': '10-3', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.098892657854887)}
-  - {'strategy_id': 'tsmom', 'params': 'n30', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.098892657854887)}
-  - {'strategy_id': 'tsmom', 'params': 'n90', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.098892657854887)}
-  - {'strategy_id': 'dip_pct', 'params': '-5pct-5bar', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(6.340201586173074)}
-  - {'strategy_id': 'ema_9_21', 'params': '9-21', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.098892657854887)}
-  - {'strategy_id': 'ichimoku_cloud', 'params': '9-26-52', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.098892657854887)}
-  - {'strategy_id': 'supertrend_ema200', 'params': 'st10.3-ema200', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.098892657854887)}
+  - {'strategy_id': 'sma_cross', 'params': '10-50', 'asset': 'SPY', 'tf': '1d', 'oos_pf': np.float64(5.8713920468026215), 'oos_sharpe': np.float64(1.164274885513932)}
+  - {'strategy_id': 'sma_cross', 'params': '50-200', 'asset': 'SPY', 'tf': '1d', 'oos_pf': np.float64(12.661922201820897), 'oos_sharpe': np.float64(0.7221702697820241)}
+  - {'strategy_id': 'ema_cross', 'params': '12-26', 'asset': 'SPY', 'tf': '1d', 'oos_pf': np.float64(9.49851517222281), 'oos_sharpe': np.float64(1.460468068473881)}
+  - {'strategy_id': 'above_sma', 'params': 'n200', 'asset': 'SPY', 'tf': '1d', 'oos_pf': np.float64(19.436604846528603), 'oos_sharpe': np.float64(1.1456816846166848)}
+  - {'strategy_id': 'rsi2_connors', 'params': 'fixed', 'asset': 'SPY', 'tf': '1d', 'oos_pf': np.float64(5.341781711242297), 'oos_sharpe': np.float64(1.4626808792358619)}
+  - {'strategy_id': 'tsmom', 'params': 'n90', 'asset': 'SPY', 'tf': '1d', 'oos_pf': np.float64(22.35347551862503), 'oos_sharpe': np.float64(1.2110871899409659)}
+  - {'strategy_id': 'sma_cross', 'params': '50-200', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': np.float64(476.86704573653645), 'oos_sharpe': np.float64(0.7803796243811998)}
+  - {'strategy_id': 'rsi_mr', 'params': 'exit50', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': np.float64(5.728928757996147), 'oos_sharpe': np.float64(0.27123124966683215)}
+  - {'strategy_id': 'bb_mr', 'params': '20-2', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': np.float64(7.652934421501146), 'oos_sharpe': np.float64(0.4976674090245976)}
+  - {'strategy_id': 'tsmom', 'params': 'n90', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': np.float64(5.5908102422805825), 'oos_sharpe': np.float64(0.8643766997168042)}
 Wrote /home/runner/work/deadoralive/deadoralive/docs/stocks/index.html
 Wrote /home/runner/work/deadoralive/deadoralive/docs/stocks/methodology.html
 Wrote /home/runner/work/deadoralive/deadoralive/docs/api/v1/stocks/latest.json (spec_v3 §B)

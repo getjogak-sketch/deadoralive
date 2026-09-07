@@ -1,0 +1,343 @@
+{
+  "meta": {
+    "run_date": "2026-09-07",
+    "anchor_keyword": "supertrend strategy",
+    "timeframe": "today 5-y",
+    "qualify_ratio_min": 0.5,
+    "qualify_yoy_max_decline": -0.3
+  },
+  "groups": [
+    {
+      "group": "anchor_crypto",
+      "geo": "worldwide",
+      "anchor_median_12mo_this_batch": 27.0,
+      "best_keyword": "bollinger bands strategy",
+      "group_qualifies": true,
+      "keywords": [
+        {
+          "keyword": "supertrend strategy",
+          "median_12mo": 27.0,
+          "ratio_vs_anchor": 1.0,
+          "yoy_pct": null,
+          "status": "OK",
+          "qualifies": true,
+          "related": []
+        },
+        {
+          "keyword": "golden cross strategy",
+          "median_12mo": 2.0,
+          "ratio_vs_anchor": 0.07407407407407407,
+          "yoy_pct": null,
+          "status": "OK",
+          "qualifies": false,
+          "related": []
+        },
+        {
+          "keyword": "rsi strategy backtest",
+          "median_12mo": 15.0,
+          "ratio_vs_anchor": 0.5555555555555556,
+          "yoy_pct": null,
+          "status": "OK",
+          "qualifies": true,
+          "related": []
+        },
+        {
+          "keyword": "bollinger bands strategy",
+          "median_12mo": 51.0,
+          "ratio_vs_anchor": 1.8888888888888888,
+          "yoy_pct": 1.4285714285714286,
+          "status": "OK",
+          "qualifies": true,
+          "related": [
+            {
+              "query": "bollinger bands strategy forex",
+              "value": 100,
+              "kind": "top"
+            }
+          ]
+        },
+        {
+          "keyword": "volatility breakout strategy",
+          "median_12mo": 4.0,
+          "ratio_vs_anchor": 0.14814814814814814,
+          "yoy_pct": null,
+          "status": "OK",
+          "qualifies": false,
+          "related": []
+        }
+      ]
+    },
+    {
+      "group": "forex_commodities",
+      "geo": "worldwide",
+      "anchor_median_12mo_this_batch": 7.0,
+      "best_keyword": "gold trading strategy",
+      "group_qualifies": true,
+      "keywords": [
+        {
+          "keyword": "forex strategy backtest",
+          "median_12mo": 0.0,
+          "ratio_vs_anchor": 0.0,
+          "yoy_pct": null,
+          "status": "OK",
+          "qualifies": false,
+          "related": []
+        },
+        {
+          "keyword": "gold trading strategy",
+          "median_12mo": 48.0,
+          "ratio_vs_anchor": 6.857142857142857,
+          "yoy_pct": 7.0,
+          "status": "OK",
+          "qualifies": true,
+          "related": []
+        },
+        {
+          "keyword": "eurusd strategy",
+          "median_12mo": 7.0,
+          "ratio_vs_anchor": 1.0,
+          "yoy_pct": null,
+          "status": "OK",
+          "qualifies": true,
+          "related": []
+        },
+        {
+          "keyword": "moving average crossover forex",
+          "median_12mo": 0.0,
+          "ratio_vs_anchor": 0.0,
+          "yoy_pct": null,
+          "status": "OK",
+          "qualifies": false,
+          "related": []
+        }
+      ]
+    },
+    {
+      "group": "bot_templates",
+      "geo": "worldwide",
+      "anchor_median_12mo_this_batch": 26.0,
+      "best_keyword": "pionex grid bot",
+      "group_qualifies": true,
+      "keywords": [
+        {
+          "keyword": "3commas strategy",
+          "median_12mo": 0.0,
+          "ratio_vs_anchor": 0.0,
+          "yoy_pct": null,
+          "status": "OK",
+          "qualifies": false,
+          "related": []
+        },
+        {
+          "keyword": "grid bot strategy",
+          "median_12mo": 12.0,
+          "ratio_vs_anchor": 0.46153846153846156,
+          "yoy_pct": null,
+          "status": "OK",
+          "qualifies": false,
+          "related": []
+        },
+        {
+          "keyword": "dca bot strategy",
+          "median_12mo": 0.0,
+          "ratio_vs_anchor": 0.0,
+          "yoy_pct": null,
+          "status": "OK",
+          "qualifies": false,
+          "related": []
+        },
+        {
+          "keyword": "pionex grid bot",
+          "median_12mo": 35.0,
+          "ratio_vs_anchor": 1.3461538461538463,
+          "yoy_pct": null,
+          "status": "OK",
+          "qualifies": true,
+          "related": []
+        }
+      ]
+    },
+    {
+      "group": "indicator_combos",
+      "geo": "worldwide",
+      "anchor_median_12mo_this_batch": 36.0,
+      "best_keyword": "ichimoku strategy",
+      "group_qualifies": true,
+      "keywords": [
+        {
+          "keyword": "ema 200 macd strategy",
+          "median_12mo": 0.0,
+          "ratio_vs_anchor": 0.0,
+          "yoy_pct": null,
+          "status": "OK",
+          "qualifies": false,
+          "related": []
+        },
+        {
+          "keyword": "rsi divergence strategy",
+          "median_12mo": 0.0,
+          "ratio_vs_anchor": 0.0,
+          "yoy_pct": null,
+          "status": "OK",
+          "qualifies": false,
+          "related": []
+        },
+        {
+          "keyword": "ichimoku strategy",
+          "median_12mo": 33.0,
+          "ratio_vs_anchor": 0.9166666666666666,
+          "yoy_pct": 1.0,
+          "status": "OK",
+          "qualifies": true,
+          "related": []
+        },
+        {
+          "keyword": "heikin ashi strategy",
+          "median_12mo": 0.0,
+          "ratio_vs_anchor": 0.0,
+          "yoy_pct": null,
+          "status": "OK",
+          "qualifies": false,
+          "related": []
+        }
+      ]
+    },
+    {
+      "group": "stocks_etf",
+      "geo": "worldwide",
+      "anchor_median_12mo_this_batch": 13.0,
+      "best_keyword": "qqq strategy",
+      "group_qualifies": true,
+      "keywords": [
+        {
+          "keyword": "spy trading strategy",
+          "median_12mo": 7.0,
+          "ratio_vs_anchor": 0.5384615384615384,
+          "yoy_pct": null,
+          "status": "OK",
+          "qualifies": true,
+          "related": []
+        },
+        {
+          "keyword": "qqq strategy",
+          "median_12mo": 42.0,
+          "ratio_vs_anchor": 3.230769230769231,
+          "yoy_pct": null,
+          "status": "OK",
+          "qualifies": true,
+          "related": []
+        },
+        {
+          "keyword": "sma 200 strategy stocks",
+          "median_12mo": 0.0,
+          "ratio_vs_anchor": 0.0,
+          "yoy_pct": null,
+          "status": "OK",
+          "qualifies": false,
+          "related": []
+        },
+        {
+          "keyword": "swing trading strategy backtest",
+          "median_12mo": 0.0,
+          "ratio_vs_anchor": 0.0,
+          "yoy_pct": null,
+          "status": "OK",
+          "qualifies": false,
+          "related": []
+        }
+      ]
+    },
+    {
+      "group": "sports_systems",
+      "geo": "worldwide",
+      "anchor_median_12mo_this_batch": 6.0,
+      "best_keyword": "sports betting system",
+      "group_qualifies": true,
+      "keywords": [
+        {
+          "keyword": "sports betting system",
+          "median_12mo": 33.0,
+          "ratio_vs_anchor": 5.5,
+          "yoy_pct": null,
+          "status": "OK",
+          "qualifies": true,
+          "related": [
+            {
+              "query": "best sports betting system",
+              "value": 100,
+              "kind": "top"
+            },
+            {
+              "query": "sports betting system software",
+              "value": 25,
+              "kind": "top"
+            }
+          ]
+        },
+        {
+          "keyword": "betting strategy backtest",
+          "median_12mo": 0.0,
+          "ratio_vs_anchor": 0.0,
+          "yoy_pct": null,
+          "status": "OK",
+          "qualifies": false,
+          "related": []
+        },
+        {
+          "keyword": "kelly criterion betting",
+          "median_12mo": 13.0,
+          "ratio_vs_anchor": 2.1666666666666665,
+          "yoy_pct": null,
+          "status": "OK",
+          "qualifies": true,
+          "related": []
+        }
+      ]
+    },
+    {
+      "group": "korean",
+      "geo": "KR",
+      "anchor_median_12mo_this_batch": 0.0,
+      "best_keyword": "\ubcc0\ub3d9\uc131 \ub3cc\ud30c \uc804\ub7b5",
+      "group_qualifies": "N/A",
+      "keywords": [
+        {
+          "keyword": "\ubcc0\ub3d9\uc131 \ub3cc\ud30c \uc804\ub7b5",
+          "median_12mo": 0.0,
+          "ratio_vs_anchor": null,
+          "yoy_pct": null,
+          "status": "OK",
+          "qualifies": "N/A",
+          "related": []
+        },
+        {
+          "keyword": "\uc5c5\ube44\ud2b8 \uc790\ub3d9\ub9e4\ub9e4",
+          "median_12mo": 0.0,
+          "ratio_vs_anchor": null,
+          "yoy_pct": null,
+          "status": "OK",
+          "qualifies": "N/A",
+          "related": []
+        },
+        {
+          "keyword": "\uc774\ub3d9\ud3c9\uade0 \uad50\ucc28 \uc804\ub7b5",
+          "median_12mo": 0.0,
+          "ratio_vs_anchor": null,
+          "yoy_pct": null,
+          "status": "OK",
+          "qualifies": "N/A",
+          "related": []
+        },
+        {
+          "keyword": "\ube44\ud2b8\ucf54\uc778 \ubc31\ud14c\uc2a4\ud2b8",
+          "median_12mo": 0.0,
+          "ratio_vs_anchor": null,
+          "yoy_pct": null,
+          "status": "OK",
+          "qualifies": "N/A",
+          "related": []
+        }
+      ]
+    }
+  ]
+}

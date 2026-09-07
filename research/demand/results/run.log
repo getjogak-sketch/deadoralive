@@ -1,0 +1,8 @@
+[demand] group=anchor_crypto geo=worldwide keywords=['supertrend strategy', 'golden cross strategy', 'rsi strategy backtest', 'bollinger bands strategy', 'volatility breakout strategy']
+[demand] group=forex_commodities geo=worldwide keywords=['forex strategy backtest', 'gold trading strategy', 'eurusd strategy', 'moving average crossover forex']
+[demand] group=bot_templates geo=worldwide keywords=['3commas strategy', 'grid bot strategy', 'dca bot strategy', 'pionex grid bot']
+[demand] group=indicator_combos geo=worldwide keywords=['ema 200 macd strategy', 'rsi divergence strategy', 'ichimoku strategy', 'heikin ashi strategy']
+[demand] group=stocks_etf geo=worldwide keywords=['spy trading strategy', 'qqq strategy', 'sma 200 strategy stocks', 'swing trading strategy backtest']
+[demand] group=sports_systems geo=worldwide keywords=['sports betting system', 'betting strategy backtest', 'kelly criterion betting']
+[demand] group=korean geo=KR keywords=['변동성 돌파 전략', '업비트 자동매매', '이동평균 교차 전략', '비트코인 백테스트']
+[demand] done — 6/7 groups qualify

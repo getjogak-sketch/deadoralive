@@ -3,8 +3,8 @@ Running tests.py as a hard gate before producing results...
 [PASS] robustness above_sma: 1 numeric param -> at most 3 grid points
 [PASS] robustness bb_mr: no numeric params -> empty grid (nothing to vary)
 [PASS] robustness: computing the grid never mutates the registered params dict it was given
-[PASS] robustness runtime btc/1d: full registry grid well under the 10-minute CI budget (0.21s)
-[PASS] robustness runtime btc/4h: full registry grid well under the 10-minute CI budget (0.36s)
+[PASS] robustness runtime btc/1d: full registry grid well under the 10-minute CI budget (0.20s)
+[PASS] robustness runtime btc/4h: full registry grid well under the 10-minute CI budget (0.35s)
 [PASS] check_issue: good input accepted (sma_cross, 'n_fast=10, n_slow=50')
 [PASS] check_issue: good input accepted (vol_breakout, 'k=0.5')
 [PASS] check_issue: good input accepted (macd, '')
@@ -29,30 +29,30 @@ Running tests.py as a hard gate before producing results...
 ALL TESTS PASSED (pandas-engine tests; run crosscheck_bt.py separately for §6.2)
 
 [run_weekly] BTCUSD 1d: as_of=2026-09-06, 24 rows (22 strategy variants + 2 reference), 7 popular-combo rows
-[run_weekly] BTCUSD 4h: as_of=2026-09-06, 24 rows (22 strategy variants + 2 reference), 7 popular-combo rows
+[run_weekly] BTCUSD 4h: as_of=2026-09-07, 24 rows (22 strategy variants + 2 reference), 7 popular-combo rows
 [run_weekly] ETHUSD 1d: as_of=2026-09-06, 24 rows (22 strategy variants + 2 reference), 7 popular-combo rows
-[run_weekly] ETHUSD 4h: as_of=2026-09-06, 24 rows (22 strategy variants + 2 reference), 7 popular-combo rows
+[run_weekly] ETHUSD 4h: as_of=2026-09-07, 24 rows (22 strategy variants + 2 reference), 7 popular-combo rows
 
 Wrote 96 rows to /home/runner/work/deadoralive/deadoralive/results/latest.json
-Wrote /home/runner/work/deadoralive/deadoralive/results/history/2026-09-06.json
+Wrote /home/runner/work/deadoralive/deadoralive/results/history/2026-09-07.json
 Wrote /home/runner/work/deadoralive/deadoralive/docs/latest.json
 Verdict tally: {'ALIVE': 16, 'FADING': 31, 'DEAD': 26, 'TOO FEW TRADES': 15}
 
 SUSPICIOUS RESULTS (OOS PF > 5.0 or Sharpe > 4.0) — treat as a possible bug, per spec_v2 §6:
   - {'strategy_id': 'ichimoku_cloud', 'params': '9-26-52', 'asset': 'BTCUSD', 'tf': '1d', 'oos_pf': np.float64(5.172875215437771), 'oos_sharpe': np.float64(1.3032629725020888)}
-  - {'strategy_id': 'dip_pct', 'params': '-5pct-5bar', 'asset': 'BTCUSD', 'tf': '4h', 'oos_pf': np.float64(13.64100308775583), 'oos_sharpe': np.float64(1.0271808472709134)}
+  - {'strategy_id': 'dip_pct', 'params': '-5pct-5bar', 'asset': 'BTCUSD', 'tf': '4h', 'oos_pf': np.float64(13.64100308775583), 'oos_sharpe': np.float64(1.0277669856099427)}
   - {'strategy_id': 'sma_cross', 'params': '20-100', 'asset': 'ETHUSD', 'tf': '1d', 'oos_pf': np.float64(6.926337821019069), 'oos_sharpe': np.float64(0.9884006148022598)}
   - {'strategy_id': 'donchian', 'params': '55-20', 'asset': 'ETHUSD', 'tf': '1d', 'oos_pf': np.float64(6.381769104415739), 'oos_sharpe': np.float64(0.8539892157595069)}
 Wrote /home/runner/work/deadoralive/deadoralive/docs/index.html
 Wrote /home/runner/work/deadoralive/deadoralive/docs/methodology.html
 Wrote /home/runner/work/deadoralive/deadoralive/docs/api/v1/en/latest.json (spec_v3 §B)
 [run_weekly] [ko] KRW-BTC 1d: as_of=2026-09-06, 24 rows (22 strategy variants + 2 reference), 7 popular-combo rows
-[run_weekly] [ko] KRW-BTC 4h: as_of=2026-09-06, 24 rows (22 strategy variants + 2 reference), 7 popular-combo rows
+[run_weekly] [ko] KRW-BTC 4h: as_of=2026-09-07, 24 rows (22 strategy variants + 2 reference), 7 popular-combo rows
 [run_weekly] [ko] KRW-ETH 1d: as_of=2026-09-06, 24 rows (22 strategy variants + 2 reference), 7 popular-combo rows
-[run_weekly] [ko] KRW-ETH 4h: as_of=2026-09-06, 24 rows (22 strategy variants + 2 reference), 7 popular-combo rows
+[run_weekly] [ko] KRW-ETH 4h: as_of=2026-09-07, 24 rows (22 strategy variants + 2 reference), 7 popular-combo rows
 
 [ko] Wrote 96 rows to /home/runner/work/deadoralive/deadoralive/results/latest_ko.json
-Wrote /home/runner/work/deadoralive/deadoralive/results/history/ko_2026-09-06.json
+Wrote /home/runner/work/deadoralive/deadoralive/results/history/ko_2026-09-07.json
 Wrote /home/runner/work/deadoralive/deadoralive/docs/ko/latest.json
 [ko] Verdict tally: {'ALIVE': 20, 'FADING': 32, 'DEAD': 19, 'TOO FEW TRADES': 17}
 
@@ -61,7 +61,7 @@ Wrote /home/runner/work/deadoralive/deadoralive/docs/ko/latest.json
   - {'strategy_id': 'ema_cross', 'params': '12-26', 'asset': 'KRW-BTC', 'tf': '1d', 'oos_pf': np.float64(6.267391504644455), 'oos_sharpe': np.float64(1.5786455871796825)}
   - {'strategy_id': 'ema_9_21', 'params': '9-21', 'asset': 'KRW-BTC', 'tf': '1d', 'oos_pf': np.float64(5.377713554298217), 'oos_sharpe': np.float64(1.4986946278205595)}
   - {'strategy_id': 'ichimoku_cloud', 'params': '9-26-52', 'asset': 'KRW-BTC', 'tf': '1d', 'oos_pf': np.float64(21.112094129384086), 'oos_sharpe': np.float64(1.648551666573572)}
-  - {'strategy_id': 'sma_cross', 'params': '50-200', 'asset': 'KRW-BTC', 'tf': '4h', 'oos_pf': np.float64(6.146494839859624), 'oos_sharpe': np.float64(1.492610548717834)}
+  - {'strategy_id': 'sma_cross', 'params': '50-200', 'asset': 'KRW-BTC', 'tf': '4h', 'oos_pf': np.float64(6.09784123192502), 'oos_sharpe': np.float64(1.4770243178854294)}
   - {'strategy_id': 'sma_cross', 'params': '20-100', 'asset': 'KRW-ETH', 'tf': '1d', 'oos_pf': np.float64(5.7263592730392645), 'oos_sharpe': np.float64(0.9234755709837061)}
   - {'strategy_id': 'above_sma', 'params': 'n200', 'asset': 'KRW-ETH', 'tf': '1d', 'oos_pf': np.float64(19.632374023175526), 'oos_sharpe': np.float64(0.6238004359412529)}
   - {'strategy_id': 'bb_squeeze', 'params': 'bb20.2-look120-conf5', 'asset': 'KRW-ETH', 'tf': '1d', 'oos_pf': np.float64(7.10205196114507), 'oos_sharpe': np.float64(0.9357037459427794)}

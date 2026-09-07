@@ -256,11 +256,14 @@ def _scorecard_html(row: dict, lang: str) -> str:
         f"<td>{fmt(oos.get(key), kind)}</td></tr>"
         for key, lbl, kind in labels
     )
-    bh_label = "Buy &amp; hold (OOS)" if lang != "ko" else "단순 보유 (OOS)"
-    fee_label = "Fee drag (OOS)" if lang != "ko" else "수수료 영향 (OOS)"
+    bh_label = "Buy &amp; hold (OOS)" if lang != "ko" else "단순 보유 (표본외)"
+    fee_label = "Fee drag (OOS)" if lang != "ko" else "수수료로 사라진 수익 (표본외)"
+    if lang == "ko":
+        bh_text = f"수익률 {bs._fmt_pct(oos.get('bh_return'))}, 최대낙폭 {bs._fmt_pct_already(oos.get('bh_mdd'))}"
+    else:
+        bh_text = f"{bs._fmt_pct(oos.get('bh_return'))} return, {bs._fmt_pct_already(oos.get('bh_mdd'))} MDD"
     extra = (
-        f"<tr><td>{bh_label}</td><td colspan='2'>"
-        f"{bs._fmt_pct(oos.get('bh_return'))} return, {bs._fmt_pct_already(oos.get('bh_mdd'))} MDD</td></tr>"
+        f"<tr><td>{bh_label}</td><td colspan='2'>{bh_text}</td></tr>"
         f"<tr><td>{fee_label}</td><td colspan='2'>{bs._fmt_pct(oos.get('fee_drag'))}</td></tr>"
     )
     return f"<table class='scorecard'><thead>{head}</thead><tbody>{rows_html}{extra}</tbody></table>"
@@ -422,7 +425,7 @@ def _build_one_page(edition_key: str, lang: str, strategy_id: str, params: str, 
         back_link_text = "전체 표로 돌아가기"
         meth_link_text = "방법론"
         check_link_text = "내 전략도 검사해 보기"
-        interp_title = "숫자 요약 (해석 없음)"
+        interp_title = "숫자로만 정리하면"
     else:
         strategy_name_disp = entry.get("name", strategy_id)
         params_disp = _params_display(strategy_id, params, "en")

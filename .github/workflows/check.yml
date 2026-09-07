@@ -6,7 +6,13 @@ name: check-strategy
 # then closes the issue — label "done" only when the input was valid.
 on:
   issues:
-    types: [opened, labeled]
+    types: [opened]
+
+# One run per issue: creating a labeled issue fires both `opened` and `labeled`, which double-posted
+# in testing — so we react to `opened` only (the issue form applies the label before that event).
+concurrency:
+  group: check-${{ github.event.issue.number }}
+  cancel-in-progress: false
 
 permissions:
   issues: write

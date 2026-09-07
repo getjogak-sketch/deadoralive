@@ -1,3 +1,11 @@
+/home/runner/work/deadoralive/deadoralive/fetch_data.py:75: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+  now = pd.Timestamp.utcnow().tz_localize(None)
+/home/runner/work/deadoralive/deadoralive/fetch_data.py:75: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+  now = pd.Timestamp.utcnow().tz_localize(None)
+/home/runner/work/deadoralive/deadoralive/fetch_data.py:75: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+  now = pd.Timestamp.utcnow().tz_localize(None)
+/home/runner/work/deadoralive/deadoralive/fetch_data.py:75: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+  now = pd.Timestamp.utcnow().tz_localize(None)
 /home/runner/work/deadoralive/deadoralive/fetch_data.py:180: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
   now = pd.Timestamp.utcnow().tz_localize(None) if now is None else now
 /home/runner/work/deadoralive/deadoralive/fetch_data.py:180: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
@@ -6,22 +14,30 @@
   now = pd.Timestamp.utcnow().tz_localize(None) if now is None else now
 /home/runner/work/deadoralive/deadoralive/fetch_data.py:180: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
   now = pd.Timestamp.utcnow().tz_localize(None) if now is None else now
-[fetch_data] BTCUSD 1d: no new bars.
-[fetch_data] BTCUSD 4h: no new bars.
-[fetch_data] ETHUSD 1d: no new bars.
-[fetch_data] ETHUSD 4h: no new bars.
-[fetch_data] (Upbit) KRW-BTC 1d: wrote 3262 rows (2017-10-01 00:00:00 .. 2026-09-05 00:00:00) -> /home/runner/work/deadoralive/deadoralive/data/KRW-BTC_1d.csv
-[fetch_data] (Upbit) KRW-BTC 4h: wrote 19574 rows (2017-10-01 00:00:00 .. 2026-09-06 16:00:00) -> /home/runner/work/deadoralive/deadoralive/data/KRW-BTC_4h.csv
-[fetch_data] (Upbit) KRW-ETH 1d: wrote 3259 rows (2017-10-01 00:00:00 .. 2026-09-05 00:00:00) -> /home/runner/work/deadoralive/deadoralive/data/KRW-ETH_1d.csv
-[fetch_data] (Upbit) KRW-ETH 4h: wrote 19551 rows (2017-10-01 00:00:00 .. 2026-09-06 16:00:00) -> /home/runner/work/deadoralive/deadoralive/data/KRW-ETH_4h.csv
-total 6156
-drwxr-xr-x 2 runner runner    4096 Sep  6 22:29 .
-drwxr-xr-x 8 runner runner    4096 Sep  6 22:26 ..
--rw-r--r-- 1 runner runner  191197 Sep  6 22:26 BTCUSD_1d.csv
--rw-r--r-- 1 runner runner 1310660 Sep  6 22:26 BTCUSD_4h.csv
--rw-r--r-- 1 runner runner  178841 Sep  6 22:26 ETHUSD_1d.csv
--rw-r--r-- 1 runner runner 1235287 Sep  6 22:26 ETHUSD_4h.csv
--rw-r--r-- 1 runner runner  224811 Sep  6 22:27 KRW-BTC_1d.csv
--rw-r--r-- 1 runner runner 1508753 Sep  6 22:28 KRW-BTC_4h.csv
--rw-r--r-- 1 runner runner  210413 Sep  6 22:28 KRW-ETH_1d.csv
--rw-r--r-- 1 runner runner 1422106 Sep  6 22:29 KRW-ETH_4h.csv
+/home/runner/work/deadoralive/deadoralive/fetch_data.py:370: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+  now = pd.Timestamp.utcnow().tz_localize(None) if now is None else now
+/home/runner/work/deadoralive/deadoralive/fetch_data.py:370: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+  now = pd.Timestamp.utcnow().tz_localize(None) if now is None else now
+[fetch_data] BTCUSD 1d: wrote 3308 rows (2017-08-17 00:00:00 .. 2026-09-06 00:00:00) -> /home/runner/work/deadoralive/deadoralive/data/BTCUSD_1d.csv
+[fetch_data] BTCUSD 4h: wrote 19848 rows (2017-08-17 00:00:00 .. 2026-09-06 20:00:00) -> /home/runner/work/deadoralive/deadoralive/data/BTCUSD_4h.csv
+[fetch_data] ETHUSD 1d: wrote 3308 rows (2017-08-17 00:00:00 .. 2026-09-06 00:00:00) -> /home/runner/work/deadoralive/deadoralive/data/ETHUSD_1d.csv
+[fetch_data] ETHUSD 4h: wrote 19848 rows (2017-08-17 00:00:00 .. 2026-09-06 20:00:00) -> /home/runner/work/deadoralive/deadoralive/data/ETHUSD_4h.csv
+[fetch_data] (Upbit) KRW-BTC 1d: wrote 3263 rows (2017-10-01 00:00:00 .. 2026-09-06 00:00:00) -> /home/runner/work/deadoralive/deadoralive/data/KRW-BTC_1d.csv
+[fetch_data] (Upbit) KRW-BTC 4h: wrote 19575 rows (2017-10-01 00:00:00 .. 2026-09-06 20:00:00) -> /home/runner/work/deadoralive/deadoralive/data/KRW-BTC_4h.csv
+[fetch_data] (Upbit) KRW-ETH 1d: wrote 3260 rows (2017-10-01 00:00:00 .. 2026-09-06 00:00:00) -> /home/runner/work/deadoralive/deadoralive/data/KRW-ETH_1d.csv
+[fetch_data] (Upbit) KRW-ETH 4h: wrote 19552 rows (2017-10-01 00:00:00 .. 2026-09-06 20:00:00) -> /home/runner/work/deadoralive/deadoralive/data/KRW-ETH_4h.csv
+[fetch_data] (stocks) SPY 1d: wrote 322 rows (2000-01-01 00:00:00 .. 2026-09-04 00:00:00) -> /home/runner/work/deadoralive/deadoralive/data/SPY_1d.csv
+[fetch_data] (stocks) QQQ 1d: wrote 322 rows (2000-01-01 00:00:00 .. 2026-09-04 00:00:00) -> /home/runner/work/deadoralive/deadoralive/data/QQQ_1d.csv
+total 6224
+drwxr-xr-x 2 runner runner    4096 Sep  7 01:15 .
+drwxr-xr-x 8 runner runner    4096 Sep  7 01:13 ..
+-rw-r--r-- 1 runner runner  191254 Sep  7 01:13 BTCUSD_1d.csv
+-rw-r--r-- 1 runner runner 1310727 Sep  7 01:13 BTCUSD_4h.csv
+-rw-r--r-- 1 runner runner  178894 Sep  7 01:13 ETHUSD_1d.csv
+-rw-r--r-- 1 runner runner 1235349 Sep  7 01:13 ETHUSD_4h.csv
+-rw-r--r-- 1 runner runner  224883 Sep  7 01:13 KRW-BTC_1d.csv
+-rw-r--r-- 1 runner runner 1508834 Sep  7 01:14 KRW-BTC_4h.csv
+-rw-r--r-- 1 runner runner  210479 Sep  7 01:14 KRW-ETH_1d.csv
+-rw-r--r-- 1 runner runner 1422180 Sep  7 01:15 KRW-ETH_4h.csv
+-rw-r--r-- 1 runner runner   29865 Sep  7 01:15 QQQ_1d.csv
+-rw-r--r-- 1 runner runner   30267 Sep  7 01:15 SPY_1d.csv

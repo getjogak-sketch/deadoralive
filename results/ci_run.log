@@ -1,43 +1,37 @@
 Running tests.py as a hard gate before producing results...
-upper hand-derived
-[PASS] indicator Donchian lower hand-derived
-[PASS] indicator Supertrend: None during ATR(10) warm-up
-[PASS] indicator Supertrend: only up/down after warm-up
-[PASS] Upbit parser: correct normalized columns
-[PASS] Upbit parser: 3 rows in, 3 rows out
-[PASS] Upbit parser: ascending order (oldest first)
-[PASS] Upbit parser: oldest row's date is 2024-01-01
-[PASS] Upbit parser: newest row's date is 2024-01-03
-[PASS] Upbit parser: field mapping correct (close <- trade_price)
-[PASS] Upbit parser: field mapping correct (open/high/low/volume)
-[PASS] Upbit parser: still-forming last 1d candle is dropped
-[PASS] Upbit parser: fully-closed last candle is kept
-[PASS] Korean page (no-data notice): mandatory disclaimer appears exactly twice (top+bottom)
-[PASS] Korean page (no-data notice): banned word absent — '추천'
-[PASS] Korean page (no-data notice): banned word absent — '수익 보장'
-[PASS] Korean page (no-data notice): banned word absent — '확실'
-[PASS] Korean page (no-data notice): banned word absent — '필승'
-[PASS] Korean no-data page shows the '이번 주 데이터 없음' notice
-[PASS] Korean page (full data): mandatory disclaimer appears exactly twice (top+bottom)
-[PASS] Korean page (full data): banned word absent — '추천'
-[PASS] Korean page (full data): banned word absent — '수익 보장'
-[PASS] Korean page (full data): banned word absent — '확실'
-[PASS] Korean page (full data): banned word absent — '필승'
-[PASS] Korean full-data page shows the ALIVE badge as 생존
-[PASS] Korean full-data page shows a Korean(English) strategy name
-[PASS] Korean full-data page formats the last price in KRW
-[PASS] Korean page (methodology): mandatory disclaimer appears exactly twice (top+bottom)
-[PASS] Korean page (methodology): banned word absent — '추천'
-[PASS] Korean page (methodology): banned word absent — '수익 보장'
-[PASS] Korean page (methodology): banned word absent — '확실'
-[PASS] Korean page (methodology): banned word absent — '필승'
+2
+[PASS] robustness above_sma: 1 numeric param -> at most 3 grid points
+[PASS] robustness bb_mr: no numeric params -> empty grid (nothing to vary)
+[PASS] robustness: computing the grid never mutates the registered params dict it was given
+[PASS] robustness runtime btc/1d: full registry grid well under the 10-minute CI budget (0.22s)
+[PASS] robustness runtime btc/4h: full registry grid well under the 10-minute CI budget (0.36s)
+[PASS] check_issue: good input accepted (sma_cross, 'n_fast=10, n_slow=50')
+[PASS] check_issue: good input accepted (vol_breakout, 'k=0.5')
+[PASS] check_issue: good input accepted (macd, '')
+[PASS] check_issue: good input accepted (rsi_uptrend, 'n_sma=200')
+[PASS] check_issue: good input accepted (dip_pct, 'threshold=-0.05, n_hold=5')
+[PASS] check_issue: bad input rejected (not_a_real_strategy, '', checked=True)
+[PASS] check_issue: bad input rejected (sma_cross, 'n_fast=50, n_slow=10', checked=True)
+[PASS] check_issue: bad input rejected (vol_breakout, 'k=5.0', checked=True)
+[PASS] check_issue: bad input rejected (rsi_uptrend, 'n_sma=200', checked=True)
+[PASS] check_issue: bad input rejected (sma_cross, 'n_fast=10, n_slow=50', checked=False)
+[PASS] check_issue: injection-shaped params string rejected ("__import__('os').system('echo hi')")
+[PASS] check_issue: injection-shaped params string rejected ('n_fast=10 and True')
+[PASS] check_issue: injection-shaped params string rejected ('n_fast=10, n_slow=(50)')
+[PASS] check_issue: non-empty params for a fixed strategy rejected
+[PASS] check_issue: end-to-end dry run on real BTCUSD data succeeds
+[PASS] check_issue: dry-run comment carries the valid-status marker
+[PASS] check_issue: dry-run comment shows the verdict line
+[PASS] check_issue: dry-run comment links to methodology
+[PASS] check_issue: end-to-end dry run on bad input is rejected, not crashed
+[PASS] check_issue: invalid comment carries the invalid-status marker
 
 ALL TESTS PASSED (pandas-engine tests; run crosscheck_bt.py separately for §6.2)
 
-[run_weekly] BTCUSD 1d: as_of=2026-09-05, 24 rows (22 strategy variants + 2 reference)
-[run_weekly] BTCUSD 4h: as_of=2026-09-06, 24 rows (22 strategy variants + 2 reference)
-[run_weekly] ETHUSD 1d: as_of=2026-09-05, 24 rows (22 strategy variants + 2 reference)
-[run_weekly] ETHUSD 4h: as_of=2026-09-06, 24 rows (22 strategy variants + 2 reference)
+[run_weekly] BTCUSD 1d: as_of=2026-09-06, 24 rows (22 strategy variants + 2 reference), 7 popular-combo rows
+[run_weekly] BTCUSD 4h: as_of=2026-09-06, 24 rows (22 strategy variants + 2 reference), 7 popular-combo rows
+[run_weekly] ETHUSD 1d: as_of=2026-09-06, 24 rows (22 strategy variants + 2 reference), 7 popular-combo rows
+[run_weekly] ETHUSD 4h: as_of=2026-09-06, 24 rows (22 strategy variants + 2 reference), 7 popular-combo rows
 
 Wrote 96 rows to /home/runner/work/deadoralive/deadoralive/results/latest.json
 Wrote /home/runner/work/deadoralive/deadoralive/results/history/2026-09-06.json
@@ -45,15 +39,17 @@ Wrote /home/runner/work/deadoralive/deadoralive/docs/latest.json
 Verdict tally: {'ALIVE': 16, 'FADING': 31, 'DEAD': 26, 'TOO FEW TRADES': 15}
 
 SUSPICIOUS RESULTS (OOS PF > 5.0 or Sharpe > 4.0) — treat as a possible bug, per spec_v2 §6:
-  - {'strategy_id': 'dip_pct', 'params': '-5pct-5bar', 'asset': 'BTCUSD', 'tf': '4h', 'oos_pf': np.float64(13.64100308775583), 'oos_sharpe': np.float64(1.0272979947124028)}
-  - {'strategy_id': 'sma_cross', 'params': '20-100', 'asset': 'ETHUSD', 'tf': '1d', 'oos_pf': np.float64(6.796330825558598), 'oos_sharpe': np.float64(0.9725511031090982)}
-  - {'strategy_id': 'donchian', 'params': '55-20', 'asset': 'ETHUSD', 'tf': '1d', 'oos_pf': np.float64(6.232514125326542), 'oos_sharpe': np.float64(0.8346150652449134)}
+  - {'strategy_id': 'ichimoku_cloud', 'params': '9-26-52', 'asset': 'BTCUSD', 'tf': '1d', 'oos_pf': np.float64(5.172875215437771), 'oos_sharpe': np.float64(1.3032629725020888)}
+  - {'strategy_id': 'dip_pct', 'params': '-5pct-5bar', 'asset': 'BTCUSD', 'tf': '4h', 'oos_pf': np.float64(13.64100308775583), 'oos_sharpe': np.float64(1.0271808472709134)}
+  - {'strategy_id': 'sma_cross', 'params': '20-100', 'asset': 'ETHUSD', 'tf': '1d', 'oos_pf': np.float64(6.926337821019069), 'oos_sharpe': np.float64(0.9884006148022598)}
+  - {'strategy_id': 'donchian', 'params': '55-20', 'asset': 'ETHUSD', 'tf': '1d', 'oos_pf': np.float64(6.381769104415739), 'oos_sharpe': np.float64(0.8539892157595069)}
 Wrote /home/runner/work/deadoralive/deadoralive/docs/index.html
 Wrote /home/runner/work/deadoralive/deadoralive/docs/methodology.html
-[run_weekly] [ko] KRW-BTC 1d: as_of=2026-09-05, 24 rows (22 strategy variants + 2 reference)
-[run_weekly] [ko] KRW-BTC 4h: as_of=2026-09-06, 24 rows (22 strategy variants + 2 reference)
-[run_weekly] [ko] KRW-ETH 1d: as_of=2026-09-05, 24 rows (22 strategy variants + 2 reference)
-[run_weekly] [ko] KRW-ETH 4h: as_of=2026-09-06, 24 rows (22 strategy variants + 2 reference)
+Wrote /home/runner/work/deadoralive/deadoralive/docs/api/v1/en/latest.json (spec_v3 §B)
+[run_weekly] [ko] KRW-BTC 1d: as_of=2026-09-06, 24 rows (22 strategy variants + 2 reference), 7 popular-combo rows
+[run_weekly] [ko] KRW-BTC 4h: as_of=2026-09-06, 24 rows (22 strategy variants + 2 reference), 7 popular-combo rows
+[run_weekly] [ko] KRW-ETH 1d: as_of=2026-09-06, 24 rows (22 strategy variants + 2 reference), 7 popular-combo rows
+[run_weekly] [ko] KRW-ETH 4h: as_of=2026-09-06, 24 rows (22 strategy variants + 2 reference), 7 popular-combo rows
 
 [ko] Wrote 96 rows to /home/runner/work/deadoralive/deadoralive/results/latest_ko.json
 Wrote /home/runner/work/deadoralive/deadoralive/results/history/ko_2026-09-06.json
@@ -61,10 +57,61 @@ Wrote /home/runner/work/deadoralive/deadoralive/docs/ko/latest.json
 [ko] Verdict tally: {'ALIVE': 20, 'FADING': 32, 'DEAD': 19, 'TOO FEW TRADES': 17}
 
 [ko] SUSPICIOUS RESULTS (OOS PF > 5.0 or Sharpe > 4.0) — treat as a possible bug, per spec_v2 §6:
-  - {'strategy_id': 'sma_cross', 'params': '10-50', 'asset': 'KRW-BTC', 'tf': '1d', 'oos_pf': np.float64(7.5870810595138325), 'oos_sharpe': np.float64(1.4153731159262037)}
-  - {'strategy_id': 'ema_cross', 'params': '12-26', 'asset': 'KRW-BTC', 'tf': '1d', 'oos_pf': np.float64(6.24416060705992), 'oos_sharpe': np.float64(1.5709220063828337)}
-  - {'strategy_id': 'sma_cross', 'params': '50-200', 'asset': 'KRW-BTC', 'tf': '4h', 'oos_pf': np.float64(6.108468053020536), 'oos_sharpe': np.float64(1.4804416791924337)}
-  - {'strategy_id': 'sma_cross', 'params': '20-100', 'asset': 'KRW-ETH', 'tf': '1d', 'oos_pf': np.float64(5.359742438127965), 'oos_sharpe': np.float64(0.9089950959136631)}
-  - {'strategy_id': 'above_sma', 'params': 'n200', 'asset': 'KRW-ETH', 'tf': '1d', 'oos_pf': np.float64(19.001896223682618), 'oos_sharpe': np.float64(0.6082398263290261)}
+  - {'strategy_id': 'sma_cross', 'params': '10-50', 'asset': 'KRW-BTC', 'tf': '1d', 'oos_pf': np.float64(7.618275054728473), 'oos_sharpe': np.float64(1.4231523067364253)}
+  - {'strategy_id': 'ema_cross', 'params': '12-26', 'asset': 'KRW-BTC', 'tf': '1d', 'oos_pf': np.float64(6.267391504644455), 'oos_sharpe': np.float64(1.5786455871796825)}
+  - {'strategy_id': 'ema_9_21', 'params': '9-21', 'asset': 'KRW-BTC', 'tf': '1d', 'oos_pf': np.float64(5.377713554298217), 'oos_sharpe': np.float64(1.4986946278205595)}
+  - {'strategy_id': 'ichimoku_cloud', 'params': '9-26-52', 'asset': 'KRW-BTC', 'tf': '1d', 'oos_pf': np.float64(21.112094129384086), 'oos_sharpe': np.float64(1.648551666573572)}
+  - {'strategy_id': 'sma_cross', 'params': '50-200', 'asset': 'KRW-BTC', 'tf': '4h', 'oos_pf': np.float64(6.146494839859624), 'oos_sharpe': np.float64(1.492610548717834)}
+  - {'strategy_id': 'sma_cross', 'params': '20-100', 'asset': 'KRW-ETH', 'tf': '1d', 'oos_pf': np.float64(5.7263592730392645), 'oos_sharpe': np.float64(0.9234755709837061)}
+  - {'strategy_id': 'above_sma', 'params': 'n200', 'asset': 'KRW-ETH', 'tf': '1d', 'oos_pf': np.float64(19.632374023175526), 'oos_sharpe': np.float64(0.6238004359412529)}
+  - {'strategy_id': 'bb_squeeze', 'params': 'bb20.2-look120-conf5', 'asset': 'KRW-ETH', 'tf': '1d', 'oos_pf': np.float64(7.10205196114507), 'oos_sharpe': np.float64(0.9357037459427794)}
+  - {'strategy_id': 'ichimoku_cloud', 'params': '9-26-52', 'asset': 'KRW-ETH', 'tf': '1d', 'oos_pf': np.float64(6.090469099999487), 'oos_sharpe': np.float64(1.223223997679689)}
 Wrote /home/runner/work/deadoralive/deadoralive/docs/ko/index.html
 Wrote /home/runner/work/deadoralive/deadoralive/docs/ko/methodology.html
+Wrote /home/runner/work/deadoralive/deadoralive/docs/api/v1/ko/latest.json (spec_v3 §B)
+[run_weekly] [stocks] SPY 1d: as_of=2026-09-04, 24 rows (22 strategy variants + 2 reference), 7 popular-combo rows
+[run_weekly] [stocks] QQQ 1d: as_of=2026-09-04, 24 rows (22 strategy variants + 2 reference), 7 popular-combo rows
+
+[stocks] Wrote 48 rows to /home/runner/work/deadoralive/deadoralive/results/latest_stocks.json
+Wrote /home/runner/work/deadoralive/deadoralive/results/history/stocks_2026-09-04.json
+Wrote /home/runner/work/deadoralive/deadoralive/docs/stocks/latest.json
+[stocks] Verdict tally: {'ALIVE': 0, 'FADING': 4, 'DEAD': 0, 'TOO FEW TRADES': 40}
+
+[stocks] SUSPICIOUS RESULTS (OOS PF > 5.0 or Sharpe > 4.0) — treat as a possible bug, per spec_v2 §6:
+  - {'strategy_id': 'sma_cross', 'params': '10-50', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
+  - {'strategy_id': 'sma_cross', 'params': '20-100', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
+  - {'strategy_id': 'sma_cross', 'params': '50-200', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
+  - {'strategy_id': 'ema_cross', 'params': '12-26', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
+  - {'strategy_id': 'above_sma', 'params': 'n200', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
+  - {'strategy_id': 'above_sma', 'params': 'n50', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
+  - {'strategy_id': 'donchian', 'params': '20-10', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
+  - {'strategy_id': 'donchian', 'params': '55-20', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
+  - {'strategy_id': 'bb_breakout', 'params': '20-2', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
+  - {'strategy_id': 'supertrend', 'params': '10-3', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
+  - {'strategy_id': 'tsmom', 'params': 'n30', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
+  - {'strategy_id': 'tsmom', 'params': 'n90', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
+  - {'strategy_id': 'dip_pct', 'params': '-5pct-5bar', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(6.997893027229655)}
+  - {'strategy_id': 'ema_9_21', 'params': '9-21', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
+  - {'strategy_id': 'ichimoku_cloud', 'params': '9-26-52', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
+  - {'strategy_id': 'supertrend_ema200', 'params': 'st10.3-ema200', 'asset': 'SPY', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.469588516074073)}
+  - {'strategy_id': 'sma_cross', 'params': '10-50', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.098892657854887)}
+  - {'strategy_id': 'sma_cross', 'params': '20-100', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.098892657854887)}
+  - {'strategy_id': 'sma_cross', 'params': '50-200', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.098892657854887)}
+  - {'strategy_id': 'ema_cross', 'params': '12-26', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.098892657854887)}
+  - {'strategy_id': 'above_sma', 'params': 'n200', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.098892657854887)}
+  - {'strategy_id': 'above_sma', 'params': 'n50', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.098892657854887)}
+  - {'strategy_id': 'donchian', 'params': '20-10', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.098892657854887)}
+  - {'strategy_id': 'donchian', 'params': '55-20', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.098892657854887)}
+  - {'strategy_id': 'rsi2_connors', 'params': 'fixed', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(4.740080168535479)}
+  - {'strategy_id': 'supertrend', 'params': '10-3', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.098892657854887)}
+  - {'strategy_id': 'tsmom', 'params': 'n30', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.098892657854887)}
+  - {'strategy_id': 'tsmom', 'params': 'n90', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.098892657854887)}
+  - {'strategy_id': 'dip_pct', 'params': '-5pct-5bar', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(6.340201586173074)}
+  - {'strategy_id': 'ema_9_21', 'params': '9-21', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.098892657854887)}
+  - {'strategy_id': 'ichimoku_cloud', 'params': '9-26-52', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.098892657854887)}
+  - {'strategy_id': 'supertrend_ema200', 'params': 'st10.3-ema200', 'asset': 'QQQ', 'tf': '1d', 'oos_pf': inf, 'oos_sharpe': np.float64(5.098892657854887)}
+Wrote /home/runner/work/deadoralive/deadoralive/docs/stocks/index.html
+Wrote /home/runner/work/deadoralive/deadoralive/docs/stocks/methodology.html
+Wrote /home/runner/work/deadoralive/deadoralive/docs/api/v1/stocks/latest.json (spec_v3 §B)
+Wrote /home/runner/work/deadoralive/deadoralive/docs/api/v1/README.md
+Wrote /home/runner/work/deadoralive/deadoralive/docs/api/index.html

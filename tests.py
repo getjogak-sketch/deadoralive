@@ -1534,8 +1534,11 @@ def test_check_issue_extended_check_sections():
               "### BTCUSD 1d" in comment_md)
         check("check_issue: extended check covers BTCUSD 4h too (ALL timeframes, not just the "
               "one selected on the issue form)", "### BTCUSD 4h" in comment_md)
-        check("check_issue: extended check notes ETHUSD was skipped (no local data in this dev env)",
-              "ETHUSD" in comment_md and "Skipped" in comment_md)
+        # ETHUSD is either covered (CI, where data/ETHUSD_*.csv exist) or explicitly skipped (dev box).
+        import os as _os
+        _eth_present = _os.path.exists(_os.path.join(config.DATA_DIR, "ETHUSD_1d.csv"))
+        check("check_issue: extended check covers or explicitly skips ETHUSD",
+              ("### ETHUSD 1d" in comment_md) if _eth_present else ("ETHUSD" in comment_md and "Skipped" in comment_md))
         check("check_issue: extended check includes the full OOS trade list (collapsible)",
               "Full OOS trade list" in comment_md and "<details>" in comment_md)
         check("check_issue: extended check includes an OOS monthly-returns table",

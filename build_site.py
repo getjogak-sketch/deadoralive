@@ -349,6 +349,7 @@ def build_index(payload: dict, out_path: str | None = None, assets: list | None 
   &middot; <a href="{html.escape(_check_strategy_url())}">Check your own strategy</a></div>
   <div class="disclaimer">{html.escape(payload['legal_disclaimer'])}</div>
 </footer>
+{config.ANALYTICS_SNIPPET}
 </body>
 </html>
 """
@@ -540,6 +541,7 @@ def build_methodology(out_path: str | None = None, assets: list | None = None,
   &middot; <a href="{html.escape(_check_strategy_url())}">Check your own strategy</a></div>
   <div class="disclaimer">{html.escape(config.LEGAL_DISCLAIMER)}</div>
 </footer>
+{config.ANALYTICS_SNIPPET}
 </body>
 </html>
 """
@@ -840,6 +842,7 @@ def build_index_ko(payload: dict, out_path: str | None = None):
   &middot; <a href="{html.escape(_check_strategy_url())}">내 전략도 검사해 보기</a></div>
 </footer>
 {_disclaimer_block_ko()}
+{config.ANALYTICS_SNIPPET}
 </body>
 </html>
 """
@@ -1048,6 +1051,7 @@ def build_methodology_ko(out_path: str | None = None):
   &middot; <a href="{html.escape(_check_strategy_url())}">내 전략도 검사해 보기</a></div>
 </footer>
 {_disclaimer_block_ko()}
+{config.ANALYTICS_SNIPPET}
 </body>
 </html>
 """
@@ -1094,6 +1098,7 @@ def build_empty_edition_page_ko(out_path: str | None = None, as_of: str | None =
   &middot; <a href="{html.escape(_check_strategy_url())}">내 전략도 검사해 보기</a></div>
 </footer>
 {_disclaimer_block_ko()}
+{config.ANALYTICS_SNIPPET}
 </body>
 </html>
 """
@@ -1322,6 +1327,7 @@ def build_api_index_html(out_path: str | None = None) -> str:
   &middot; <a href="{html.escape(_check_strategy_url())}">Check your own strategy</a></div>
   <div class="disclaimer">{html.escape(config.LEGAL_DISCLAIMER)}</div>
 </footer>
+{config.ANALYTICS_SNIPPET}
 </body>
 </html>
 """

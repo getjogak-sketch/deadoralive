@@ -15,6 +15,11 @@ PROJECT_NAME = "Dead or Alive"
 TAGLINE = "Popular trading strategies, re-tested every week — after fees, out-of-sample."
 REPO_URL = "https://github.com/getjogak-sketch/deadoralive"     # placeholder — fill in once the repo has a public home
 SIGNUP_URL = ""   # placeholder — empty means the signup link is hidden on the page
+
+# Privacy-friendly visit counter (GoatCounter: no cookies, no personal data). Public snippet —
+# it only tells the browser where to send an anonymous page-view ping. Empty string disables it.
+ANALYTICS_SNIPPET = ('<script data-goatcounter="https://jogak.goatcounter.com/count" '
+                     'async src="//gc.zgo.at/count.js"></script>')
 # Placeholder GitHub Pages URL (spec_v3 §B needs a concrete base URL for the API docs' `requests`
 # example) — the conventional <owner>.github.io/<repo> address for REPO_URL above. Fill in once
 # the repo has a public home, same as REPO_URL itself.

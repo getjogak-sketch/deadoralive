@@ -274,7 +274,10 @@ def update_symbol_offline_upbit(symbol: str, tf: str) -> bool:
 
 STOOQ_URL = "https://stooq.com/q/d/l/?s={symbol}.us&i=d"
 STOOQ_SYMBOL = {"SPY": "spy", "QQQ": "qqq"}
-YAHOO_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?range=max&interval=1d"
+YAHOO_CHART_URL = ("https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
+                   "?period1=946684800&period2={period2}&interval=1d&events=history")
+# NOTE: `range=max&interval=1d` silently comes back as MONTHLY bars from Yahoo (observed in CI,
+# 322 rows for 2000-2026), so we pass an explicit period1/period2 window like yfinance does.
 
 _NORM_COLUMNS = ["date", "open", "high", "low", "close", "volume"]
 
@@ -383,10 +386,20 @@ def fetch_ohlc_stooq(symbol: str) -> pd.DataFrame:
 
 
 def fetch_ohlc_yahoo(symbol: str) -> pd.DataFrame:
-    resp = requests.get(YAHOO_CHART_URL.format(symbol=symbol), timeout=30,
-                         headers={"User-Agent": "deadoralive/0.1 (+github.com/getjogak-sketch/deadoralive)"})
+    url = YAHOO_CHART_URL.format(symbol=symbol, period2=int(time.time()))
+    resp = requests.get(url, timeout=30,
+                         headers={"User-Agent": "Mozilla/5.0 (deadoralive/0.1; +github.com/getjogak-sketch/deadoralive)"})
     resp.raise_for_status()
     return _parse_yahoo_chart_json(resp.json())
+
+
+def _looks_daily(df: pd.DataFrame) -> bool:
+    """Sanity guard: a daily equity series has a median gap of 1 day (weekends make some 3).
+    Monthly/weekly data (median gap > 5 days) must never be written as *_1d.csv."""
+    if len(df) < 30:
+        return False
+    gaps = df["date"].sort_values().diff().dropna().dt.days
+    return float(gaps.median()) <= 5
 
 
 def update_symbol_online_stocks(symbol: str, tf: str = "1d") -> bool:
@@ -396,19 +409,31 @@ def update_symbol_online_stocks(symbol: str, tf: str = "1d") -> bool:
     (small)"). Never raises past a network error on the Yahoo leg either — that, too, becomes a
     skip-with-warning, since spec_v3 §A requires "if both fail, skip with a warning (never fail
     the run)"."""
+    source = "stooq"
     try:
         df = fetch_ohlc_stooq(symbol)
+        if not df.empty and not _looks_daily(df):
+            print(f"[fetch_data] Stooq returned non-daily-looking data for {symbol} "
+                  f"({len(df)} rows) — discarding, trying Yahoo.")
+            df = _empty_ohlc_df()
     except requests.exceptions.RequestException as e:
         print(f"[fetch_data] Stooq fetch failed for {symbol}: {e} — trying Yahoo fallback.")
         df = _empty_ohlc_df()
 
     if df.empty:
+        source = "yahoo"
         try:
             df = fetch_ohlc_yahoo(symbol)
+            if not df.empty and not _looks_daily(df):
+                print(f"[fetch_data] Yahoo returned non-daily-looking data for {symbol} "
+                      f"({len(df)} rows) — discarding (not a failure).")
+                df = _empty_ohlc_df()
         except requests.exceptions.RequestException as e:
             print(f"[fetch_data] Yahoo fallback also failed for {symbol}: {e} — skipping "
                   f"(not a failure).")
             df = _empty_ohlc_df()
+    if not df.empty:
+        print(f"[fetch_data] (stocks) {symbol}: source={source}")
 
     if df.empty:
         print(f"[fetch_data] WARNING: both Stooq and Yahoo returned no usable data for "

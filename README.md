@@ -450,3 +450,70 @@ references that only resolve inside this site's own stylesheet, and a badge is s
 on its own (a README, a third-party page) with no access to it. A badge states only that week's
 automated, out-of-sample, net-of-cost verdict — never an endorsement or advice language; see
 `docs/registry.html`'s "Embed a badge" section for the markdown embed snippet shown to readers.
+
+## Edge research program
+
+`research/edge/` is a separate, one-time-per-run question from everything above: not "does this
+week's OOS still look OK?" (`verdict.py`, re-run every week) but "is there any strategy x asset x
+timeframe combination in this whole codebase that is robustly profitable after fees *across
+years* of walk-forward windows, and not by luck once the number of combinations tested is honestly
+accounted for?" `research/edge/CRITERIA.md` is the full pre-registered rule (written before
+`run_edge.py` existed, same discipline as `REGISTRY.md`/`registry_ledger.json` above) — read that
+file for the exact thresholds; this section only covers the shape of the program and how to use
+its output.
+
+- **Universe**: every `registry.py` variant (`REGISTRY` + `POPULAR_COMBOS`, unchanged, reused via
+  `registry.iter_variants()`/`iter_popular_combo_variants()`) plus an expanded parameter grid
+  defined *only* inside `run_edge.py` itself (`EXTRA_GRID` — sma/ema cross, Donchian, vol-breakout
+  k, tsmom, above-SMA, RSI-MR exit) — **never** added to the public `registry.py`, so this program
+  can explore far more parameter points than this site ever publishes a verdict for. ~54 strategy
+  variants total, times every `data/<SYMBOL>_<TF>.csv` this run finds (crypto, KRW pairs, stocks,
+  macro — every asset every edition already covers).
+- **Method**: 12 non-overlapping 6-month walk-forward windows over the most recent 6 years per
+  asset, reusing `engine.py`/`metrics.py`/`strategies.py` completely unchanged (this program adds
+  no new simulation logic — only the walk-forward loop and the selection rule). A combination
+  survives only if it clears hit-rate, median-PF, and trade-count bars *and* the identical
+  parameters also work on 2+ *other* assets *and* a small parameter neighbourhood around it also
+  works (reusing `robustness.py`'s own neighbour-grid idea, walked forward through the same
+  windows instead of a single OOS check) — see CRITERIA.md E3 for the exact numbers.
+- **The honest part**: the identical selection process is re-run 20 times against a block-
+  bootstrap-by-month reshuffling of each asset's own returns (an intentionally simple placebo,
+  documented simplifications and a measured limitation both spelled out in CRITERIA.md E3) — this
+  is the *noise floor*: how many "survivors" this exact procedure finds by chance alone, with no
+  real edge, purely from testing many combinations. The real survivor count is only reported as
+  **EDGE FOUND** if it exceeds that noise floor's mean + 1 standard deviation; otherwise the
+  program reports **NO EVIDENCE OF EDGE**, explicitly.
+- **Public output** — `research/edge/results/SUMMARY.md`: N tested, survivor counts (overall and
+  by edition — en/ko/stocks/macro — never by individual asset or strategy), the placebo mean/sd,
+  and the decision. It never names a strategy, a parameter, or an asset for a specific survivor.
+- **Private output** — `research/edge/results/survivors.json.enc`: the full survivor detail
+  (strategy id, params, asset, timeframe, per-window numbers), AES-256-CBC-encrypted with
+  `EDGE_PASSPHRASE` via `openssl enc -aes-256-cbc -pbkdf2 -salt -pass env:EDGE_PASSPHRASE`. If
+  `EDGE_PASSPHRASE` is unset when `run_edge.py` runs, nothing private is written and `SUMMARY.md`
+  says so explicitly rather than silently omitting the file. To read it back:
+  ```
+  EDGE_PASSPHRASE=... research/edge/decrypt.sh                       # -> ./survivors.json
+  EDGE_PASSPHRASE=... research/edge/decrypt.sh path/to/survivors.json.enc /tmp/out.json
+  ```
+  The passphrase lives only as the GitHub Actions secret `EDGE_PASSPHRASE` and in Cay's own
+  keeping — it is never written anywhere in this repo.
+- **Workflow** — `.github/workflows/research-edge.yml` (`workflow_dispatch`, 180-minute timeout,
+  optional `max_assets`/`shuffles` inputs): checkout, install `pandas`/`numpy`, `fetch_data.py`
+  (same step `weekly.yml` already runs — `data/*.csv` is gitignored, so a fresh checkout has none
+  without this), self-test (`run_edge.py --synthetic`), the real run, commit `results/`.
+- **Runtime**: measured on this dev box (2 asset/timeframe files, the full 54-variant universe,
+  a 2-shuffle placebo) at roughly 5 seconds for the main pass and ~3 seconds per placebo shuffle.
+  Scaled to the full ~15-asset/timeframe production universe with the default 20 shuffles, that
+  extrapolates to well under 10 minutes total — nowhere near the 150-minute soft budget this
+  task set, so `--max-assets` (fixed-seed sampling of asset/timeframe files) exists as a
+  documented safety valve but is not expected to be needed.
+- **Tests** — `research/edge/tests_edge.py` (run by the agent that built this program, not wired
+  into `tests.py` or any workflow): a planted persistent edge (across several independent
+  synthetic assets, so cross-asset consistency can be satisfied) survives the full selection; pure
+  noise does not, over multiple seeds; walk-forward windows never read past their own end
+  (truncation test) and a strategy's signal is unchanged by truncation; an encryption round-trip.
+  See that file's own module docstring and CRITERIA.md's placebo section for a documented finding
+  from building it: a same-bar breakout check (`vol_breakout`) is sensitive to exactly how
+  synthetic OHLC bars are fabricated in a way close-driven strategies are not — confirmed against
+  real BTCUSD data, and the reason the test suite's own small synthetic universe sticks to
+  "state"-type variants.

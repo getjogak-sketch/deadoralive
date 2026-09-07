@@ -1,0 +1,56 @@
+name: research-edge
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_assets:
+        description: "sample this many asset/timeframe files instead of the full universe (blank = full universe)"
+        required: false
+        default: ""
+      shuffles:
+        description: "placebo shuffle count"
+        required: false
+        default: "20"
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install pandas numpy requests
+      - name: Fetch data
+        # data/*.csv is gitignored, so a fresh checkout has none — same step weekly.yml already
+        # runs. Every asset/timeframe fetch_data.py writes here (crypto, KRW pairs, stocks, macro)
+        # is exactly CRITERIA.md E1's universe.
+        run: |
+          mkdir -p research/edge/results
+          python fetch_data.py 2>&1 | tee research/edge/results/fetch.log
+          ls -la data/ >> research/edge/results/fetch.log
+      - name: Self-test
+        run: python research/edge/run_edge.py --synthetic
+      - name: Run study
+        run: |
+          ARGS=""
+          if [ -n "${{ github.event.inputs.max_assets }}" ]; then
+            ARGS="$ARGS --max-assets ${{ github.event.inputs.max_assets }}"
+          fi
+          if [ -n "${{ github.event.inputs.shuffles }}" ]; then
+            ARGS="$ARGS --shuffles ${{ github.event.inputs.shuffles }}"
+          fi
+          python research/edge/run_edge.py $ARGS 2>&1 | tee research/edge/results/run.log
+        env:
+          EDGE_PASSPHRASE: ${{ secrets.EDGE_PASSPHRASE }}
+      - name: Commit results
+        run: |
+          git config user.name "deadoralive-bot"
+          git config user.email "deadoralive-bot@users.noreply.github.com"
+          git add -f research/edge/results/
+          git commit -m "research: edge research program run ($(date -u +%F))" || echo "nothing to commit"
+          git pull --rebase origin main || true
+          git push

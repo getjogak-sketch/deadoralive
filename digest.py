@@ -509,3 +509,41 @@ def build_all(payloads: dict) -> dict:
               f"{config.PROJECT_NAME} — 주간 요약",
               "매주 전략 백테스트 결과 중 바뀐 부분만 숫자로 정리한 요약입니다.")
     return out
+
+
+def _load_json_or_none(path: str) -> dict | None:
+    if not os.path.exists(path):
+        return None
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def main() -> int:
+    """Standalone CLI entry point (this task's §S3 workflow step: `python digest.py`, run after
+    the weekly pipeline and before the commit step). Reads each edition's just-written
+    results/latest*.json straight off disk rather than taking an in-memory payload, so it can run
+    as its own process step in CI. run_weekly.py --offline also calls digest.build_all() directly
+    at the end of its own run (so a solo local run already produces every digest artifact, per
+    this task's "run_weekly.py --offline must produce everything" requirement) — calling this
+    script again afterwards in CI is a harmless, idempotent no-op recomputation of the same data,
+    kept because spec_v3-style task instructions ask for a standalone `python digest.py` step."""
+    payloads = {
+        "en": _load_json_or_none(os.path.join(config.RESULTS_DIR, "latest.json")),
+        "ko": _load_json_or_none(os.path.join(config.RESULTS_DIR, "latest_ko.json")),
+        "stocks": _load_json_or_none(os.path.join(config.RESULTS_DIR, "latest_stocks.json")),
+    }
+    if not any(payloads.values()):
+        print("digest.py: no results/latest*.json found yet (run run_weekly.py first) — nothing "
+              "to do.")
+        return 0
+    build_all(payloads)
+    print("digest.py: wrote digest pages + feeds.")
+    return 0
+
+
+if __name__ == "__main__":
+    import sys
+    sys.exit(main())

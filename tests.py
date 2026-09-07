@@ -1170,6 +1170,120 @@ def test_digest_build_writes_pages_and_feeds():
 
 
 
+# ---------------------------------------------------------------------------
+# S3: optional publishers (publish.py) — every provider must exit 0 with no secret configured,
+# and every provider's payload shape is checked against a monkeypatched requests.post (never a
+# real network call: this dev environment blocks every one of these hosts anyway).
+# ---------------------------------------------------------------------------
+
+_PUBLISH_ENV_KEYS = [
+    "BUTTONDOWN_API_KEY", "BUTTONDOWN_SEND_KO", "BLUESKY_HANDLE", "BLUESKY_APP_PASSWORD",
+    "MASTODON_INSTANCE", "MASTODON_TOKEN", "KAGGLE_USERNAME", "KAGGLE_KEY", "HF_TOKEN",
+    "HF_DATASET_REPO",
+]
+
+
+def test_publish_no_secrets_exits_zero():
+    import publish
+
+    saved = {k: os.environ.pop(k, None) for k in _PUBLISH_ENV_KEYS}
+    try:
+        check("publish buttondown: returns 0 with no secret", publish.cmd_buttondown() == 0)
+        check("publish bluesky: returns 0 with no secret", publish.cmd_bluesky() == 0)
+        check("publish mastodon: returns 0 with no secret", publish.cmd_mastodon() == 0)
+        check("publish kaggle: returns 0 with no secret", publish.cmd_kaggle() == 0)
+        check("publish huggingface: returns 0 with no secret", publish.cmd_huggingface() == 0)
+        check("publish all: returns 0 with no secrets at all", publish.main(["all"]) == 0)
+    finally:
+        for k, v in saved.items():
+            if v is not None:
+                os.environ[k] = v
+
+
+def test_publish_payload_shapes_fake_http():
+    import json as _json
+    import tempfile
+    import publish
+    import digest as dg
+
+    calls = []
+
+    def fake_post(url, json=None, headers=None, timeout=None, **kw):
+        calls.append({"url": url, "json": json, "headers": headers})
+
+        class _Resp:
+            status_code = 200
+            text = "{}"
+
+            def raise_for_status(self):
+                pass
+
+            def json(self):
+                return {"accessJwt": "fake-jwt", "did": "did:plc:fake"}
+
+        return _Resp()
+
+    orig_post = publish.requests.post
+    orig_digest_dir = dg.DIGEST_DIR
+    tmp = tempfile.mkdtemp()
+    dg.DIGEST_DIR = tmp
+    fake_digest = {
+        "edition": "en", "as_of": "2026-09-05",
+        "tally": {"ALIVE": 8, "FADING": 17, "DEAD": 12, "TOO FEW TRADES": 7},
+        "title": "Week of 2026-09-05: 8 alive / 17 fading / 12 dead — what changed",
+        "markdown": "# test digest\n- one\n- two", "html_body": "<ul><li>x</li></ul>",
+    }
+    with open(os.path.join(tmp, "en_2026-09-05.json"), "w") as f:
+        _json.dump(fake_digest, f)
+
+    env_updates = {
+        "BUTTONDOWN_API_KEY": "tok123", "BLUESKY_HANDLE": "user.bsky.social",
+        "BLUESKY_APP_PASSWORD": "app-pass", "MASTODON_INSTANCE": "https://mastodon.example",
+        "MASTODON_TOKEN": "mtok",
+    }
+    saved = {k: os.environ.get(k) for k in env_updates}
+    os.environ.update(env_updates)
+    try:
+        publish.requests.post = fake_post
+        publish.cmd_buttondown()
+        publish.cmd_bluesky()
+        publish.cmd_mastodon()
+    finally:
+        publish.requests.post = orig_post
+        dg.DIGEST_DIR = orig_digest_dir
+        for k, v in saved.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+
+    bd_call = next((c for c in calls if c["url"] == publish.BUTTONDOWN_URL), None)
+    check("publish buttondown: posts to api.buttondown.com/v1/emails", bd_call is not None)
+    check("publish buttondown: Authorization: Token <key>",
+          bool(bd_call) and bd_call["headers"].get("Authorization", "") == "Token tok123")
+    check("publish buttondown: body has subject/body/status=about_to_send",
+          bool(bd_call) and {"subject", "body", "status"} <= set(bd_call["json"].keys())
+          and bd_call["json"]["status"] == "about_to_send")
+
+    sess_call = next((c for c in calls if c["url"] == publish.BLUESKY_SESSION_URL), None)
+    check("publish bluesky: createSession posts identifier/password",
+          bool(sess_call) and {"identifier", "password"} <= set(sess_call["json"].keys()))
+    rec_call = next((c for c in calls if c["url"] == publish.BLUESKY_RECORD_URL), None)
+    check("publish bluesky: creates an app.bsky.feed.post record with a link facet",
+          bool(rec_call) and rec_call["json"]["record"].get("$type") == "app.bsky.feed.post"
+          and len(rec_call["json"]["record"].get("facets") or []) == 1
+          and rec_call["headers"].get("Authorization") == "Bearer fake-jwt")
+
+    masto_call = next((c for c in calls if c["url"].endswith("/api/v1/statuses")), None)
+    check("publish mastodon: posts {status: ...} with Bearer auth",
+          bool(masto_call) and "status" in masto_call["json"]
+          and masto_call["headers"].get("Authorization") == "Bearer mtok")
+    check("publish: no subcommand exceeded Bluesky's 300-char post limit",
+          bool(rec_call) and len(rec_call["json"]["record"]["text"].encode("utf-8")) <= 300)
+
+
+
+
 if __name__ == "__main__":
     test_no_lookahead_ma_cross()
     test_no_lookahead_vol_breakout()
@@ -1197,6 +1311,8 @@ if __name__ == "__main__":
     test_seo_pages_no_banned_korean_words()
     test_digest_first_week_and_flips()
     test_digest_build_writes_pages_and_feeds()
+    test_publish_no_secrets_exits_zero()
+    test_publish_payload_shapes_fake_http()
 
     print()
     if FAILURES:

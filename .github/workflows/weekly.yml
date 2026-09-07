@@ -43,6 +43,11 @@ jobs:
           set -o pipefail
           python run_weekly.py 2>&1 | tee results/ci_run.log
 
+      - name: Build weekly digest (harmless idempotent recomputation of what run_weekly.py already built)
+        id: digest
+        continue-on-error: true
+        run: python digest.py
+
       - name: Commit & push updated data/results/docs
         id: commit
         continue-on-error: true
@@ -58,6 +63,22 @@ jobs:
             git commit -m "weekly: refresh data/results/site ($(date -u +%F))"
             git push
           fi
+
+      - name: Publish to optional channels (buttondown/bluesky/mastodon/kaggle/huggingface)
+        id: publish
+        continue-on-error: true
+        env:
+          BUTTONDOWN_API_KEY: ${{ secrets.BUTTONDOWN_API_KEY }}
+          BUTTONDOWN_SEND_KO: ${{ secrets.BUTTONDOWN_SEND_KO }}
+          BLUESKY_HANDLE: ${{ secrets.BLUESKY_HANDLE }}
+          BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
+          MASTODON_INSTANCE: ${{ secrets.MASTODON_INSTANCE }}
+          MASTODON_TOKEN: ${{ secrets.MASTODON_TOKEN }}
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_DATASET_REPO: ${{ secrets.HF_DATASET_REPO }}
+        run: python publish.py all
 
       - name: Fail the job if the pipeline failed
         if: steps.pipeline.outcome == 'failure'

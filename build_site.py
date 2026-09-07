@@ -270,7 +270,7 @@ def _popular_combos_html(payload: dict, assets: list | None = None, timeframes: 
 
 def build_index(payload: dict, out_path: str | None = None, assets: list | None = None,
                  timeframes: list | None = None, lang_links: str | None = None,
-                 feed_html: str | None = None):
+                 feed_html: str | None = None, places_href: str | None = None):
     """spec_v3 §A extension (additive): `assets`/`timeframes`/`lang_links` let a second edition
     (the stocks edition — SPY/QQQ, 1d only) reuse this exact template instead of duplicating it,
     per spec_v3 §A's own instruction ("reuse the English builders with an edition parameter").
@@ -291,6 +291,9 @@ def build_index(payload: dict, out_path: str | None = None, assets: list | None 
         ' &middot; <a href="feed.xml">RSS</a> &middot; <a href="feed.json">JSON Feed</a> '
         '&middot; <a href="digest/index.html">Weekly digests</a>'
     )
+    # task S4: the stocks edition has no places.html of its own (spec_v3 §A editions are en/ko/
+    # stocks but S4's status page only covers en/ko), so its call site points back at the main one.
+    places_href = places_href if places_href is not None else "places.html"
 
     groups = {}
     order = []
@@ -354,7 +357,8 @@ def build_index(payload: dict, out_path: str | None = None, assets: list | None 
 <footer class="bottom">
   <div><a href="methodology.html">Methodology</a>{repo_html}{signup_html}
   &middot; <a href="{html.escape(_check_strategy_url())}">Check your own strategy</a>
-  &middot; <a href="s/index.html">All strategy pages</a>{feed_html}</div>
+  &middot; <a href="s/index.html">All strategy pages</a>{feed_html}
+  &middot; <a href="{html.escape(places_href)}">Places this is published to</a></div>
   <div class="disclaimer">{html.escape(payload['legal_disclaimer'])}</div>
 </footer>
 {config.ANALYTICS_SNIPPET}
@@ -399,16 +403,18 @@ def _popular_combos_table_html() -> str:
 
 
 def build_methodology(out_path: str | None = None, assets: list | None = None,
-                       lang_links: str | None = None):
+                       lang_links: str | None = None, places_href: str | None = None):
     """spec_v3 §A extension (additive): `assets`/`lang_links` let the stocks edition reuse this
     template (see build_index's docstring above for the same rationale); both default to exactly
-    what this function already hard-coded before spec_v3."""
+    what this function already hard-coded before spec_v3. `places_href` (task S4): see
+    build_index's own docstring — the stocks edition has no places.html of its own."""
     out_path = out_path or os.path.join(config.DOCS_DIR, "methodology.html")
     assets = assets if assets is not None else config.ASSETS
     lang_links = lang_links if lang_links is not None else (
         '<a href="stocks/methodology.html">Stocks edition</a> &middot; '
         '<a href="ko/methodology.html">한국어 (Korean edition)</a>'
     )
+    places_href = places_href if places_href is not None else "places.html"
     # Filtered to `assets` (not all of config.COST) so this page's output is unaffected by the
     # other editions' COST entries added alongside it.
     cost_rows = "".join(
@@ -547,7 +553,8 @@ def build_methodology(out_path: str | None = None, assets: list | None = None,
 <footer class="bottom">
   <div><a href="index.html">&larr; back to results</a>
   &middot; <a href="{html.escape(_check_strategy_url())}">Check your own strategy</a>
-  &middot; <a href="s/index.html">All strategy pages</a></div>
+  &middot; <a href="s/index.html">All strategy pages</a>
+  &middot; <a href="{html.escape(places_href)}">Places this is published to</a></div>
   <div class="disclaimer">{html.escape(config.LEGAL_DISCLAIMER)}</div>
 </footer>
 {config.ANALYTICS_SNIPPET}
@@ -850,7 +857,8 @@ def build_index_ko(payload: dict, out_path: str | None = None):
   <div><a href="methodology.html">어떻게 계산했나</a>{repo_html}{signup_html} &middot; <a href="../index.html">English</a> &middot; <a href="../stocks/index.html">Stocks</a>
   &middot; <a href="{html.escape(_check_strategy_url())}">내 전략도 검사해 보기</a>
   &middot; <a href="s/index.html">전략별 페이지 전체</a>
-  &middot; <a href="feed.xml">RSS</a> &middot; <a href="digest/index.html">주간 요약</a></div>
+  &middot; <a href="feed.xml">RSS</a> &middot; <a href="digest/index.html">주간 요약</a>
+  &middot; <a href="places.html">이 엔진이 공개되는 곳</a></div>
 </footer>
 {_disclaimer_block_ko()}
 {config.ANALYTICS_SNIPPET}
@@ -1060,7 +1068,8 @@ def build_methodology_ko(out_path: str | None = None):
 <footer class="bottom">
   <div><a href="index.html">&larr; 결과표로 돌아가기</a> &middot; <a href="../methodology.html">English</a> &middot; <a href="../stocks/methodology.html">Stocks</a>
   &middot; <a href="{html.escape(_check_strategy_url())}">내 전략도 검사해 보기</a>
-  &middot; <a href="s/index.html">전략별 페이지 전체</a></div>
+  &middot; <a href="s/index.html">전략별 페이지 전체</a>
+  &middot; <a href="places.html">이 엔진이 공개되는 곳</a></div>
 </footer>
 {_disclaimer_block_ko()}
 {config.ANALYTICS_SNIPPET}
@@ -1109,7 +1118,8 @@ def build_empty_edition_page_ko(out_path: str | None = None, as_of: str | None =
   <div><a href="methodology.html">어떻게 계산했나</a> &middot; <a href="../index.html">English</a> &middot; <a href="../stocks/index.html">Stocks</a>
   &middot; <a href="{html.escape(_check_strategy_url())}">내 전략도 검사해 보기</a>
   &middot; <a href="s/index.html">전략별 페이지 전체</a>
-  &middot; <a href="feed.xml">RSS</a> &middot; <a href="digest/index.html">주간 요약</a></div>
+  &middot; <a href="feed.xml">RSS</a> &middot; <a href="digest/index.html">주간 요약</a>
+  &middot; <a href="places.html">이 엔진이 공개되는 곳</a></div>
 </footer>
 {_disclaimer_block_ko()}
 {config.ANALYTICS_SNIPPET}
@@ -1339,9 +1349,209 @@ def build_api_index_html(out_path: str | None = None) -> str:
 <footer class="bottom">
   <div><a href="../index.html">&larr; back to results</a>
   &middot; <a href="{html.escape(_check_strategy_url())}">Check your own strategy</a>
-  &middot; <a href="../s/index.html">All strategy pages</a></div>
+  &middot; <a href="../s/index.html">All strategy pages</a>
+  &middot; <a href="../places.html">Places this is published to</a></div>
   <div class="disclaimer">{html.escape(config.LEGAL_DISCLAIMER)}</div>
 </footer>
+{config.ANALYTICS_SNIPPET}
+</body>
+</html>
+"""
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    with open(out_path, "w") as f:
+        f.write(doc)
+    return out_path
+
+
+# =================================================================================================
+# "Places this engine is published to" (this task's §S4) — a status page: what is already live,
+# what turns on when a secret is set (spec_v3-adjacent S3 publishers), and what still needs a
+# one-time manual registration outside this repo entirely. Purely informational/additive; changes
+# no number, threshold, or existing page's content beyond the footer links pointing here.
+# =================================================================================================
+
+_PLACES_LIVE_EN = [
+    ("Site — English (crypto, BTC/ETH)", "docs/index.html", "Always on; rebuilt every weekly run."),
+    ("Site — Korean (Upbit KRW)", "docs/ko/index.html", "Always on; shows a 'no data this week' notice when Upbit is unreachable."),
+    ("Site — Stocks (SPY/QQQ)", "docs/stocks/index.html", "Always on; skipped for a run with no Stooq/Yahoo data."),
+    ("Machine-readable API (JSON)", "docs/api/v1/&lt;edition&gt;/latest.json", "No key; see docs/api/index.html for the schema."),
+    ('"Check my strategy" GitHub Issues bot', ".github/ISSUE_TEMPLATE/check-strategy.yml", "Open an issue with that template; a bot replies and closes it."),
+    ("RSS / JSON Feed", "docs/feed.xml, docs/feed.json, docs/ko/feed.xml", "One item per weekly run, full HTML content per item."),
+    ("Sitemap / robots.txt", "docs/sitemap.xml, docs/robots.txt", "Lists every page this site has; regenerated every run."),
+]
+_PLACES_SECRET_EN = [
+    ("Email newsletter (Buttondown)", "BUTTONDOWN_API_KEY", "Also set BUTTONDOWN_SEND_KO=1 to send the Korean digest as a second email."),
+    ("Bluesky posts", "BLUESKY_HANDLE, BLUESKY_APP_PASSWORD", "An app password, not your main account password — create one in Bluesky's settings."),
+    ("Mastodon posts", "MASTODON_INSTANCE, MASTODON_TOKEN", "MASTODON_INSTANCE is your instance's base URL, e.g. https://mastodon.social."),
+    ("Kaggle dataset", "KAGGLE_USERNAME, KAGGLE_KEY", "From a Kaggle account's Settings -> API -> Create New Token."),
+    ("Hugging Face dataset", "HF_TOKEN, HF_DATASET_REPO", "HF_DATASET_REPO is 'account-or-org/dataset-name'; token needs write access."),
+]
+_PLACES_MANUAL_EN = [
+    ("Google Search Console", "Verify the Pages URL as a property, then submit docs/sitemap.xml."),
+    ("Naver Search Advisor", "Verify the Korean edition's URL and submit its sitemap (same docs/sitemap.xml)."),
+    ("RapidAPI", "List docs/api/v1/&lt;edition&gt;/latest.json as a free/read-only API listing."),
+    ("dev.to RSS import", "Settings -> Extensions -> \"Import from RSS\", point it at docs/feed.xml."),
+]
+
+
+def _places_table_html(rows: list) -> str:
+    return "".join(f"<tr><td>{name}</td><td><code>{where}</code></td><td>{note}</td></tr>"
+                    for name, where, note in rows)
+
+
+def build_places_page(out_path: str | None = None) -> str:
+    out_path = out_path or os.path.join(config.DOCS_DIR, "places.html")
+    doc = f"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Places this engine is published to</title>
+<meta name="description" content="Where {html.escape(config.PROJECT_NAME)}'s weekly results are already live, what turns on with a secret, and what still needs a one-time manual registration.">
+<style>{BASE_CSS}
+table.places {{ border-collapse: collapse; width: 100%; margin: 0.75rem 0 1.5rem; font-size: 0.88rem; }}
+table.places th, table.places td {{ border: 1px solid var(--border); padding: 0.5rem 0.6rem; text-align: left; white-space: normal; }}
+table.places thead th {{ background: var(--card-bg); }}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Places this engine is published to</h1>
+  <p class="tagline">What's already live, what turns on when a secret is set, and what needs a
+     one-time manual registration outside this repo.</p>
+  <p class="meta"><a href="index.html">&larr; back to results</a></p>
+</header>
+<main>
+  <section class="assetblock">
+    <h2>Live now</h2>
+    <div class="tablewrap"><table class="places">
+      <thead><tr><th>Channel</th><th>Where</th><th>Notes</th></tr></thead>
+      <tbody>{_places_table_html(_PLACES_LIVE_EN)}</tbody>
+    </table></div>
+  </section>
+
+  <section class="assetblock">
+    <h2>Enabled when a secret is set</h2>
+    <p>Set these under the repo's <strong>Settings &rarr; Secrets and variables &rarr; Actions</strong>.
+       <code>publish.py</code> checks for each one and simply skips (prints "skipped: ... not set",
+       exits 0) whichever aren't configured &mdash; nothing else in the weekly run depends on them.</p>
+    <div class="tablewrap"><table class="places">
+      <thead><tr><th>Channel</th><th>Secret name(s)</th><th>Notes</th></tr></thead>
+      <tbody>{_places_table_html(_PLACES_SECRET_EN)}</tbody>
+    </table></div>
+  </section>
+
+  <section class="assetblock">
+    <h2>One-time manual registration</h2>
+    <p>These happen outside this repo entirely, once, by a human &mdash; nothing here automates
+       them.</p>
+    <div class="tablewrap"><table class="places">
+      <thead><tr><th>Where</th><th>How to enable</th></tr></thead>
+      <tbody>{"".join(f"<tr><td>{n}</td><td>{h}</td></tr>" for n, h in _PLACES_MANUAL_EN)}</tbody>
+    </table></div>
+  </section>
+</main>
+<footer class="bottom">
+  <div><a href="index.html">&larr; back to results</a>
+  &middot; <a href="methodology.html">Methodology</a></div>
+  <div class="disclaimer">{html.escape(config.LEGAL_DISCLAIMER)}</div>
+</footer>
+{config.ANALYTICS_SNIPPET}
+</body>
+</html>
+"""
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    with open(out_path, "w") as f:
+        f.write(doc)
+    return out_path
+
+
+_PLACES_LIVE_KO = [
+    ("사이트 — 영어(암호화폐, BTC/ETH)", "docs/index.html", "항상 켜져 있으며 매주 자동 갱신됩니다."),
+    ("사이트 — 한국어(업비트 KRW)", "docs/ko/index.html", "업비트 접속이 안 될 때는 '이번 주는 결과가 없습니다' 안내가 표시됩니다."),
+    ("사이트 — 주식(SPY/QQQ)", "docs/stocks/index.html", "Stooq/Yahoo 데이터가 없는 주에는 건너뜁니다."),
+    ("기계 판독용 API(JSON)", "docs/api/v1/&lt;edition&gt;/latest.json", "별도 키 없이 열람 가능합니다. 자세한 형식은 docs/api/index.html 참고."),
+    ('"내 전략도 검사해 보기" 깃허브 이슈 봇', ".github/ISSUE_TEMPLATE/check-strategy.yml", "해당 템플릿으로 이슈를 열면 봇이 댓글로 답하고 이슈를 닫습니다."),
+    ("RSS / JSON 피드", "docs/feed.xml, docs/feed.json, docs/ko/feed.xml", "매주 실행마다 항목이 하나씩 추가되며 전체 내용을 담고 있습니다."),
+    ("사이트맵 / robots.txt", "docs/sitemap.xml, docs/robots.txt", "매주 실행마다 모든 페이지 목록으로 다시 생성됩니다."),
+]
+_PLACES_SECRET_KO = [
+    ("이메일 뉴스레터(Buttondown)", "BUTTONDOWN_API_KEY", "BUTTONDOWN_SEND_KO=1을 추가로 설정하면 한국어 요약도 별도 이메일로 발송됩니다."),
+    ("블루스카이(Bluesky) 게시", "BLUESKY_HANDLE, BLUESKY_APP_PASSWORD", "계정 비밀번호가 아니라 블루스카이 설정에서 발급하는 앱 비밀번호를 사용합니다."),
+    ("마스토돈(Mastodon) 게시", "MASTODON_INSTANCE, MASTODON_TOKEN", "MASTODON_INSTANCE는 인스턴스 주소입니다. 예: https://mastodon.social"),
+    ("캐글(Kaggle) 데이터셋", "KAGGLE_USERNAME, KAGGLE_KEY", "Kaggle 계정 설정 -> API -> Create New Token에서 발급합니다."),
+    ("허깅페이스(Hugging Face) 데이터셋", "HF_TOKEN, HF_DATASET_REPO", "HF_DATASET_REPO는 '계정 또는 조직/데이터셋이름' 형식이며, 토큰은 쓰기 권한이 필요합니다."),
+]
+_PLACES_MANUAL_KO = [
+    ("구글 서치 콘솔(Google Search Console)", "사이트 소유를 확인한 뒤 docs/sitemap.xml을 제출합니다."),
+    ("네이버 서치어드바이저", "한국어판 주소 소유를 확인한 뒤 같은 docs/sitemap.xml을 제출합니다."),
+    ("래피드API(RapidAPI)", "docs/api/v1/&lt;edition&gt;/latest.json을 무료/읽기 전용 API로 등록합니다."),
+    ("dev.to RSS 가져오기", "Settings -> Extensions -> \"Import from RSS\"에서 docs/feed.xml을 등록합니다."),
+]
+
+
+def build_places_page_ko(out_path: str | None = None) -> str:
+    out_path = out_path or os.path.join(config.DOCS_DIR_KO, "places.html")
+    live_rows = "".join(f"<tr><td>{n}</td><td><code>{w}</code></td><td>{note}</td></tr>"
+                        for n, w, note in _PLACES_LIVE_KO)
+    secret_rows = "".join(f"<tr><td>{n}</td><td><code>{w}</code></td><td>{note}</td></tr>"
+                          for n, w, note in _PLACES_SECRET_KO)
+    manual_rows = "".join(f"<tr><td>{n}</td><td>{h}</td></tr>" for n, h in _PLACES_MANUAL_KO)
+    doc = f"""<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이 엔진이 공개되는 곳</title>
+<meta name="description" content="{html.escape(config.PROJECT_NAME)}의 주간 결과가 이미 공개되어 있는 곳, 비밀 값(secret)을 설정하면 켜지는 곳, 그리고 별도로 한 번만 등록하면 되는 곳을 정리했습니다.">
+<style>{BASE_CSS}{KO_EXTRA_CSS}
+table.places {{ border-collapse: collapse; width: 100%; margin: 0.75rem 0 1.5rem; font-size: 0.88rem; }}
+table.places th, table.places td {{ border: 1px solid var(--border); padding: 0.5rem 0.6rem; text-align: left; white-space: normal; }}
+table.places thead th {{ background: var(--card-bg); }}
+</style>
+</head>
+<body>
+{_disclaimer_block_ko()}
+<header class="top">
+  <h1>이 엔진이 공개되는 곳</h1>
+  <p class="tagline">이미 공개되어 있는 곳, 비밀 값(secret)을 설정하면 켜지는 곳, 저장소 밖에서 한 번만
+     등록하면 되는 곳을 정리했습니다.</p>
+  <p class="meta"><a href="index.html">&larr; 결과표로 돌아가기</a></p>
+</header>
+<main>
+  <section class="assetblock">
+    <h2>지금 공개 중</h2>
+    <div class="tablewrap"><table class="places">
+      <thead><tr><th>채널</th><th>위치</th><th>참고</th></tr></thead>
+      <tbody>{live_rows}</tbody>
+    </table></div>
+  </section>
+
+  <section class="assetblock">
+    <h2>비밀 값(secret)을 설정하면 켜지는 곳</h2>
+    <p>저장소의 <strong>Settings &rarr; Secrets and variables &rarr; Actions</strong>에서 설정합니다.
+       <code>publish.py</code>는 값이 없는 항목을 오류 없이 건너뛰기만 합니다("skipped: ... not set"
+       출력 후 정상 종료) &mdash; 매주 실행되는 나머지 과정은 이 값들과 무관합니다.</p>
+    <div class="tablewrap"><table class="places">
+      <thead><tr><th>채널</th><th>비밀 값 이름</th><th>참고</th></tr></thead>
+      <tbody>{secret_rows}</tbody>
+    </table></div>
+  </section>
+
+  <section class="assetblock">
+    <h2>한 번만 직접 등록하면 되는 곳</h2>
+    <p>이 저장소가 자동으로 처리하지 않는, 사람이 한 번만 하면 되는 등록입니다.</p>
+    <div class="tablewrap"><table class="places">
+      <thead><tr><th>대상</th><th>등록 방법</th></tr></thead>
+      <tbody>{manual_rows}</tbody>
+    </table></div>
+  </section>
+</main>
+<footer class="bottom">
+  <div><a href="index.html">&larr; 결과표로 돌아가기</a>
+  &middot; <a href="methodology.html">어떻게 계산했나</a></div>
+</footer>
+{_disclaimer_block_ko()}
 {config.ANALYTICS_SNIPPET}
 </body>
 </html>

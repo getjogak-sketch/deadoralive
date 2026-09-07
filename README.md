@@ -267,3 +267,43 @@ and output files are untouched).
   whenever its bar hasn't fully closed as of "now", which is correct either way but may drop one
   extra already-closed bar if Upbit in fact never returns a partial one — a one-bar discrepancy at
   most, self-correcting next week).
+
+## Places this engine is published to
+
+`docs/places.html` (English) and `docs/ko/places.html` (Korean) are the always-current, generated
+version of this section — this is a short summary. Every channel here is additive: none of it
+changes a number, a threshold, or an existing page's content, and none of it is required for the
+core weekly pipeline (`fetch_data.py` → `tests.py` → `run_weekly.py`) to run.
+
+**Live now — no setup needed:**
+- The site itself: English/crypto (`docs/index.html`), Korean/Upbit (`docs/ko/index.html`),
+  Stocks/SPY+QQQ (`docs/stocks/index.html`).
+- The machine-readable JSON API (`docs/api/v1/<edition>/latest.json`, spec_v3 §B).
+- The "Check my strategy" GitHub Issues bot (spec_v3 §E).
+- One static page per (strategy variant, asset) for search (`docs/s/`, `docs/ko/s/`,
+  `docs/stocks/s/`), plus `docs/sitemap.xml` and `docs/robots.txt` (this task's §S1).
+- RSS (`docs/feed.xml`, `docs/ko/feed.xml`) and JSON Feed (`docs/feed.json`) of the weekly digest
+  (`digest.py`, §S2), one item per weekly run.
+
+**Enabled when a GitHub repo secret is set** (repo → Settings → Secrets and variables → Actions;
+`publish.py`, §S3 — every one of these is independently optional and skips itself, printing
+`skipped: <VAR> not set` and exiting 0, when its secret is absent):
+
+| Channel | Secret name(s) |
+|---|---|
+| Email newsletter (Buttondown) | `BUTTONDOWN_API_KEY` (+ `BUTTONDOWN_SEND_KO=1` for a Korean copy) |
+| Bluesky post | `BLUESKY_HANDLE`, `BLUESKY_APP_PASSWORD` |
+| Mastodon post | `MASTODON_INSTANCE`, `MASTODON_TOKEN` |
+| Kaggle dataset | `KAGGLE_USERNAME`, `KAGGLE_KEY` |
+| Hugging Face dataset | `HF_TOKEN`, `HF_DATASET_REPO` |
+
+**One-time manual registration** (outside this repo, by a human, once): Google Search Console and
+Naver Search Advisor (verify the site, submit `docs/sitemap.xml`), a RapidAPI listing over
+`docs/api/v1/<edition>/latest.json`, and dev.to's "Import from RSS" pointed at `docs/feed.xml`.
+
+**Unverified in this dev environment**: `api.buttondown.com`, `bsky.social`, the Mastodon/Kaggle/
+Hugging Face APIs, and every search-engine/RapidAPI/dev.to registration above are all
+network-blocked here exactly like Bitstamp/Upbit/Stooq/Yahoo already are — `publish.py` is written
+against each provider's own documented request format and unit-tested against a monkeypatched
+`requests.post` (`tests.py`'s `test_publish_payload_shapes_fake_http`), but has never been
+exercised against a live endpoint.

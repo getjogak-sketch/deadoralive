@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이 엔진이 공개되는 곳</title>
+<meta name="description" content="Dead or Alive의 주간 결과가 이미 공개되어 있는 곳, 비밀 값(secret)을 설정하면 켜지는 곳, 그리고 별도로 한 번만 등록하면 되는 곳을 정리했습니다.">
+<style>
+:root {
+  --bg: #ffffff; --fg: #14181f; --muted: #5b6270; --border: #e2e5ea; --card-bg: #f7f8fa;
+  --link: #1a56db;
+  --alive-bg: #d9f2e3; --alive-fg: #106a37;
+  --fading-bg: #fdf1c8; --fading-fg: #7a5b00;
+  --dead-bg: #e6e8eb; --dead-fg: #4b5160;
+  --toofew-bg: #f2f3f5; --toofew-fg: #8a909c;
+  --suspicious: #c0392b;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #10131a; --fg: #e7e9ee; --muted: #9aa1b0; --border: #2a2f3a; --card-bg: #171b24;
+    --link: #7aa2ff;
+    --alive-bg: #113a26; --alive-fg: #6bdc9c;
+    --fading-bg: #3a3210; --fading-fg: #f0d572;
+    --dead-bg: #262a33; --dead-fg: #a8adb8;
+    --toofew-bg: #1c2029; --toofew-fg: #6b7180;
+    --suspicious: #ff8a7a;
+  }
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; margin: 0; padding: 0 0 3rem 0; line-height: 1.45; }
+a { color: var(--link); }
+header.top { padding: 2rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border); }
+header.top h1 { margin: 0 0 0.25rem 0; font-size: 1.7rem; }
+header.top p.tagline { margin: 0 0 1rem 0; color: var(--muted); }
+.meta { color: var(--muted); font-size: 0.9rem; }
+.tally { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 1rem; }
+.tally span { padding: 0.3rem 0.7rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600; }
+main { max-width: 1200px; margin: 0 auto; padding: 0 1.25rem; }
+nav.jump { display: flex; gap: 0.75rem; flex-wrap: wrap; margin: 1.25rem 0; }
+nav.jump a { padding: 0.3rem 0.7rem; border: 1px solid var(--border); border-radius: 6px; text-decoration: none; font-size: 0.9rem; }
+section.assetblock { margin: 2.25rem 0; }
+section.assetblock h2 { border-bottom: 2px solid var(--border); padding-bottom: 0.4rem; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; min-width: 980px; font-size: 0.85rem; }
+th, td { padding: 0.5rem 0.6rem; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--border); }
+th:nth-child(1), td:nth-child(1), th:nth-child(2), td:nth-child(2) { text-align: left; }
+thead th { background: var(--card-bg); position: sticky; top: 0; }
+tbody tr:hover { background: var(--card-bg); }
+.badge { padding: 0.15rem 0.55rem; border-radius: 999px; font-weight: 700; font-size: 0.78rem; display: inline-block; }
+.ref-row { font-style: italic; color: var(--muted); }
+.suspicious { color: var(--suspicious); font-weight: 700; }
+.gross-note { font-size: 0.75rem; color: var(--muted); }
+footer.bottom { max-width: 1200px; margin: 2.5rem auto 0; padding: 1.25rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem; }
+footer.bottom .disclaimer { margin-top: 0.75rem; }
+
+.regtable th, .regtable td { text-align: left; white-space: normal; }
+.regtable td:nth-child(4) { white-space: nowrap; }
+
+.disclaimer-block { max-width: 1200px; margin: 1rem auto; padding: 0.9rem 1.1rem; border: 1px solid var(--border); border-radius: 8px; background: var(--card-bg); color: var(--muted); font-size: 0.82rem; line-height: 1.5; }
+.notice-box { max-width: 1200px; margin: 2rem auto; padding: 2rem 1.5rem; border: 1px dashed var(--border); border-radius: 10px; text-align: center; }
+.notice-box h2 { margin-top: 0; }
+.badge small { font-weight: 500; opacity: 0.75; margin-left: 0.3rem; font-size: 0.72em; }
+
+table.places { border-collapse: collapse; width: 100%; margin: 0.75rem 0 1.5rem; font-size: 0.88rem; }
+table.places th, table.places td { border: 1px solid var(--border); padding: 0.5rem 0.6rem; text-align: left; white-space: normal; }
+table.places thead th { background: var(--card-bg); }
+</style>
+</head>
+<body>
+<div class="disclaimer-block">본 페이지는 무료로 제공되는 정보·교육 목적의 자료이며, 투자 자문이나 특정 자산의 매수·매도 권유가 아닙니다. 과거 백테스트 결과는 미래 수익을 보장하지 않으며, 모든 투자 판단과 책임은 이용자 본인에게 있습니다. 운영자는 유사투자자문업자가 아니며 어떠한 수익도 보장하지 않습니다.</div>
+<header class="top">
+  <h1>이 엔진이 공개되는 곳</h1>
+  <p class="tagline">이미 공개되어 있는 곳, 비밀 값(secret)을 설정하면 켜지는 곳, 저장소 밖에서 한 번만
+     등록하면 되는 곳을 정리했습니다.</p>
+  <p class="meta"><a href="index.html">&larr; 결과표로 돌아가기</a></p>
+</header>
+<main>
+  <section class="assetblock">
+    <h2>지금 공개 중</h2>
+    <div class="tablewrap"><table class="places">
+      <thead><tr><th>채널</th><th>위치</th><th>참고</th></tr></thead>
+      <tbody><tr><td>사이트 — 영어(암호화폐, BTC/ETH)</td><td><code>docs/index.html</code></td><td>항상 켜져 있으며 매주 자동 갱신됩니다.</td></tr><tr><td>사이트 — 한국어(업비트 KRW)</td><td><code>docs/ko/index.html</code></td><td>업비트 접속이 안 될 때는 '이번 주는 결과가 없습니다' 안내가 표시됩니다.</td></tr><tr><td>사이트 — 주식(SPY/QQQ)</td><td><code>docs/stocks/index.html</code></td><td>Stooq/Yahoo 데이터가 없는 주에는 건너뜁니다.</td></tr><tr><td>기계 판독용 API(JSON)</td><td><code>docs/api/v1/&lt;edition&gt;/latest.json</code></td><td>별도 키 없이 열람 가능합니다. 자세한 형식은 docs/api/index.html 참고.</td></tr><tr><td>"내 전략도 검사해 보기" 깃허브 이슈 봇</td><td><code>.github/ISSUE_TEMPLATE/check-strategy.yml</code></td><td>해당 템플릿으로 이슈를 열면 봇이 댓글로 답하고 이슈를 닫습니다.</td></tr><tr><td>RSS / JSON 피드</td><td><code>docs/feed.xml, docs/feed.json, docs/ko/feed.xml</code></td><td>매주 실행마다 항목이 하나씩 추가되며 전체 내용을 담고 있습니다.</td></tr><tr><td>사이트맵 / robots.txt</td><td><code>docs/sitemap.xml, docs/robots.txt</code></td><td>매주 실행마다 모든 페이지 목록으로 다시 생성됩니다.</td></tr></tbody>
+    </table></div>
+  </section>
+
+  <section class="assetblock">
+    <h2>비밀 값(secret)을 설정하면 켜지는 곳</h2>
+    <p>저장소의 <strong>Settings &rarr; Secrets and variables &rarr; Actions</strong>에서 설정합니다.
+       <code>publish.py</code>는 값이 없는 항목을 오류 없이 건너뛰기만 합니다("skipped: ... not set"
+       출력 후 정상 종료) &mdash; 매주 실행되는 나머지 과정은 이 값들과 무관합니다.</p>
+    <div class="tablewrap"><table class="places">
+      <thead><tr><th>채널</th><th>비밀 값 이름</th><th>참고</th></tr></thead>
+      <tbody><tr><td>이메일 뉴스레터(Buttondown)</td><td><code>BUTTONDOWN_API_KEY</code></td><td>BUTTONDOWN_SEND_KO=1을 추가로 설정하면 한국어 요약도 별도 이메일로 발송됩니다.</td></tr><tr><td>블루스카이(Bluesky) 게시</td><td><code>BLUESKY_HANDLE, BLUESKY_APP_PASSWORD</code></td><td>계정 비밀번호가 아니라 블루스카이 설정에서 발급하는 앱 비밀번호를 사용합니다.</td></tr><tr><td>마스토돈(Mastodon) 게시</td><td><code>MASTODON_INSTANCE, MASTODON_TOKEN</code></td><td>MASTODON_INSTANCE는 인스턴스 주소입니다. 예: https://mastodon.social</td></tr><tr><td>캐글(Kaggle) 데이터셋</td><td><code>KAGGLE_USERNAME, KAGGLE_KEY</code></td><td>Kaggle 계정 설정 -> API -> Create New Token에서 발급합니다.</td></tr><tr><td>허깅페이스(Hugging Face) 데이터셋</td><td><code>HF_TOKEN, HF_DATASET_REPO</code></td><td>HF_DATASET_REPO는 '계정 또는 조직/데이터셋이름' 형식이며, 토큰은 쓰기 권한이 필요합니다.</td></tr></tbody>
+    </table></div>
+  </section>
+
+  <section class="assetblock">
+    <h2>한 번만 직접 등록하면 되는 곳</h2>
+    <p>이 저장소가 자동으로 처리하지 않는, 사람이 한 번만 하면 되는 등록입니다.</p>
+    <div class="tablewrap"><table class="places">
+      <thead><tr><th>대상</th><th>등록 방법</th></tr></thead>
+      <tbody><tr><td>구글 서치 콘솔(Google Search Console)</td><td>사이트 소유를 확인한 뒤 docs/sitemap.xml을 제출합니다.</td></tr><tr><td>네이버 서치어드바이저</td><td>한국어판 주소 소유를 확인한 뒤 같은 docs/sitemap.xml을 제출합니다.</td></tr><tr><td>래피드API(RapidAPI)</td><td>docs/api/v1/&lt;edition&gt;/latest.json을 무료/읽기 전용 API로 등록합니다.</td></tr><tr><td>dev.to RSS 가져오기</td><td>Settings -> Extensions -> "Import from RSS"에서 docs/feed.xml을 등록합니다.</td></tr></tbody>
+    </table></div>
+  </section>
+</main>
+<footer class="bottom">
+  <div><a href="index.html">&larr; 결과표로 돌아가기</a>
+  &middot; <a href="methodology.html">어떻게 계산했나</a></div>
+</footer>
+<div class="disclaimer-block">본 페이지는 무료로 제공되는 정보·교육 목적의 자료이며, 투자 자문이나 특정 자산의 매수·매도 권유가 아닙니다. 과거 백테스트 결과는 미래 수익을 보장하지 않으며, 모든 투자 판단과 책임은 이용자 본인에게 있습니다. 운영자는 유사투자자문업자가 아니며 어떠한 수익도 보장하지 않습니다.</div>
+<script data-goatcounter="https://jogak.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

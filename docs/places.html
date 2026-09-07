@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Places this engine is published to</title>
+<meta name="description" content="Where Dead or Alive's weekly results are already live, what turns on with a secret, and what still needs a one-time manual registration.">
+<style>
+:root {
+  --bg: #ffffff; --fg: #14181f; --muted: #5b6270; --border: #e2e5ea; --card-bg: #f7f8fa;
+  --link: #1a56db;
+  --alive-bg: #d9f2e3; --alive-fg: #106a37;
+  --fading-bg: #fdf1c8; --fading-fg: #7a5b00;
+  --dead-bg: #e6e8eb; --dead-fg: #4b5160;
+  --toofew-bg: #f2f3f5; --toofew-fg: #8a909c;
+  --suspicious: #c0392b;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #10131a; --fg: #e7e9ee; --muted: #9aa1b0; --border: #2a2f3a; --card-bg: #171b24;
+    --link: #7aa2ff;
+    --alive-bg: #113a26; --alive-fg: #6bdc9c;
+    --fading-bg: #3a3210; --fading-fg: #f0d572;
+    --dead-bg: #262a33; --dead-fg: #a8adb8;
+    --toofew-bg: #1c2029; --toofew-fg: #6b7180;
+    --suspicious: #ff8a7a;
+  }
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; margin: 0; padding: 0 0 3rem 0; line-height: 1.45; }
+a { color: var(--link); }
+header.top { padding: 2rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border); }
+header.top h1 { margin: 0 0 0.25rem 0; font-size: 1.7rem; }
+header.top p.tagline { margin: 0 0 1rem 0; color: var(--muted); }
+.meta { color: var(--muted); font-size: 0.9rem; }
+.tally { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 1rem; }
+.tally span { padding: 0.3rem 0.7rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600; }
+main { max-width: 1200px; margin: 0 auto; padding: 0 1.25rem; }
+nav.jump { display: flex; gap: 0.75rem; flex-wrap: wrap; margin: 1.25rem 0; }
+nav.jump a { padding: 0.3rem 0.7rem; border: 1px solid var(--border); border-radius: 6px; text-decoration: none; font-size: 0.9rem; }
+section.assetblock { margin: 2.25rem 0; }
+section.assetblock h2 { border-bottom: 2px solid var(--border); padding-bottom: 0.4rem; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; min-width: 980px; font-size: 0.85rem; }
+th, td { padding: 0.5rem 0.6rem; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--border); }
+th:nth-child(1), td:nth-child(1), th:nth-child(2), td:nth-child(2) { text-align: left; }
+thead th { background: var(--card-bg); position: sticky; top: 0; }
+tbody tr:hover { background: var(--card-bg); }
+.badge { padding: 0.15rem 0.55rem; border-radius: 999px; font-weight: 700; font-size: 0.78rem; display: inline-block; }
+.ref-row { font-style: italic; color: var(--muted); }
+.suspicious { color: var(--suspicious); font-weight: 700; }
+.gross-note { font-size: 0.75rem; color: var(--muted); }
+footer.bottom { max-width: 1200px; margin: 2.5rem auto 0; padding: 1.25rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem; }
+footer.bottom .disclaimer { margin-top: 0.75rem; }
+
+table.places { border-collapse: collapse; width: 100%; margin: 0.75rem 0 1.5rem; font-size: 0.88rem; }
+table.places th, table.places td { border: 1px solid var(--border); padding: 0.5rem 0.6rem; text-align: left; white-space: normal; }
+table.places thead th { background: var(--card-bg); }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Places this engine is published to</h1>
+  <p class="tagline">What's already live, what turns on when a secret is set, and what needs a
+     one-time manual registration outside this repo.</p>
+  <p class="meta"><a href="index.html">&larr; back to results</a></p>
+</header>
+<main>
+  <section class="assetblock">
+    <h2>Live now</h2>
+    <div class="tablewrap"><table class="places">
+      <thead><tr><th>Channel</th><th>Where</th><th>Notes</th></tr></thead>
+      <tbody><tr><td>Site — English (crypto, BTC/ETH)</td><td><code>docs/index.html</code></td><td>Always on; rebuilt every weekly run.</td></tr><tr><td>Site — Korean (Upbit KRW)</td><td><code>docs/ko/index.html</code></td><td>Always on; shows a 'no data this week' notice when Upbit is unreachable.</td></tr><tr><td>Site — Stocks (SPY/QQQ)</td><td><code>docs/stocks/index.html</code></td><td>Always on; skipped for a run with no Stooq/Yahoo data.</td></tr><tr><td>Machine-readable API (JSON)</td><td><code>docs/api/v1/&lt;edition&gt;/latest.json</code></td><td>No key; see docs/api/index.html for the schema.</td></tr><tr><td>"Check my strategy" GitHub Issues bot</td><td><code>.github/ISSUE_TEMPLATE/check-strategy.yml</code></td><td>Open an issue with that template; a bot replies and closes it.</td></tr><tr><td>RSS / JSON Feed</td><td><code>docs/feed.xml, docs/feed.json, docs/ko/feed.xml</code></td><td>One item per weekly run, full HTML content per item.</td></tr><tr><td>Sitemap / robots.txt</td><td><code>docs/sitemap.xml, docs/robots.txt</code></td><td>Lists every page this site has; regenerated every run.</td></tr></tbody>
+    </table></div>
+  </section>
+
+  <section class="assetblock">
+    <h2>Enabled when a secret is set</h2>
+    <p>Set these under the repo's <strong>Settings &rarr; Secrets and variables &rarr; Actions</strong>.
+       <code>publish.py</code> checks for each one and simply skips (prints "skipped: ... not set",
+       exits 0) whichever aren't configured &mdash; nothing else in the weekly run depends on them.</p>
+    <div class="tablewrap"><table class="places">
+      <thead><tr><th>Channel</th><th>Secret name(s)</th><th>Notes</th></tr></thead>
+      <tbody><tr><td>Email newsletter (Buttondown)</td><td><code>BUTTONDOWN_API_KEY</code></td><td>Also set BUTTONDOWN_SEND_KO=1 to send the Korean digest as a second email.</td></tr><tr><td>Bluesky posts</td><td><code>BLUESKY_HANDLE, BLUESKY_APP_PASSWORD</code></td><td>An app password, not your main account password — create one in Bluesky's settings.</td></tr><tr><td>Mastodon posts</td><td><code>MASTODON_INSTANCE, MASTODON_TOKEN</code></td><td>MASTODON_INSTANCE is your instance's base URL, e.g. https://mastodon.social.</td></tr><tr><td>Kaggle dataset</td><td><code>KAGGLE_USERNAME, KAGGLE_KEY</code></td><td>From a Kaggle account's Settings -> API -> Create New Token.</td></tr><tr><td>Hugging Face dataset</td><td><code>HF_TOKEN, HF_DATASET_REPO</code></td><td>HF_DATASET_REPO is 'account-or-org/dataset-name'; token needs write access.</td></tr></tbody>
+    </table></div>
+  </section>
+
+  <section class="assetblock">
+    <h2>One-time manual registration</h2>
+    <p>These happen outside this repo entirely, once, by a human &mdash; nothing here automates
+       them.</p>
+    <div class="tablewrap"><table class="places">
+      <thead><tr><th>Where</th><th>How to enable</th></tr></thead>
+      <tbody><tr><td>Google Search Console</td><td>Verify the Pages URL as a property, then submit docs/sitemap.xml.</td></tr><tr><td>Naver Search Advisor</td><td>Verify the Korean edition's URL and submit its sitemap (same docs/sitemap.xml).</td></tr><tr><td>RapidAPI</td><td>List docs/api/v1/&lt;edition&gt;/latest.json as a free/read-only API listing.</td></tr><tr><td>dev.to RSS import</td><td>Settings -> Extensions -> "Import from RSS", point it at docs/feed.xml.</td></tr></tbody>
+    </table></div>
+  </section>
+</main>
+<footer class="bottom">
+  <div><a href="index.html">&larr; back to results</a>
+  &middot; <a href="methodology.html">Methodology</a></div>
+  <div class="disclaimer">Educational / informational content only. This is not investment advice, and nothing here is a recommendation to buy or sell any asset. Past backtested performance, especially net-of-cost historical simulation, does not guarantee future results.</div>
+</footer>
+<script data-goatcounter="https://jogak.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

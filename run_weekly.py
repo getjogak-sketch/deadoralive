@@ -409,6 +409,17 @@ def main():
     print(f"Wrote {os.path.join(config.DOCS_DIR, 'api', 'index.html')}")
 
     # -------------------------------------------------------------------------------------------
+    # "Places this engine is published to" (this task's §S4) — a status page (live now / enabled
+    # by secret / one-time manual registration). English + Korean; not part of the stocks edition
+    # (which links back to the English one instead — see build_index/build_methodology's
+    # `places_href` default).
+    # -------------------------------------------------------------------------------------------
+    build_site.build_places_page()
+    build_site.build_places_page_ko()
+    print(f"Wrote {os.path.join(config.DOCS_DIR, 'places.html')}")
+    print(f"Wrote {os.path.join(config.DOCS_DIR_KO, 'places.html')}")
+
+    # -------------------------------------------------------------------------------------------
     # Programmatic SEO pages, sitemap, robots.txt (this task's §S1) — additive, read-only over the
     # payloads already assembled above. `payload` here is the English edition's own payload dict,
     # already in scope from this function's top half.
@@ -425,7 +436,13 @@ def main():
         (config.PAGES_URL.rstrip("/") + "/index.html", payload["as_of"]),
         (config.PAGES_URL.rstrip("/") + "/methodology.html", payload["as_of"]),
         (config.PAGES_URL.rstrip("/") + "/api/index.html", payload["as_of"]),
+        (config.PAGES_URL.rstrip("/") + "/places.html", payload["as_of"]),
     ]
+    # docs/ko/places.html is always written above regardless of whether Upbit had data this run,
+    # so it always belongs in the sitemap — falling back to the English as_of for its <lastmod>
+    # on a week where the Korean edition itself has nothing new to report.
+    extra_urls.append((config.PAGES_URL.rstrip("/") + "/ko/places.html",
+                        (payload_ko or {}).get("as_of", payload["as_of"])))
     if payload_ko:
         extra_urls.append((config.PAGES_URL.rstrip("/") + "/ko/index.html", payload_ko["as_of"]))
         extra_urls.append((config.PAGES_URL.rstrip("/") + "/ko/methodology.html", payload_ko["as_of"]))
@@ -674,11 +691,12 @@ def _run_stocks_edition():
                             assets=assets, timeframes=timeframes,
                             lang_links=('<a href="../index.html">English (crypto)</a> &middot; '
                                         '<a href="../ko/index.html">한국어</a>'),
-                            feed_html="")
+                            feed_html="", places_href="../places.html")
     build_site.build_methodology(out_path=os.path.join(out_dir, "methodology.html"),
                                   assets=assets,
                                   lang_links=('<a href="../methodology.html">English (crypto)</a> '
-                                              '&middot; <a href="../ko/methodology.html">한국어</a>'))
+                                              '&middot; <a href="../ko/methodology.html">한국어</a>'),
+                                  places_href="../places.html")
     print(f"Wrote {os.path.join(out_dir, 'index.html')}")
     print(f"Wrote {os.path.join(out_dir, 'methodology.html')}")
 

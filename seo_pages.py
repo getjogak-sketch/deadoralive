@@ -190,6 +190,10 @@ STRATEGY_LEAD_EN = {
 # title lead above.
 _GRID_BOT_SECONDARY_LEAD_EN = "Grid bot strategy"
 
+# Coordinator follow-up (2026-09-07): the same fixed footnote as build_site.py's bot-templates
+# table, also on the SEO strategy pages for these three bot ids specifically.
+_BOT_FOOTNOTE_STRATEGY_IDS = ("grid_bot", "dca_bot", "dca_bot_sl")
+
 
 def _seo_lead_phrase(strategy_id: str, asset: str) -> str | None:
     """The high-demand lead phrase for this (strategy, asset) SEO page, or None if neither matches
@@ -600,6 +604,12 @@ def _build_one_page(edition_key: str, lang: str, strategy_id: str, params: str, 
     if lang != "ko" and strategy_id == "grid_bot":
         rule_text = f"{_GRID_BOT_SECONDARY_LEAD_EN}: {rule_text}"
 
+    bot_footnote_html = ""
+    if strategy_id in _BOT_FOOTNOTE_STRATEGY_IDS:
+        footnote = bs.BOT_TEMPLATES_FOOTNOTE_KO if lang == "ko" else bs.BOT_TEMPLATES_FOOTNOTE_EN
+        lead = "승률을 보기 전에 먼저 읽어 주세요:" if lang == "ko" else "Read this before the win rates:"
+        bot_footnote_html = f'<p class="gross-note"><strong>{lead}</strong> {html.escape(footnote)}</p>'
+
     tf_sections = []
     for tf in tf_order:
         r = tf_rows[tf]
@@ -623,6 +633,7 @@ def _build_one_page(edition_key: str, lang: str, strategy_id: str, params: str, 
 </header>
 <main>
   <p><strong>{rule_label}:</strong> {html.escape(rule_text)}</p>
+  {bot_footnote_html}
   {disclaimer_top}
   {"".join(tf_sections)}
   <div class="interp">

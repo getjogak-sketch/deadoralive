@@ -1,7 +1,7 @@
 {
   "project_name": "Dead or Alive",
   "tagline": "Popular trading strategies, re-tested every week \u2014 after fees, out-of-sample.",
-  "generated_at": "2026-09-07T13:45:25.703460+00:00",
+  "generated_at": "2026-09-07T13:50:15.013437+00:00",
   "as_of": "2026-09-05",
   "oos_days": 730,
   "tally": {
@@ -4202,7 +4202,8 @@
         "sharpe": -1.4820502645717701,
         "exposure": 55.39596273291926,
         "max_consec_loss": 20,
-        "avg_trade_return": -0.010473944527935672
+        "avg_trade_return": -0.010473944527935672,
+        "max_deal_dd": null
       },
       "oos": {
         "total_return": -0.09944814603098662,
@@ -4217,7 +4218,8 @@
         "exposure": 55.677154582763336,
         "max_consec_loss": 10,
         "avg_trade_return": -0.003148841953222762,
-        "fee_drag": 0.05769693435551981
+        "fee_drag": 0.05769693435551981,
+        "max_deal_dd": null
       },
       "suspicious": false,
       "robustness": {
@@ -4267,7 +4269,8 @@
         "sharpe": -0.4187928024540958,
         "exposure": 50.34937888198758,
         "max_consec_loss": 10,
-        "avg_trade_return": -0.007579532130876213
+        "avg_trade_return": -0.007579532130876213,
+        "max_deal_dd": null
       },
       "oos": {
         "total_return": -0.09269796578705813,
@@ -4282,7 +4285,8 @@
         "exposure": 21.751025991792066,
         "max_consec_loss": 10,
         "avg_trade_return": -0.013656790324398123,
-        "fee_drag": 0.01203243358187156
+        "fee_drag": 0.01203243358187156,
+        "max_deal_dd": null
       },
       "suspicious": false,
       "robustness": {
@@ -4332,7 +4336,8 @@
         "sharpe": -0.07966861518556229,
         "exposure": 48.60248447204969,
         "max_consec_loss": 10,
-        "avg_trade_return": -0.0027311007239783584
+        "avg_trade_return": -0.0027311007239783584,
+        "max_deal_dd": null
       },
       "oos": {
         "total_return": 0.011627866864664771,
@@ -4347,7 +4352,8 @@
         "exposure": 47.05882352941176,
         "max_consec_loss": 10,
         "avg_trade_return": 0.002821951535321091,
-        "fee_drag": 0.00906249401708803
+        "fee_drag": 0.00906249401708803,
+        "max_deal_dd": null
       },
       "suspicious": false,
       "robustness": {
@@ -4397,7 +4403,8 @@
         "sharpe": 5.972180767174108,
         "exposure": 32.33695652173913,
         "max_consec_loss": 0,
-        "avg_trade_return": 0.013984999999999909
+        "avg_trade_return": 0.013984999999999909,
+        "max_deal_dd": 0.5055320434574179
       },
       "oos": {
         "total_return": 2.260856853355568,
@@ -4412,7 +4419,8 @@
         "exposure": 58.5499316005472,
         "max_consec_loss": 1,
         "avg_trade_return": 0.013433682434144991,
-        "fee_drag": 0.3844902936687986
+        "fee_drag": 0.3844902936687986,
+        "max_deal_dd": 0.3868694387352679
       },
       "suspicious": true,
       "robustness": {
@@ -4462,7 +4470,8 @@
         "sharpe": 8.18197447151155,
         "exposure": 28.843167701863354,
         "max_consec_loss": 0,
-        "avg_trade_return": 0.013984999999999902
+        "avg_trade_return": 0.013984999999999902,
+        "max_deal_dd": 0.3691210122423579
       },
       "oos": {
         "total_return": 0.9647966138108477,
@@ -4477,7 +4486,8 @@
         "exposure": 62.927496580027366,
         "max_consec_loss": 1,
         "avg_trade_return": 0.01343323112721451,
-        "fee_drag": 0.16048748027991255
+        "fee_drag": 0.16048748027991255,
+        "max_deal_dd": 0.374186115382781
       },
       "suspicious": true,
       "robustness": {
@@ -4527,7 +4537,8 @@
         "sharpe": 4.076010041304275,
         "exposure": 27.833850931677016,
         "max_consec_loss": 2,
-        "avg_trade_return": 0.01292097633136085
+        "avg_trade_return": 0.01292097633136085,
+        "max_deal_dd": 0.3691210122423577
       },
       "oos": {
         "total_return": 1.301518351441867,
@@ -4542,7 +4553,8 @@
         "exposure": 47.8796169630643,
         "max_consec_loss": 1,
         "avg_trade_return": 0.01308283122051521,
-        "fee_drag": 0.2600128541591862
+        "fee_drag": 0.2600128541591862,
+        "max_deal_dd": 0.1810224114668444
       },
       "suspicious": true,
       "robustness": {
@@ -4592,7 +4604,8 @@
         "sharpe": -1.5323115090226773,
         "exposure": 52.91796066252588,
         "max_consec_loss": 10,
-        "avg_trade_return": -0.00485258141464152
+        "avg_trade_return": -0.00485258141464152,
+        "max_deal_dd": null
       },
       "oos": {
         "total_return": -0.11957596428737904,
@@ -4607,7 +4620,8 @@
         "exposure": 49.72640218878249,
         "max_consec_loss": 10,
         "avg_trade_return": -0.0027352898138743734,
-        "fee_drag": 0.08108153788938477
+        "fee_drag": 0.08108153788938477,
+        "max_deal_dd": null
       },
       "suspicious": false,
       "robustness": {
@@ -4657,7 +4671,8 @@
         "sharpe": 0.03186270497848596,
         "exposure": 52.20626293995859,
         "max_consec_loss": 10,
-        "avg_trade_return": 0.00013579712275454755
+        "avg_trade_return": 0.00013579712275454755,
+        "max_deal_dd": null
       },
       "oos": {
         "total_return": -0.014914217332936852,
@@ -4672,7 +4687,8 @@
         "exposure": 47.01322389420884,
         "max_consec_loss": 10,
         "avg_trade_return": -0.001122978013607299,
-        "fee_drag": 0.024958008706629453
+        "fee_drag": 0.024958008706629453,
+        "max_deal_dd": null
       },
       "suspicious": false,
       "robustness": {
@@ -4722,7 +4738,8 @@
         "sharpe": 0.3889962229138423,
         "exposure": 51.721014492753625,
         "max_consec_loss": 10,
-        "avg_trade_return": 0.006213566858367788
+        "avg_trade_return": 0.006213566858367788,
+        "max_deal_dd": null
       },
       "oos": {
         "total_return": 0.05769036968724883,
@@ -4737,7 +4754,8 @@
         "exposure": 44.68764249886001,
         "max_consec_loss": 10,
         "avg_trade_return": 0.011278502109653548,
-        "fee_drag": 0.010649418888754703
+        "fee_drag": 0.010649418888754703,
+        "max_deal_dd": null
       },
       "suspicious": false,
       "robustness": {
@@ -4787,7 +4805,8 @@
         "sharpe": 1.4156220575219238,
         "exposure": 94.24818840579711,
         "max_consec_loss": 1,
-        "avg_trade_return": 0.013780595483805159
+        "avg_trade_return": 0.013780595483805159,
+        "max_deal_dd": 0.8124807168246667
       },
       "oos": {
         "total_return": 0.27810710161650487,
@@ -4802,7 +4821,8 @@
         "exposure": 96.73962608299134,
         "max_consec_loss": 1,
         "avg_trade_return": 0.01154436568735853,
-        "fee_drag": 0.14632632325135408
+        "fee_drag": 0.14632632325135408,
+        "max_deal_dd": 0.5185986086757478
       },
       "suspicious": true,
       "robustness": {
@@ -4852,7 +4872,8 @@
         "sharpe": 1.1470052980062841,
         "exposure": 93.68530020703933,
         "max_consec_loss": 1,
-        "avg_trade_return": 0.013844724246624586
+        "avg_trade_return": 0.013844724246624586,
+        "max_deal_dd": 0.8086016609537062
       },
       "oos": {
         "total_return": 0.3146041170249445,
@@ -4867,7 +4888,8 @@
         "exposure": 95.78203374373005,
         "max_consec_loss": 1,
         "avg_trade_return": 0.012172811161766517,
-        "fee_drag": 0.21059487061756643
+        "fee_drag": 0.21059487061756643,
+        "max_deal_dd": 0.5086402573975014
       },
       "suspicious": true,
       "robustness": {
@@ -4917,7 +4939,8 @@
         "sharpe": 3.2089650480533094,
         "exposure": 78.89492753623189,
         "max_consec_loss": 2,
-        "avg_trade_return": 0.01246321749073002
+        "avg_trade_return": 0.01246321749073002,
+        "max_deal_dd": 0.21569069528327797
       },
       "oos": {
         "total_return": 0.310387947888207,
@@ -4932,7 +4955,8 @@
         "exposure": 93.16005471956224,
         "max_consec_loss": 1,
         "avg_trade_return": 0.011172813741787923,
-        "fee_drag": 0.30950126294656943
+        "fee_drag": 0.30950126294656943,
+        "max_deal_dd": 0.1795244210652659
       },
       "suspicious": true,
       "robustness": {

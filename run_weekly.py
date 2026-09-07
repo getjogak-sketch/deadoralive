@@ -308,13 +308,19 @@ def _build_bot_row(sid, sname, variant, df, is_mask, oos_mask, cost, bars_per_ye
 
     robustness = bots.compute_bot_robustness(sid, params, df, oos_mask, cost)
 
+    # Coordinator follow-up (2026-09-07): "max open drawdown of a single deal" for the DCA bots —
+    # None (rendered "-") for grid_bot, whose trades carry no comparable per-deal drawdown field.
+    is_max_deal_dd = bots.max_deal_dd(trades_is)
+    oos_max_deal_dd = bots.max_deal_dd(trades_oos)
+
     row = {
         "strategy_id": sid, "strategy_name": sname, "type": "lotsim",
         "params": variant["params_str"], "asset": symbol, "timeframe": tf,
         "as_of": str(as_of.date()),
         "verdict": verd,
-        "is": _clean_metrics(m_is),
-        "oos": {**_clean_metrics(m_oos), "fee_drag": None if np.isnan(fee_drag) else fee_drag},
+        "is": {**_clean_metrics(m_is), "max_deal_dd": is_max_deal_dd},
+        "oos": {**_clean_metrics(m_oos), "fee_drag": None if np.isnan(fee_drag) else fee_drag,
+                "max_deal_dd": oos_max_deal_dd},
         "suspicious": bool(is_suspicious),
         "robustness": robustness,
         "group": "bot_templates",

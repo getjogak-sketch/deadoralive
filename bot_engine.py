@@ -233,6 +233,8 @@ def simulate_dca_bot(df: pd.DataFrame, mask: pd.Series, cost: float, so_step_pct
     next_so = 1                # next safety-order index (1..5) still eligible
     so_skipped = False
     capital_ref = cash         # re-based to current cash at the instant each new deal starts
+    deal_min_low = None        # running min of the bar low over the open deal's life, for the
+                                # "max open drawdown of a single deal" footnote metric below
 
     for t in range(start_idx, end_idx + 1):
         if not deal_open:
@@ -248,6 +250,12 @@ def simulate_dca_bot(df: pd.DataFrame, mask: pd.Series, cost: float, so_step_pct
             deal_open = True
             next_so = 1
             so_skipped = False
+            deal_min_low = None
+
+        # Coordinator follow-up: track the deal's worst mark-to-market drawdown so far — how far
+        # the bar's low has dipped below the deal's running average entry, as a fraction of that
+        # average. Cheap: one running min, updated every bar the deal is open, no extra pass.
+        deal_min_low = lows[t] if deal_min_low is None else min(deal_min_low, lows[t])
 
         # Safety orders: sequential, ascending in price step (deepest = largest index).
         while next_so <= 5 and not so_skipped:
@@ -278,6 +286,7 @@ def simulate_dca_bot(df: pd.DataFrame, mask: pd.Series, cost: float, so_step_pct
                     "entry_date": entry_date, "entry_price": avg_price,
                     "exit_date": dates[t], "exit_price": fill,
                     "return": proceeds / total_cost - 1.0,
+                    "max_open_dd": max(0.0, (avg_price - deal_min_low) / avg_price),
                 })
                 cash += proceeds
                 deal_open = False
@@ -292,6 +301,7 @@ def simulate_dca_bot(df: pd.DataFrame, mask: pd.Series, cost: float, so_step_pct
                     "entry_date": entry_date, "entry_price": avg_price,
                     "exit_date": dates[t], "exit_price": fill,
                     "return": proceeds / total_cost - 1.0,
+                    "max_open_dd": max(0.0, (avg_price - deal_min_low) / avg_price),
                 })
                 cash += proceeds
                 deal_open = False
@@ -304,6 +314,7 @@ def simulate_dca_bot(df: pd.DataFrame, mask: pd.Series, cost: float, so_step_pct
                 "entry_date": entry_date, "entry_price": avg_price,
                 "exit_date": dates[t], "exit_price": fill,
                 "return": proceeds / total_cost - 1.0,
+                "max_open_dd": max(0.0, (avg_price - deal_min_low) / avg_price),
             })
             cash += proceeds
             deal_open = False
@@ -333,6 +344,16 @@ _SIM = {
 
 def run(sid: str, params: dict, df: pd.DataFrame, mask: pd.Series, cost: float):
     return _SIM[sid](df, mask, cost, params)
+
+
+def max_deal_dd(trades: list) -> float | None:
+    """Coordinator follow-up (2026-09-07): 'max open drawdown of a single deal' for the DCA bots —
+    the worst (avg_entry - low)/avg_entry seen across any one deal's open lifetime, maxed over every
+    deal in `trades`. grid_bot's trades have no `max_open_dd` field (a grid lot's "drawdown" isn't
+    a comparable single-deal concept — see the footnote text instead), so this returns None for it
+    and for an empty trades list; callers render that as '-'."""
+    vals = [t["max_open_dd"] for t in trades if "max_open_dd" in t]
+    return max(vals) if vals else None
 
 
 # =============================================================================

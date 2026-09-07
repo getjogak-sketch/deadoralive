@@ -77,6 +77,7 @@ footer.bottom .disclaimer { margin-top: 0.75rem; }
 </header>
 <main>
   <p><strong>Rule:</strong> Grid bot strategy: 20 fixed grid levels spanning +/-range_pct around the price at activation (and after every reset); each level below the activation price is funded with capital/20 and buys when the bar&#x27;s low reaches it, then sells (and re-arms) when the bar&#x27;s high reaches one grid step above; if the close ever exits the grid&#x27;s range, every open lot is liquidated at that close and the grid re-activates, re-centered on that close, the next bar</p>
+  <p class="gross-note"><strong>Read this before the win rates:</strong> DCA bots win most deals by design (small take-profits); their risk sits in the open position during long declines and in the single forced liquidation at period end. Judge them by max drawdown and exposure, not win rate. Grid bots earn inside the range and lose on every reset.</p>
   <div class="disclaimer-block">Educational / informational content only. This is not investment advice, and nothing here is a recommendation to buy or sell any asset. Past backtested performance, especially net-of-cost historical simulation, does not guarantee future results.</div>
   
 <div class="tfblock">

@@ -197,6 +197,38 @@ def _row_html(row):
     )
 
 
+# Coordinator follow-up (2026-09-07): a fixed footnote under the "Bot templates" table on every
+# edition page, explaining why DCA bots' near-100% win rates are by construction, not a signal.
+BOT_TEMPLATES_FOOTNOTE_EN = (
+    'DCA bots win most deals by design (small take-profits); their risk sits in the open position '
+    'during long declines and in the single forced liquidation at period end. Judge them by max '
+    'drawdown and exposure, not win rate. Grid bots earn inside the range and lose on every reset.'
+)
+BOT_TEMPLATES_FOOTNOTE_KO = (
+    'DCA 봇은 작은 이익 실현을 반복하는 구조라 승률이 높게 나오는 것이 정상이며, 실제 위험은 긴 '
+    '하락 구간에서 들고 있는 포지션과 구간 끝의 강제 청산에 있습니다. 승률이 아니라 최대 낙폭과 '
+    '보유 비중으로 판단하시기 바랍니다. 그리드 봇은 범위 안에서 벌고 범위를 벗어날 때마다 잃습니다.'
+)
+
+
+def _bot_row_html(row):
+    """_row_html plus one extra trailing column: "max open drawdown of a single deal" — DCA-only
+    (grid_bot rows render '-' here, see bot_engine.max_deal_dd's own docstring)."""
+    tr = _row_html(row)
+    dd = row["oos"].get("max_deal_dd")
+    cell = "-" if dd is None else _fmt_pct(dd)
+    assert tr.endswith("</tr>")
+    return tr[:-len("</tr>")] + f"<td>{cell}</td></tr>"
+
+
+def _bot_row_html_ko(row):
+    tr = _row_html_ko(row)
+    dd = row["oos"].get("max_deal_dd")
+    cell = "-" if dd is None else _fmt_pct(dd)
+    assert tr.endswith("</tr>")
+    return tr[:-len("</tr>")] + f"<td>{cell}</td></tr>"
+
+
 def _asset_tf_section(asset, tf, rows, as_of):
     anchor = f"{asset}-{tf}"
     body_rows = "\n".join(_row_html(r) for r in rows)
@@ -311,10 +343,10 @@ def _bot_templates_html(payload: dict, assets: list | None = None, timeframes: l
         <th>OOS Return</th><th>OOS PF</th><th>OOS MDD</th><th>OOS Trades</th><th>OOS Win%</th>
         <th>IS PF</th><th>IS MDD</th>
         <th>B&amp;H OOS Return</th><th>B&amp;H OOS MDD</th>
-        <th>Fee drag&sup1;</th><th>Robustness&sup2;</th>
+        <th>Fee drag&sup1;</th><th>Robustness&sup2;</th><th>Max deal DD&sup3;</th>
       </tr></thead>
       <tbody>
-{chr(10).join(_row_html(r) for r in groups[(a, tf)])}
+{chr(10).join(_bot_row_html(r) for r in groups[(a, tf)])}
       </tbody>
     </table>
   </div>""" for a, tf in order)
@@ -329,6 +361,10 @@ def _bot_templates_html(payload: dict, assets: list | None = None, timeframes: l
      model and verdict thresholds as every strategy above, and pre-registered the same way,
      before any result was computed.</p>
   {subsections}
+  <p class="gross-note">&sup3; Max deal DD (DCA bots only; "-" for grid bots) = the worst
+     mark-to-market dip below a single deal's average entry price, while that deal was still open,
+     as a share of that average &mdash; the largest of these across every OOS deal.</p>
+  <p class="gross-note"><strong>Read this before the win rates:</strong> {html.escape(BOT_TEMPLATES_FOOTNOTE_EN)}</p>
 </section>"""
 
 
@@ -975,10 +1011,10 @@ def _bot_templates_html_ko(payload: dict) -> str:
         <th>최근 2년 수익률</th><th>PF</th><th>최대 낙폭</th><th>거래 횟수</th><th>승률</th>
         <th>이전 기간 PF</th><th>이전 기간 최대 낙폭</th>
         <th>단순 보유 수익률</th><th>단순 보유 최대 낙폭</th>
-        <th>수수료로 사라진 수익</th><th>주변 설정값 안정성</th>
+        <th>수수료로 사라진 수익</th><th>주변 설정값 안정성</th><th>거래별 최대 낙폭&sup3;</th>
       </tr></thead>
       <tbody>
-{chr(10).join(_row_html_ko(r) for r in groups[(a, tf)])}
+{chr(10).join(_bot_row_html_ko(r) for r in groups[(a, tf)])}
       </tbody>
     </table>
   </div>""" for a, tf in order)
@@ -993,6 +1029,10 @@ def _bot_templates_html_ko(payload: dict) -> str:
      거래(deal) 건수를 뜻합니다. 수수료·판정 기준은 위 전략들과 같고, 결과를 보기 전에 미리
      등록해 두었습니다.</p>
   {subsections}
+  <p class="gross-note">&sup3; 거래별 최대 낙폭(DCA 봇에만 해당, 그리드 봇은 "-")은 하나의 거래
+     (deal)가 열려 있는 동안 평균 진입가 대비 가장 많이 내려간 순간의 낙폭을, 표본외 기간의
+     모든 거래 중 가장 큰 값으로 나타낸 것입니다.</p>
+  <p class="gross-note"><strong>승률을 보기 전에 먼저 읽어 주세요:</strong> {html.escape(BOT_TEMPLATES_FOOTNOTE_KO)}</p>
 </section>"""
 
 

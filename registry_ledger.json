@@ -1,0 +1,375 @@
+[
+  {
+    "id": "above_sma:n200",
+    "strategy_id": "above_sma",
+    "strategy_name": "Price above SMA",
+    "params": {
+      "n": 200
+    },
+    "params_str": "n200",
+    "source": "textbook",
+    "registered_on": "2026-09-06",
+    "registered_commit": "c65f546c8f50da968e744821efe3ce1b99dace77",
+    "rule_text": "close > SMA(n) -> long"
+  },
+  {
+    "id": "above_sma:n50",
+    "strategy_id": "above_sma",
+    "strategy_name": "Price above SMA",
+    "params": {
+      "n": 50
+    },
+    "params_str": "n50",
+    "source": "textbook",
+    "registered_on": "2026-09-06",
+    "registered_commit": "c65f546c8f50da968e744821efe3ce1b99dace77",
+    "rule_text": "close > SMA(n) -> long"
+  },
+  {
+    "id": "bb_breakout:20-2",
+    "strategy_id": "bb_breakout",
+    "strategy_name": "Bollinger breakout",
+    "params": {},
+    "params_str": "20-2",
+    "source": "textbook",
+    "registered_on": "2026-09-06",
+    "registered_commit": "c65f546c8f50da968e744821efe3ce1b99dace77",
+    "rule_text": "close > upper band(20,2) -> long; close < middle band -> flat"
+  },
+  {
+    "id": "bb_mr:20-2",
+    "strategy_id": "bb_mr",
+    "strategy_name": "Bollinger mean reversion",
+    "params": {},
+    "params_str": "20-2",
+    "source": "textbook",
+    "registered_on": "2026-09-06",
+    "registered_commit": "c65f546c8f50da968e744821efe3ce1b99dace77",
+    "rule_text": "close < lower band(20,2) -> long; close > middle band -> flat"
+  },
+  {
+    "id": "dip_3down:fixed",
+    "strategy_id": "dip_3down",
+    "strategy_name": "Buy the dip (3 down closes)",
+    "params": {},
+    "params_str": "fixed",
+    "source": "textbook",
+    "registered_on": "2026-09-06",
+    "registered_commit": "c65f546c8f50da968e744821efe3ce1b99dace77",
+    "rule_text": "3 consecutive down closes -> long; first up close -> flat"
+  },
+  {
+    "id": "dip_pct:-5pct-5bar",
+    "strategy_id": "dip_pct",
+    "strategy_name": "Buy the dip (-x% bar)",
+    "params": {
+      "threshold": -0.05,
+      "n_hold": 5
+    },
+    "params_str": "-5pct-5bar",
+    "source": "textbook",
+    "registered_on": "2026-09-06",
+    "registered_commit": "c65f546c8f50da968e744821efe3ce1b99dace77",
+    "rule_text": "bar return <= -5% -> enter next open, exit 5 bars later at the open"
+  },
+  {
+    "id": "donchian:20-10",
+    "strategy_id": "donchian",
+    "strategy_name": "Donchian/Turtle breakout",
+    "params": {
+      "n_high": 20,
+      "n_low": 10
+    },
+    "params_str": "20-10",
+    "source": "textbook",
+    "registered_on": "2026-09-06",
+    "registered_commit": "c65f546c8f50da968e744821efe3ce1b99dace77",
+    "rule_text": "close > prior N-bar high -> long; close < prior M-bar low -> flat"
+  },
+  {
+    "id": "donchian:55-20",
+    "strategy_id": "donchian",
+    "strategy_name": "Donchian/Turtle breakout",
+    "params": {
+      "n_high": 55,
+      "n_low": 20
+    },
+    "params_str": "55-20",
+    "source": "textbook",
+    "registered_on": "2026-09-06",
+    "registered_commit": "c65f546c8f50da968e744821efe3ce1b99dace77",
+    "rule_text": "close > prior N-bar high -> long; close < prior M-bar low -> flat"
+  },
+  {
+    "id": "ema_cross:12-26",
+    "strategy_id": "ema_cross",
+    "strategy_name": "EMA crossover",
+    "params": {
+      "n_fast": 12,
+      "n_slow": 26
+    },
+    "params_str": "12-26",
+    "source": "textbook",
+    "registered_on": "2026-09-06",
+    "registered_commit": "c65f546c8f50da968e744821efe3ce1b99dace77",
+    "rule_text": "EMA fast > EMA slow -> long"
+  },
+  {
+    "id": "macd:12-26-9",
+    "strategy_id": "macd",
+    "strategy_name": "MACD signal cross",
+    "params": {},
+    "params_str": "12-26-9",
+    "source": "textbook",
+    "registered_on": "2026-09-06",
+    "registered_commit": "c65f546c8f50da968e744821efe3ce1b99dace77",
+    "rule_text": "MACD(12,26,9) line > signal -> long"
+  },
+  {
+    "id": "rsi2_connors:fixed",
+    "strategy_id": "rsi2_connors",
+    "strategy_name": "Connors RSI(2)",
+    "params": {},
+    "params_str": "fixed",
+    "source": "textbook",
+    "registered_on": "2026-09-06",
+    "registered_commit": "c65f546c8f50da968e744821efe3ce1b99dace77",
+    "rule_text": "RSI(2) < 10 AND close > SMA(200) -> long; close > SMA(5) -> flat"
+  },
+  {
+    "id": "rsi_mr:exit50",
+    "strategy_id": "rsi_mr",
+    "strategy_name": "RSI mean reversion",
+    "params": {
+      "exit": 50
+    },
+    "params_str": "exit50",
+    "source": "textbook",
+    "registered_on": "2026-09-06",
+    "registered_commit": "c65f546c8f50da968e744821efe3ce1b99dace77",
+    "rule_text": "RSI(14) < 30 -> long; RSI(14) > exit -> flat"
+  },
+  {
+    "id": "rsi_mr:exit70",
+    "strategy_id": "rsi_mr",
+    "strategy_name": "RSI mean reversion",
+    "params": {
+      "exit": 70
+    },
+    "params_str": "exit70",
+    "source": "textbook",
+    "registered_on": "2026-09-06",
+    "registered_commit": "c65f546c8f50da968e744821efe3ce1b99dace77",
+    "rule_text": "RSI(14) < 30 -> long; RSI(14) > exit -> flat"
+  },
+  {
+    "id": "sma_cross:10-50",
+    "strategy_id": "sma_cross",
+    "strategy_name": "SMA crossover",
+    "params": {
+      "n_fast": 10,
+      "n_slow": 50
+    },
+    "params_str": "10-50",
+    "source": "textbook",
+    "registered_on": "2026-09-06",
+    "registered_commit": "c65f546c8f50da968e744821efe3ce1b99dace77",
+    "rule_text": "fast SMA > slow SMA -> long"
+  },
+  {
+    "id": "sma_cross:20-100",
+    "strategy_id": "sma_cross",
+    "strategy_name": "SMA crossover",
+    "params": {
+      "n_fast": 20,
+      "n_slow": 100
+    },
+    "params_str": "20-100",
+    "source": "textbook",
+    "registered_on": "2026-09-06",
+    "registered_commit": "c65f546c8f50da968e744821efe3ce1b99dace77",
+    "rule_text": "fast SMA > slow SMA -> long"
+  },
+  {
+    "id": "sma_cross:50-200",
+    "strategy_id": "sma_cross",
+    "strategy_name": "SMA crossover",
+    "params": {
+      "n_fast": 50,
+      "n_slow": 200
+    },
+    "params_str": "50-200",
+    "source": "textbook",
+    "registered_on": "2026-09-06",
+    "registered_commit": "c65f546c8f50da968e744821efe3ce1b99dace77",
+    "rule_text": "fast SMA > slow SMA -> long"
+  },
+  {
+    "id": "supertrend:10-3",
+    "strategy_id": "supertrend",
+    "strategy_name": "Supertrend",
+    "params": {},
+    "params_str": "10-3",
+    "source": "textbook",
+    "registered_on": "2026-09-06",
+    "registered_commit": "c65f546c8f50da968e744821efe3ce1b99dace77",
+    "rule_text": "Supertrend(10,3) direction up -> long"
+  },
+  {
+    "id": "tsmom:n30",
+    "strategy_id": "tsmom",
+    "strategy_name": "Time-series momentum",
+    "params": {
+      "n": 30
+    },
+    "params_str": "n30",
+    "source": "textbook",
+    "registered_on": "2026-09-06",
+    "registered_commit": "c65f546c8f50da968e744821efe3ce1b99dace77",
+    "rule_text": "close[t] > close[t-n] -> long"
+  },
+  {
+    "id": "tsmom:n90",
+    "strategy_id": "tsmom",
+    "strategy_name": "Time-series momentum",
+    "params": {
+      "n": 90
+    },
+    "params_str": "n90",
+    "source": "textbook",
+    "registered_on": "2026-09-06",
+    "registered_commit": "c65f546c8f50da968e744821efe3ce1b99dace77",
+    "rule_text": "close[t] > close[t-n] -> long"
+  },
+  {
+    "id": "vol_breakout:k0.5",
+    "strategy_id": "vol_breakout",
+    "strategy_name": "Larry Williams volatility breakout",
+    "params": {
+      "k": 0.5
+    },
+    "params_str": "k0.5",
+    "source": "textbook",
+    "registered_on": "2026-09-06",
+    "registered_commit": "c65f546c8f50da968e744821efe3ce1b99dace77",
+    "rule_text": "v1 spec.md §4B: open + k*(prior day range) intrabar breakout, 1-bar hold"
+  },
+  {
+    "id": "vol_breakout:k0.7",
+    "strategy_id": "vol_breakout",
+    "strategy_name": "Larry Williams volatility breakout",
+    "params": {
+      "k": 0.7
+    },
+    "params_str": "k0.7",
+    "source": "textbook",
+    "registered_on": "2026-09-06",
+    "registered_commit": "c65f546c8f50da968e744821efe3ce1b99dace77",
+    "rule_text": "v1 spec.md §4B: open + k*(prior day range) intrabar breakout, 1-bar hold"
+  },
+  {
+    "id": "vol_breakout_trend:k0.5-sma20",
+    "strategy_id": "vol_breakout_trend",
+    "strategy_name": "Volatility breakout + trend filter",
+    "params": {
+      "k": 0.5,
+      "sma_n": 20
+    },
+    "params_str": "k0.5-sma20",
+    "source": "textbook",
+    "registered_on": "2026-09-06",
+    "registered_commit": "c65f546c8f50da968e744821efe3ce1b99dace77",
+    "rule_text": "v1 §4B, gated on open > SMA(20) of the prior bar"
+  },
+  {
+    "id": "bb_squeeze:bb20.2-look120-conf5",
+    "strategy_id": "bb_squeeze",
+    "strategy_name": "Bollinger squeeze breakout",
+    "params": {
+      "n_lookback": 120,
+      "n_confirm": 5
+    },
+    "params_str": "bb20.2-look120-conf5",
+    "source": "popular_combo",
+    "registered_on": "2026-09-07",
+    "registered_commit": "ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db",
+    "rule_text": "bandwidth at/under its own prior 120-bar low ('squeeze') within the last 5 bars AND close > upper band(20,2) -> long; close < middle band -> flat"
+  },
+  {
+    "id": "ema200_macd:ema200-macd12.26.9",
+    "strategy_id": "ema200_macd",
+    "strategy_name": "EMA200 trend + MACD cross",
+    "params": {
+      "n_ema": 200
+    },
+    "params_str": "ema200-macd12.26.9",
+    "source": "popular_combo",
+    "registered_on": "2026-09-07",
+    "registered_commit": "ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db",
+    "rule_text": "close > EMA200 AND MACD(12,26,9) line > signal -> long; MACD line < signal OR close < EMA200 -> flat"
+  },
+  {
+    "id": "ema_9_21:9-21",
+    "strategy_id": "ema_9_21",
+    "strategy_name": "EMA 9/21 crossover",
+    "params": {
+      "n_fast": 9,
+      "n_slow": 21
+    },
+    "params_str": "9-21",
+    "source": "popular_combo",
+    "registered_on": "2026-09-07",
+    "registered_commit": "ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db",
+    "rule_text": "EMA9 > EMA21 -> long, else flat"
+  },
+  {
+    "id": "heikin_ashi_trend:conf2",
+    "strategy_id": "heikin_ashi_trend",
+    "strategy_name": "Heikin-Ashi colour",
+    "params": {
+      "n_confirm": 2
+    },
+    "params_str": "conf2",
+    "source": "popular_combo",
+    "registered_on": "2026-09-07",
+    "registered_commit": "ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db",
+    "rule_text": "2 consecutive HA close > HA open -> long; first HA close < HA open -> flat"
+  },
+  {
+    "id": "ichimoku_cloud:9-26-52",
+    "strategy_id": "ichimoku_cloud",
+    "strategy_name": "Ichimoku cloud breakout",
+    "params": {},
+    "params_str": "9-26-52",
+    "source": "popular_combo",
+    "registered_on": "2026-09-07",
+    "registered_commit": "ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db",
+    "rule_text": "close > cloud top -> long; close < cloud bottom -> flat (cloud shifted +26 bars, no lookahead)"
+  },
+  {
+    "id": "rsi_uptrend:rsi14-sma200",
+    "strategy_id": "rsi_uptrend",
+    "strategy_name": "RSI dip in uptrend",
+    "params": {
+      "n_sma": 200
+    },
+    "params_str": "rsi14-sma200",
+    "source": "popular_combo",
+    "registered_on": "2026-09-07",
+    "registered_commit": "ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db",
+    "rule_text": "RSI(14) < 30 AND close > SMA200 -> long; RSI(14) > 70 OR close < SMA200 -> flat"
+  },
+  {
+    "id": "supertrend_ema200:st10.3-ema200",
+    "strategy_id": "supertrend_ema200",
+    "strategy_name": "Supertrend + EMA200 filter",
+    "params": {
+      "n_ema": 200
+    },
+    "params_str": "st10.3-ema200",
+    "source": "popular_combo",
+    "registered_on": "2026-09-07",
+    "registered_commit": "ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db",
+    "rule_text": "Supertrend(10,3) up AND close > EMA200 -> long; Supertrend flips down -> flat"
+  }
+]

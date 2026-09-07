@@ -1236,6 +1236,104 @@ def test_seo_pages_no_banned_korean_words():
         sp.EDITION_OUT_DIR["ko"] = orig_docs_ko
 
 
+# ---------------------------------------------------------------------------
+# R1: pre-registration ledger (ledger.py, registry_ledger.json, docs/registry.html)
+# ---------------------------------------------------------------------------
+
+def test_ledger_matches_registry_bijection():
+    """Every tradeable registry variant (registry.iter_variants() + iter_popular_combo_variants()
+    — the same universe verdict.py ever badges) has exactly one ledger entry, and vice versa: no
+    ledger entry that doesn't correspond to a current registry variant. REFERENCE rows are excluded
+    from both sides on purpose (they never get a verdict either)."""
+    import registry as _reg
+    import ledger as _ldg
+
+    expected_ids = {
+        f"{sid}:{variant['params_str']}"
+        for sid, _sname, _stype, variant in _reg.iter_variants()
+    } | {
+        f"{sid}:{variant['params_str']}"
+        for sid, _sname, _stype, variant in _reg.iter_popular_combo_variants()
+    }
+    ledger_entries = _ldg.load_ledger()
+    ledger_ids = {e["id"] for e in ledger_entries}
+
+    check("ledger: registry_ledger.json is non-empty", len(ledger_entries) > 0)
+    check("ledger: no duplicate ids", len(ledger_ids) == len(ledger_entries))
+    missing_from_ledger = expected_ids - ledger_ids
+    extra_in_ledger = ledger_ids - expected_ids
+    check("ledger: every registry variant has a ledger entry",
+          not missing_from_ledger, f"missing: {sorted(missing_from_ledger)}")
+    check("ledger: every ledger entry corresponds to a current registry variant",
+          not extra_in_ledger, f"extra: {sorted(extra_in_ledger)}")
+
+    for e in ledger_entries:
+        check(f"ledger {e['id']}: has registered_on/registered_commit/source/rule_text",
+              bool(e.get("registered_on")) and bool(e.get("registered_commit"))
+              and e.get("source") in ("textbook", "popular_combo", "community")
+              and bool(e.get("rule_text")))
+
+
+def test_ledger_immutable_against_snapshot():
+    """No entry present in the checked-in snapshot (registry_ledger.snapshot.json) may ever differ
+    from the live ledger (registry_ledger.json) — this is the mechanical enforcement of REGISTRY.md
+    rule 2 ("no edits after registration"). New entries (present in the live ledger but not yet in
+    the snapshot — e.g. a newly-accepted community proposal) are fine and expected over time; a
+    changed EXISTING entry is not."""
+    import ledger as _ldg
+
+    live = {e["id"]: e for e in _ldg.load_ledger(_ldg.LEDGER_PATH)}
+    snapshot = {e["id"]: e for e in _ldg.load_ledger(_ldg.SNAPSHOT_PATH)}
+
+    check("ledger snapshot: file exists and is non-empty", len(snapshot) > 0)
+    check("ledger: live ledger contains every snapshotted id",
+          set(snapshot) <= set(live), f"missing: {sorted(set(snapshot) - set(live))}")
+
+    for eid, snap_entry in snapshot.items():
+        live_entry = live.get(eid)
+        if live_entry is None:
+            continue
+        for field in ("params", "params_str", "source", "registered_on", "registered_commit",
+                      "rule_text", "strategy_id", "strategy_name"):
+            check(f"ledger immutability {eid}.{field}: unchanged since snapshot",
+                  live_entry.get(field) == snap_entry.get(field),
+                  f"live={live_entry.get(field)!r} snapshot={snap_entry.get(field)!r}")
+
+
+def test_registry_page_builds_and_no_banned_korean_words():
+    import tempfile
+    import build_site as bs
+
+    orig_docs, orig_docs_ko = config.DOCS_DIR, config.DOCS_DIR_KO
+    tmp = tempfile.mkdtemp()
+    config.DOCS_DIR = tmp
+    config.DOCS_DIR_KO = os.path.join(tmp, "ko")
+    try:
+        en_path = bs.build_registry_page()
+        ko_path = bs.build_registry_page_ko()
+        check("registry page: docs/registry.html written", os.path.exists(en_path))
+        check("registry page: docs/ko/registry.html written", os.path.exists(ko_path))
+
+        with open(en_path, encoding="utf-8") as f:
+            en_html = f.read()
+        check("registry page: has a <title>", "<title>" in en_html)
+        check("registry page: links to propose-strategy.yml issue template",
+              "issues/new?template=propose-strategy.yml" in en_html)
+        check("registry page: lists every ledger entry's id",
+              all(f">{e['id']}<" in en_html for e in __import__("ledger").load_ledger()))
+
+        with open(ko_path, encoding="utf-8") as f:
+            ko_html = f.read()
+        banned = ["추천", "수익 보장", "확실", "필승"]
+        for word in banned:
+            check(f"registry page ko: no banned word '{word}'", word not in ko_html)
+        check("registry page ko: carries the Korean disclaimer",
+              config.LEGAL_DISCLAIMER_KO in ko_html)
+        check("registry page ko: disclaimer appears at top and bottom",
+              ko_html.count(config.LEGAL_DISCLAIMER_KO) == 2)
+    finally:
+        config.DOCS_DIR, config.DOCS_DIR_KO = orig_docs, orig_docs_ko
+
 
 # ---------------------------------------------------------------------------
 # S2: weekly digest (digest.py)
@@ -1505,6 +1603,9 @@ if __name__ == "__main__":
     test_check_issue_extended_check_sections()
     test_seo_pages_strategy_page_count_and_shape()
     test_seo_pages_no_banned_korean_words()
+    test_ledger_matches_registry_bijection()
+    test_ledger_immutable_against_snapshot()
+    test_registry_page_builds_and_no_banned_korean_words()
     test_digest_first_week_and_flips()
     test_digest_build_writes_pages_and_feeds()
     test_publish_no_secrets_exits_zero()

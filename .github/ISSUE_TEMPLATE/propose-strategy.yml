@@ -1,0 +1,82 @@
+name: Propose a strategy
+description: >-
+  Suggest a strategy for the pre-registration ledger. Not automated — a maintainer reads this
+  queue and, if accepted, registers the exact rule/params BEFORE any result is computed for it.
+  See REGISTRY.md for why registration has to happen before the backtest, not after.
+title: "[propose] "
+labels: ["propose-strategy"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This does **not** run a backtest and does **not** post a result. It only queues a
+        proposal for a maintainer to review. If accepted, it is added to `registry.py` and
+        `registry_ledger.json` with a registration date **before any backtest runs for it** —
+        the same pre-registration rule every other strategy on this site follows (see
+        [REGISTRY.md](../../blob/main/REGISTRY.md)). You will not see a result attached to a
+        strategy the first time it appears here.
+
+  - type: input
+    id: name
+    attributes:
+      label: Strategy name
+      description: A short name for the strategy (e.g. "Golden cross with volume filter").
+      placeholder: "Golden cross with volume filter"
+    validations:
+      required: true
+
+  - type: textarea
+    id: rule
+    attributes:
+      label: Exact rule text
+      description: >-
+        The precise entry and exit conditions, in plain English — exactly as it would appear in
+        the registry table. Be specific about ties/edge cases (what happens exactly at the
+        threshold?). Vague rules ("buy on strength") cannot be registered as written.
+      placeholder: >-
+        e.g. "close > SMA(50) AND volume > 20-day average volume -> long; close < SMA(50) -> flat"
+    validations:
+      required: true
+
+  - type: input
+    id: params
+    attributes:
+      label: Fixed parameters
+      description: >-
+        Every number the rule depends on, as name=value pairs. Leave empty only if the rule truly
+        has no numeric parameter.
+      placeholder: "n_sma=50, n_vol=20"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: source
+    attributes:
+      label: Source
+      description: Where does this strategy come from?
+      options:
+        - "Standard textbook indicator (source: textbook)"
+        - "Commonly taught combo, e.g. YouTube/TradingView (source: popular_combo)"
+        - "My own idea / other (source: community)"
+    validations:
+      required: true
+
+  - type: input
+    id: source_link
+    attributes:
+      label: Source link (optional)
+      description: A link to where this strategy is taught/described, if there is one.
+      placeholder: "https://..."
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Confirmation
+      options:
+        - label: >-
+            I understand this is a proposal for a queue, not a request that runs automatically,
+            and that if accepted it will be registered (dated, committed) before any result is
+            computed for it.
+          required: true

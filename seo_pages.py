@@ -412,6 +412,7 @@ def _build_one_page(edition_key: str, lang: str, strategy_id: str, params: str, 
                                      tf_rows)
         back_index = "../index.html"
         back_meth = "../methodology.html"
+        back_registry = "../registry.html"
         s_index = "index.html"
         check_link = bs._check_strategy_url()
         signup_html = ""
@@ -446,6 +447,7 @@ def _build_one_page(edition_key: str, lang: str, strategy_id: str, params: str, 
                                      tf_rows)
         back_index = "../index.html"
         back_meth = "../methodology.html"
+        back_registry = "../registry.html" if edition_key != "stocks" else "../../registry.html"
         s_index = "index.html"
         check_link = bs._check_strategy_url()
         signup_html = ""
@@ -496,6 +498,7 @@ def _build_one_page(edition_key: str, lang: str, strategy_id: str, params: str, 
   <p>
     <a href="{back_index}">{back_link_text}</a> &middot;
     <a href="{back_meth}">{meth_link_text}</a> &middot;
+    <a href="{back_registry}">{'전략 등록부' if lang == 'ko' else 'Strategy registry'}</a> &middot;
     <a href="{html.escape(check_link)}">{check_link_text}</a>{signup_html} &middot;
     <a href="{s_index}">{'전체 전략 페이지' if lang == 'ko' else 'All strategy pages'}</a>
   </p>

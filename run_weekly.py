@@ -420,6 +420,16 @@ def main():
     print(f"Wrote {os.path.join(config.DOCS_DIR_KO, 'places.html')}")
 
     # -------------------------------------------------------------------------------------------
+    # Strategy registry / pre-registration ledger page (task R1) — edition-agnostic (the ledger
+    # itself, registry_ledger.json, is not regenerated here; see ledger.py's own docstring for why
+    # it is a one-time/append-only generator, never rerun automatically by the weekly pipeline).
+    # -------------------------------------------------------------------------------------------
+    build_site.build_registry_page()
+    build_site.build_registry_page_ko()
+    print(f"Wrote {os.path.join(config.DOCS_DIR, 'registry.html')}")
+    print(f"Wrote {os.path.join(config.DOCS_DIR_KO, 'registry.html')}")
+
+    # -------------------------------------------------------------------------------------------
     # Programmatic SEO pages, sitemap, robots.txt (this task's §S1) — additive, read-only over the
     # payloads already assembled above. `payload` here is the English edition's own payload dict,
     # already in scope from this function's top half.
@@ -437,6 +447,8 @@ def main():
         (config.PAGES_URL.rstrip("/") + "/methodology.html", payload["as_of"]),
         (config.PAGES_URL.rstrip("/") + "/api/index.html", payload["as_of"]),
         (config.PAGES_URL.rstrip("/") + "/places.html", payload["as_of"]),
+        (config.PAGES_URL.rstrip("/") + "/registry.html", payload["as_of"]),
+        (config.PAGES_URL.rstrip("/") + "/ko/registry.html", payload["as_of"]),
     ]
     # docs/ko/places.html is always written above regardless of whether Upbit had data this run,
     # so it always belongs in the sitemap — falling back to the English as_of for its <lastmod>
@@ -691,12 +703,14 @@ def _run_stocks_edition():
                             assets=assets, timeframes=timeframes,
                             lang_links=('<a href="../index.html">English (crypto)</a> &middot; '
                                         '<a href="../ko/index.html">한국어</a>'),
-                            feed_html="", places_href="../places.html")
+                            feed_html="", places_href="../places.html",
+                            registry_href="../registry.html")
     build_site.build_methodology(out_path=os.path.join(out_dir, "methodology.html"),
                                   assets=assets,
                                   lang_links=('<a href="../methodology.html">English (crypto)</a> '
                                               '&middot; <a href="../ko/methodology.html">한국어</a>'),
-                                  places_href="../places.html")
+                                  places_href="../places.html",
+                                  registry_href="../registry.html")
     print(f"Wrote {os.path.join(out_dir, 'index.html')}")
     print(f"Wrote {os.path.join(out_dir, 'methodology.html')}")
 

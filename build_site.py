@@ -10,6 +10,7 @@ import os
 
 import config
 import registry as reg
+import ledger as ldg
 
 VERDICT_COLORS = {
     "ALIVE": ("var(--alive-bg)", "var(--alive-fg)"),
@@ -73,6 +74,12 @@ def _check_strategy_url() -> str:
     config.REPO_URL — the one and only place this path is assembled, so every page's link stays
     in sync if REPO_URL is ever filled in with the repo's real public address."""
     return config.REPO_URL.rstrip("/") + "/issues/new?template=check-strategy.yml"
+
+
+def _propose_strategy_url() -> str:
+    """task R1: the new-issue URL for the "Propose a strategy" queue — same pattern as
+    _check_strategy_url above, over the propose-strategy.yml template instead."""
+    return config.REPO_URL.rstrip("/") + "/issues/new?template=propose-strategy.yml"
 
 
 def _fmt_pct(x, dp=1):
@@ -270,7 +277,8 @@ def _popular_combos_html(payload: dict, assets: list | None = None, timeframes: 
 
 def build_index(payload: dict, out_path: str | None = None, assets: list | None = None,
                  timeframes: list | None = None, lang_links: str | None = None,
-                 feed_html: str | None = None, places_href: str | None = None):
+                 feed_html: str | None = None, places_href: str | None = None,
+                 registry_href: str | None = None):
     """spec_v3 §A extension (additive): `assets`/`timeframes`/`lang_links` let a second edition
     (the stocks edition — SPY/QQQ, 1d only) reuse this exact template instead of duplicating it,
     per spec_v3 §A's own instruction ("reuse the English builders with an edition parameter").
@@ -294,6 +302,9 @@ def build_index(payload: dict, out_path: str | None = None, assets: list | None 
     # task S4: the stocks edition has no places.html of its own (spec_v3 §A editions are en/ko/
     # stocks but S4's status page only covers en/ko), so its call site points back at the main one.
     places_href = places_href if places_href is not None else "places.html"
+    # task R1: same reasoning — the stocks edition has no registry.html of its own (the ledger is
+    # edition-agnostic, one shared page), so its call site points back at the main one too.
+    registry_href = registry_href if registry_href is not None else "registry.html"
 
     groups = {}
     order = []
@@ -356,6 +367,7 @@ def build_index(payload: dict, out_path: str | None = None, assets: list | None 
 </main>
 <footer class="bottom">
   <div><a href="methodology.html">Methodology</a>{repo_html}{signup_html}
+  &middot; <a href="{html.escape(registry_href)}">Strategy registry</a>
   &middot; <a href="{html.escape(_check_strategy_url())}">Check your own strategy</a>
   &middot; <a href="s/index.html">All strategy pages</a>{feed_html}
   &middot; <a href="{html.escape(places_href)}">Places this is published to</a></div>
@@ -403,11 +415,13 @@ def _popular_combos_table_html() -> str:
 
 
 def build_methodology(out_path: str | None = None, assets: list | None = None,
-                       lang_links: str | None = None, places_href: str | None = None):
+                       lang_links: str | None = None, places_href: str | None = None,
+                       registry_href: str | None = None):
     """spec_v3 §A extension (additive): `assets`/`lang_links` let the stocks edition reuse this
     template (see build_index's docstring above for the same rationale); both default to exactly
     what this function already hard-coded before spec_v3. `places_href` (task S4): see
-    build_index's own docstring — the stocks edition has no places.html of its own."""
+    build_index's own docstring — the stocks edition has no places.html of its own.
+    `registry_href` (task R1): same reasoning, for the shared registry.html page."""
     out_path = out_path or os.path.join(config.DOCS_DIR, "methodology.html")
     assets = assets if assets is not None else config.ASSETS
     lang_links = lang_links if lang_links is not None else (
@@ -415,6 +429,7 @@ def build_methodology(out_path: str | None = None, assets: list | None = None,
         '<a href="ko/methodology.html">한국어 (Korean edition)</a>'
     )
     places_href = places_href if places_href is not None else "places.html"
+    registry_href = registry_href if registry_href is not None else "registry.html"
     # Filtered to `assets` (not all of config.COST) so this page's output is unaffected by the
     # other editions' COST entries added alongside it.
     cost_rows = "".join(
@@ -511,6 +526,17 @@ def build_methodology(out_path: str | None = None, assets: list | None = None,
   </section>
 
   <section class="assetblock">
+    <h2>How strategies get in</h2>
+    <p>Every strategy below is pre-registered: its exact rule text and fixed parameters are
+       written down and dated <strong>before</strong> any result is computed, the same way a
+       clinical trial is pre-registered &mdash; and once registered, an entry never changes; a
+       correction is always a new, separately dated entry. See the
+       <a href="{html.escape(registry_href)}">strategy registry</a> for the full dated ledger (every variant,
+       its registration date, and the commit that added it) and
+       <a href="{html.escape(_propose_strategy_url())}">propose a strategy</a> to suggest one.</p>
+  </section>
+
+  <section class="assetblock">
     <h2>Strategy registry</h2>
     <div class="tablewrap"><table>
       <thead><tr><th>id</th><th>Name</th><th>Type</th><th>Rule</th><th>Params</th></tr></thead>
@@ -565,6 +591,7 @@ def build_methodology(out_path: str | None = None, assets: list | None = None,
 </main>
 <footer class="bottom">
   <div><a href="index.html">&larr; back to results</a>
+  &middot; <a href="{html.escape(registry_href)}">Strategy registry</a>
   &middot; <a href="{html.escape(_check_strategy_url())}">Check your own strategy</a>
   &middot; <a href="s/index.html">All strategy pages</a>
   &middot; <a href="{html.escape(places_href)}">Places this is published to</a></div>
@@ -868,6 +895,7 @@ def build_index_ko(payload: dict, out_path: str | None = None):
 </main>
 <footer class="bottom">
   <div><a href="methodology.html">어떻게 계산했나</a>{repo_html}{signup_html} &middot; <a href="../index.html">English</a> &middot; <a href="../stocks/index.html">Stocks</a>
+  &middot; <a href="registry.html">전략 등록부</a>
   &middot; <a href="{html.escape(_check_strategy_url())}">내 전략도 검사해 보기</a>
   &middot; <a href="s/index.html">전략별 페이지 전체</a>
   &middot; <a href="feed.xml">RSS</a> &middot; <a href="digest/index.html">주간 요약</a>
@@ -1043,6 +1071,15 @@ def build_methodology_ko(out_path: str | None = None):
   </section>
 
   <section class="assetblock">
+    <h2>전략은 어떻게 등록되나</h2>
+    <p>아래 모든 전략은 사전 등록되어 있습니다 — 정확한 규칙 문구와 고정 설정값을 결과를 계산하기
+       <strong>전에</strong> 문서로 남기고 날짜를 기록합니다. 임상시험 사전 등록과 같은 방식이며,
+       한 번 등록된 항목은 이후 절대 바뀌지 않고 정정이 필요하면 항상 새로 날짜가 찍힌 별도 항목을
+       추가합니다. 전체 등록일과 등록 커밋은 <a href="registry.html">전략 등록부</a>에서 확인할 수
+       있고, <a href="{html.escape(_propose_strategy_url())}">전략을 제안</a>할 수도 있습니다.</p>
+  </section>
+
+  <section class="assetblock">
     <h2>검사하는 전략 목록</h2>
     <div class="tablewrap"><table class="regtable">
       <thead><tr><th>id</th><th>전략</th><th>규칙</th><th>설정값</th></tr></thead>
@@ -1092,6 +1129,7 @@ def build_methodology_ko(out_path: str | None = None):
 </main>
 <footer class="bottom">
   <div><a href="index.html">&larr; 결과표로 돌아가기</a> &middot; <a href="../methodology.html">English</a> &middot; <a href="../stocks/methodology.html">Stocks</a>
+  &middot; <a href="registry.html">전략 등록부</a>
   &middot; <a href="{html.escape(_check_strategy_url())}">내 전략도 검사해 보기</a>
   &middot; <a href="s/index.html">전략별 페이지 전체</a>
   &middot; <a href="places.html">이 엔진이 공개되는 곳</a></div>
@@ -1141,6 +1179,7 @@ def build_empty_edition_page_ko(out_path: str | None = None, as_of: str | None =
 </main>
 <footer class="bottom">
   <div><a href="methodology.html">어떻게 계산했나</a> &middot; <a href="../index.html">English</a> &middot; <a href="../stocks/index.html">Stocks</a>
+  &middot; <a href="registry.html">전략 등록부</a>
   &middot; <a href="{html.escape(_check_strategy_url())}">내 전략도 검사해 보기</a>
   &middot; <a href="s/index.html">전략별 페이지 전체</a>
   &middot; <a href="feed.xml">RSS</a> &middot; <a href="digest/index.html">주간 요약</a>
@@ -1373,6 +1412,7 @@ def build_api_index_html(out_path: str | None = None) -> str:
 </main>
 <footer class="bottom">
   <div><a href="../index.html">&larr; back to results</a>
+  &middot; <a href="../registry.html">Strategy registry</a>
   &middot; <a href="{html.escape(_check_strategy_url())}">Check your own strategy</a>
   &middot; <a href="../s/index.html">All strategy pages</a>
   &middot; <a href="../places.html">Places this is published to</a></div>
@@ -1479,7 +1519,8 @@ table.places thead th {{ background: var(--card-bg); }}
 </main>
 <footer class="bottom">
   <div><a href="index.html">&larr; back to results</a>
-  &middot; <a href="methodology.html">Methodology</a></div>
+  &middot; <a href="methodology.html">Methodology</a>
+  &middot; <a href="registry.html">Strategy registry</a></div>
   <div class="disclaimer">{html.escape(config.LEGAL_DISCLAIMER)}</div>
 </footer>
 {config.ANALYTICS_SNIPPET}
@@ -1576,7 +1617,187 @@ table.places thead th {{ background: var(--card-bg); }}
 </main>
 <footer class="bottom">
   <div><a href="index.html">&larr; 결과표로 돌아가기</a>
-  &middot; <a href="methodology.html">어떻게 계산했나</a></div>
+  &middot; <a href="methodology.html">어떻게 계산했나</a>
+  &middot; <a href="registry.html">전략 등록부</a></div>
+</footer>
+{_disclaimer_block_ko()}
+{config.ANALYTICS_SNIPPET}
+</body>
+</html>
+"""
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    with open(out_path, "w") as f:
+        f.write(doc)
+    return out_path
+
+
+# ===========================================================================
+# task R1: the pre-registration ledger page. Purely a rendering of registry_ledger.json (built by
+# ledger.py, itself derived once from registry.py + git history — see ledger.py's own docstring)
+# plus REGISTRY.md's rules text; this module computes nothing new and never mutates the ledger.
+# ===========================================================================
+
+_SOURCE_LABEL_EN = {
+    "textbook": "textbook", "popular_combo": "popular combo", "community": "community",
+}
+_SOURCE_LABEL_KO = {
+    "textbook": "표준 지표", "popular_combo": "인기 조합", "community": "커뮤니티 제안",
+}
+
+
+def _ledger_table_html(lang: str) -> str:
+    labels = _SOURCE_LABEL_KO if lang == "ko" else _SOURCE_LABEL_EN
+    rows = []
+    for e in ldg.load_ledger():
+        commit_short = e["registered_commit"][:7]
+        commit_url = config.REPO_URL.rstrip("/") + "/commit/" + e["registered_commit"]
+        rows.append(
+            f"<tr><td>{html.escape(e['registered_on'])}</td>"
+            f"<td><code>{html.escape(e['id'])}</code></td>"
+            f"<td>{html.escape(e['strategy_name'])}</td>"
+            f"<td>{html.escape(labels.get(e['source'], e['source']))}</td>"
+            f"<td>{html.escape(e['rule_text'])}</td>"
+            f"<td><a href=\"{html.escape(commit_url)}\"><code>{commit_short}</code></a></td></tr>"
+        )
+    return "\n".join(rows)
+
+
+def build_registry_page(out_path: str | None = None, lang_links: str | None = None,
+                         places_href: str | None = None) -> str:
+    out_path = out_path or os.path.join(config.DOCS_DIR, "registry.html")
+    lang_links = lang_links if lang_links is not None else (
+        '<a href="ko/registry.html">한국어 (Korean)</a>'
+    )
+    places_href = places_href if places_href is not None else "places.html"
+    n = len(ldg.load_ledger())
+    doc = f"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Strategy registry &mdash; {html.escape(config.PROJECT_NAME)}</title>
+<meta name="description" content="Every strategy variant this site ever tests, with the exact rule text, fixed parameters, registration date, and commit hash it was locked in at — before any result was computed.">
+<style>{BASE_CSS}
+table.ledger td, table.ledger th {{ text-align: left; white-space: normal; }}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Strategy registry</h1>
+  <p class="tagline">The pre-registration ledger: every strategy this site has ever tested, and
+     exactly when its rule and parameters were locked in &mdash; before any result was computed.</p>
+  <p class="meta"><a href="index.html">&larr; back to results</a> &middot; {lang_links}</p>
+</header>
+<main>
+  <section class="assetblock">
+    <h2>Why pre-registration</h2>
+    <p>This works the same way pre-registering a clinical trial does: the exact thing being
+       tested, and the exact fixed numbers it runs at, are written down and dated
+       <strong>before</strong> any result is computed &mdash; never chosen, tuned, or rewritten
+       after seeing how well they performed. Once an entry below exists, its rule text and
+       parameters never change; a correction is always a brand-new entry with its own date, never
+       an edit to an old one (<code>tests.py</code> enforces this by comparing the live ledger
+       against a checked-in snapshot on every run). See
+       <a href="{html.escape(config.REPO_URL.rstrip('/') + '/blob/main/REGISTRY.md')}">REGISTRY.md</a>
+       for the full rules, and
+       <a href="{html.escape(_propose_strategy_url())}">propose a strategy</a> to suggest one for
+       the queue &mdash; accepted proposals are registered, with a date, before any backtest is
+       run for them.</p>
+  </section>
+
+  <section class="assetblock">
+    <h2>Embed a badge</h2>
+    <p>Every strategy/asset/timeframe combination has a small SVG badge showing its
+       <em>current</em> weekly verdict &mdash; nothing more. It is not an endorsement and it is
+       not a signal to act on; it just states this week's automated, out-of-sample, net-of-cost
+       result, the same as the rest of this site.</p>
+    <pre style="white-space:pre-wrap;background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:0.75rem 1rem;font-size:0.85rem;">[![Dead or Alive]({html.escape(config.PAGES_URL.rstrip('/'))}/badges/en/sma_cross-10-50-BTCUSD-1d.svg)]({html.escape(config.PAGES_URL.rstrip('/'))}/s/sma-cross-10-50-btcusd.html)</pre>
+    <p>Swap <code>en</code>, the strategy id, params slug, asset, and timeframe for the
+       combination you want (see the ledger's <code>id</code> column and
+       <a href="s/index.html">all strategy pages</a>). An edition-wide summary badge is also
+       available at <code>docs/badges/&lt;edition&gt;/summary.svg</code>.</p>
+  </section>
+
+  <section class="assetblock">
+    <h2>Ledger ({n} entries, sorted by registration date)</h2>
+    <div class="tablewrap"><table class="ledger">
+      <thead><tr><th>Registered</th><th>id</th><th>Strategy</th><th>Source</th><th>Rule</th><th>Commit</th></tr></thead>
+      <tbody>{_ledger_table_html("en")}</tbody>
+    </table></div>
+  </section>
+</main>
+<footer class="bottom">
+  <div><a href="index.html">&larr; back to results</a>
+  &middot; <a href="methodology.html">Methodology</a>
+  &middot; <a href="{html.escape(places_href)}">Places this is published to</a></div>
+  <div class="disclaimer">{html.escape(config.LEGAL_DISCLAIMER)}</div>
+</footer>
+{config.ANALYTICS_SNIPPET}
+</body>
+</html>
+"""
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    with open(out_path, "w") as f:
+        f.write(doc)
+    return out_path
+
+
+def build_registry_page_ko(out_path: str | None = None) -> str:
+    out_path = out_path or os.path.join(config.DOCS_DIR_KO, "registry.html")
+    n = len(ldg.load_ledger())
+    doc = f"""<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>전략 등록부 &mdash; {html.escape(config.PROJECT_NAME)}</title>
+<meta name="description" content="이 사이트가 검사하는 모든 전략의 정확한 규칙, 고정 설정값, 등록일, 등록 커밋 — 결과를 계산하기 전에 미리 고정해 둔 값입니다.">
+<style>{BASE_CSS}{KO_EXTRA_CSS}
+table.ledger td, table.ledger th {{ text-align: left; white-space: normal; }}
+</style>
+</head>
+<body>
+{_disclaimer_block_ko()}
+<header class="top">
+  <h1>전략 등록부</h1>
+  <p class="tagline">사전 등록 원장 — 이 사이트가 검사해 온 모든 전략과, 그 규칙·설정값을 결과를 보기
+     전에 언제 고정했는지 보여줍니다.</p>
+  <p class="meta"><a href="index.html">&larr; 결과표로 돌아가기</a> &middot;
+     <a href="../registry.html">English</a></p>
+</header>
+<main>
+  <section class="assetblock">
+    <h2>왜 사전 등록인가</h2>
+    <p>임상시험을 사전 등록하는 것과 같은 원리입니다 — 무엇을 검증할지, 어떤 고정값으로 검증할지를
+       결과를 보기 <strong>전에</strong> 미리 문서로 남겨 둡니다. 아래 목록에 한 번 들어간 항목은
+       규칙 문구와 설정값이 이후 절대 바뀌지 않으며, 정정이 필요하면 항상 새로운 날짜를 가진 새 항목을
+       추가할 뿐 기존 항목을 고치지 않습니다 (<code>tests.py</code>가 매 실행마다 원장을 체크인된
+       스냅샷과 비교해 이를 확인합니다). 전체 규칙은
+       <a href="{html.escape(config.REPO_URL.rstrip('/') + '/blob/main/REGISTRY.md')}">REGISTRY.md</a>를
+       참고하시고, <a href="{html.escape(_propose_strategy_url())}">전략을 제안</a>해 대기열에 올릴
+       수도 있습니다 — 채택된 제안은 결과를 계산하기 전에 먼저 등록됩니다.</p>
+  </section>
+
+  <section class="assetblock">
+    <h2>배지 가져다 쓰기</h2>
+    <p>전략·자산·주기 조합마다 이번 주 판정만 보여주는 작은 SVG 배지가 있습니다. 매수·매도를
+       권하는 신호가 아니며, 이 사이트의 다른 결과와 마찬가지로 매주 자동 갱신되는 표본외·수수료 반영
+       결과 하나만 나타냅니다. 에디션 전체 요약 배지는
+       <code>docs/badges/&lt;edition&gt;/summary.svg</code>에 있습니다.</p>
+  </section>
+
+  <section class="assetblock">
+    <h2>등록 목록 ({n}개, 등록일순)</h2>
+    <div class="tablewrap"><table class="ledger">
+      <thead><tr><th>등록일</th><th>id</th><th>전략</th><th>출처</th><th>규칙</th><th>커밋</th></tr></thead>
+      <tbody>{_ledger_table_html("ko")}</tbody>
+    </table></div>
+  </section>
+</main>
+<footer class="bottom">
+  <div><a href="index.html">&larr; 결과표로 돌아가기</a> &middot; <a href="../registry.html">English</a>
+  &middot; <a href="methodology.html">어떻게 계산했나</a>
+  &middot; <a href="places.html">이 엔진이 공개되는 곳</a></div>
 </footer>
 {_disclaimer_block_ko()}
 {config.ANALYTICS_SNIPPET}

@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>전략 등록부 &mdash; Dead or Alive</title>
+<meta name="description" content="이 사이트가 검사하는 모든 전략의 정확한 규칙, 고정 설정값, 등록일, 등록 커밋 — 결과를 계산하기 전에 미리 고정해 둔 값입니다.">
+<style>
+:root {
+  --bg: #ffffff; --fg: #14181f; --muted: #5b6270; --border: #e2e5ea; --card-bg: #f7f8fa;
+  --link: #1a56db;
+  --alive-bg: #d9f2e3; --alive-fg: #106a37;
+  --fading-bg: #fdf1c8; --fading-fg: #7a5b00;
+  --dead-bg: #e6e8eb; --dead-fg: #4b5160;
+  --toofew-bg: #f2f3f5; --toofew-fg: #8a909c;
+  --suspicious: #c0392b;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #10131a; --fg: #e7e9ee; --muted: #9aa1b0; --border: #2a2f3a; --card-bg: #171b24;
+    --link: #7aa2ff;
+    --alive-bg: #113a26; --alive-fg: #6bdc9c;
+    --fading-bg: #3a3210; --fading-fg: #f0d572;
+    --dead-bg: #262a33; --dead-fg: #a8adb8;
+    --toofew-bg: #1c2029; --toofew-fg: #6b7180;
+    --suspicious: #ff8a7a;
+  }
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; margin: 0; padding: 0 0 3rem 0; line-height: 1.45; }
+a { color: var(--link); }
+header.top { padding: 2rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border); }
+header.top h1 { margin: 0 0 0.25rem 0; font-size: 1.7rem; }
+header.top p.tagline { margin: 0 0 1rem 0; color: var(--muted); }
+.meta { color: var(--muted); font-size: 0.9rem; }
+.tally { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 1rem; }
+.tally span { padding: 0.3rem 0.7rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600; }
+main { max-width: 1200px; margin: 0 auto; padding: 0 1.25rem; }
+nav.jump { display: flex; gap: 0.75rem; flex-wrap: wrap; margin: 1.25rem 0; }
+nav.jump a { padding: 0.3rem 0.7rem; border: 1px solid var(--border); border-radius: 6px; text-decoration: none; font-size: 0.9rem; }
+section.assetblock { margin: 2.25rem 0; }
+section.assetblock h2 { border-bottom: 2px solid var(--border); padding-bottom: 0.4rem; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; min-width: 980px; font-size: 0.85rem; }
+th, td { padding: 0.5rem 0.6rem; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--border); }
+th:nth-child(1), td:nth-child(1), th:nth-child(2), td:nth-child(2) { text-align: left; }
+thead th { background: var(--card-bg); position: sticky; top: 0; }
+tbody tr:hover { background: var(--card-bg); }
+.badge { padding: 0.15rem 0.55rem; border-radius: 999px; font-weight: 700; font-size: 0.78rem; display: inline-block; }
+.ref-row { font-style: italic; color: var(--muted); }
+.suspicious { color: var(--suspicious); font-weight: 700; }
+.gross-note { font-size: 0.75rem; color: var(--muted); }
+footer.bottom { max-width: 1200px; margin: 2.5rem auto 0; padding: 1.25rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem; }
+footer.bottom .disclaimer { margin-top: 0.75rem; }
+
+.regtable th, .regtable td { text-align: left; white-space: normal; }
+.regtable td:nth-child(4) { white-space: nowrap; }
+
+.disclaimer-block { max-width: 1200px; margin: 1rem auto; padding: 0.9rem 1.1rem; border: 1px solid var(--border); border-radius: 8px; background: var(--card-bg); color: var(--muted); font-size: 0.82rem; line-height: 1.5; }
+.notice-box { max-width: 1200px; margin: 2rem auto; padding: 2rem 1.5rem; border: 1px dashed var(--border); border-radius: 10px; text-align: center; }
+.notice-box h2 { margin-top: 0; }
+.badge small { font-weight: 500; opacity: 0.75; margin-left: 0.3rem; font-size: 0.72em; }
+
+table.ledger td, table.ledger th { text-align: left; white-space: normal; }
+</style>
+</head>
+<body>
+<div class="disclaimer-block">본 페이지는 무료로 제공되는 정보·교육 목적의 자료이며, 투자 자문이나 특정 자산의 매수·매도 권유가 아닙니다. 과거 백테스트 결과는 미래 수익을 보장하지 않으며, 모든 투자 판단과 책임은 이용자 본인에게 있습니다. 운영자는 유사투자자문업자가 아니며 어떠한 수익도 보장하지 않습니다.</div>
+<header class="top">
+  <h1>전략 등록부</h1>
+  <p class="tagline">사전 등록 원장 — 이 사이트가 검사해 온 모든 전략과, 그 규칙·설정값을 결과를 보기
+     전에 언제 고정했는지 보여줍니다.</p>
+  <p class="meta"><a href="index.html">&larr; 결과표로 돌아가기</a> &middot;
+     <a href="../registry.html">English</a></p>
+</header>
+<main>
+  <section class="assetblock">
+    <h2>왜 사전 등록인가</h2>
+    <p>임상시험을 사전 등록하는 것과 같은 원리입니다 — 무엇을 검증할지, 어떤 고정값으로 검증할지를
+       결과를 보기 <strong>전에</strong> 미리 문서로 남겨 둡니다. 아래 목록에 한 번 들어간 항목은
+       규칙 문구와 설정값이 이후 절대 바뀌지 않으며, 정정이 필요하면 항상 새로운 날짜를 가진 새 항목을
+       추가할 뿐 기존 항목을 고치지 않습니다 (<code>tests.py</code>가 매 실행마다 원장을 체크인된
+       스냅샷과 비교해 이를 확인합니다). 전체 규칙은
+       <a href="https://github.com/getjogak-sketch/deadoralive/blob/main/REGISTRY.md">REGISTRY.md</a>를
+       참고하시고, <a href="https://github.com/getjogak-sketch/deadoralive/issues/new?template=propose-strategy.yml">전략을 제안</a>해 대기열에 올릴
+       수도 있습니다 — 채택된 제안은 결과를 계산하기 전에 먼저 등록됩니다.</p>
+  </section>
+
+  <section class="assetblock">
+    <h2>배지 가져다 쓰기</h2>
+    <p>전략·자산·주기 조합마다 이번 주 판정만 보여주는 작은 SVG 배지가 있습니다. 매수·매도를
+       권하는 신호가 아니며, 이 사이트의 다른 결과와 마찬가지로 매주 자동 갱신되는 표본외·수수료 반영
+       결과 하나만 나타냅니다. 에디션 전체 요약 배지는
+       <code>docs/badges/&lt;edition&gt;/summary.svg</code>에 있습니다.</p>
+  </section>
+
+  <section class="assetblock">
+    <h2>등록 목록 (29개, 등록일순)</h2>
+    <div class="tablewrap"><table class="ledger">
+      <thead><tr><th>등록일</th><th>id</th><th>전략</th><th>출처</th><th>규칙</th><th>커밋</th></tr></thead>
+      <tbody><tr><td>2026-09-06</td><td><code>above_sma:n200</code></td><td>Price above SMA</td><td>표준 지표</td><td>close &gt; SMA(n) -&gt; long</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/c65f546c8f50da968e744821efe3ce1b99dace77"><code>c65f546</code></a></td></tr>
+<tr><td>2026-09-06</td><td><code>above_sma:n50</code></td><td>Price above SMA</td><td>표준 지표</td><td>close &gt; SMA(n) -&gt; long</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/c65f546c8f50da968e744821efe3ce1b99dace77"><code>c65f546</code></a></td></tr>
+<tr><td>2026-09-06</td><td><code>bb_breakout:20-2</code></td><td>Bollinger breakout</td><td>표준 지표</td><td>close &gt; upper band(20,2) -&gt; long; close &lt; middle band -&gt; flat</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/c65f546c8f50da968e744821efe3ce1b99dace77"><code>c65f546</code></a></td></tr>
+<tr><td>2026-09-06</td><td><code>bb_mr:20-2</code></td><td>Bollinger mean reversion</td><td>표준 지표</td><td>close &lt; lower band(20,2) -&gt; long; close &gt; middle band -&gt; flat</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/c65f546c8f50da968e744821efe3ce1b99dace77"><code>c65f546</code></a></td></tr>
+<tr><td>2026-09-06</td><td><code>dip_3down:fixed</code></td><td>Buy the dip (3 down closes)</td><td>표준 지표</td><td>3 consecutive down closes -&gt; long; first up close -&gt; flat</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/c65f546c8f50da968e744821efe3ce1b99dace77"><code>c65f546</code></a></td></tr>
+<tr><td>2026-09-06</td><td><code>dip_pct:-5pct-5bar</code></td><td>Buy the dip (-x% bar)</td><td>표준 지표</td><td>bar return &lt;= -5% -&gt; enter next open, exit 5 bars later at the open</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/c65f546c8f50da968e744821efe3ce1b99dace77"><code>c65f546</code></a></td></tr>
+<tr><td>2026-09-06</td><td><code>donchian:20-10</code></td><td>Donchian/Turtle breakout</td><td>표준 지표</td><td>close &gt; prior N-bar high -&gt; long; close &lt; prior M-bar low -&gt; flat</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/c65f546c8f50da968e744821efe3ce1b99dace77"><code>c65f546</code></a></td></tr>
+<tr><td>2026-09-06</td><td><code>donchian:55-20</code></td><td>Donchian/Turtle breakout</td><td>표준 지표</td><td>close &gt; prior N-bar high -&gt; long; close &lt; prior M-bar low -&gt; flat</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/c65f546c8f50da968e744821efe3ce1b99dace77"><code>c65f546</code></a></td></tr>
+<tr><td>2026-09-06</td><td><code>ema_cross:12-26</code></td><td>EMA crossover</td><td>표준 지표</td><td>EMA fast &gt; EMA slow -&gt; long</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/c65f546c8f50da968e744821efe3ce1b99dace77"><code>c65f546</code></a></td></tr>
+<tr><td>2026-09-06</td><td><code>macd:12-26-9</code></td><td>MACD signal cross</td><td>표준 지표</td><td>MACD(12,26,9) line &gt; signal -&gt; long</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/c65f546c8f50da968e744821efe3ce1b99dace77"><code>c65f546</code></a></td></tr>
+<tr><td>2026-09-06</td><td><code>rsi2_connors:fixed</code></td><td>Connors RSI(2)</td><td>표준 지표</td><td>RSI(2) &lt; 10 AND close &gt; SMA(200) -&gt; long; close &gt; SMA(5) -&gt; flat</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/c65f546c8f50da968e744821efe3ce1b99dace77"><code>c65f546</code></a></td></tr>
+<tr><td>2026-09-06</td><td><code>rsi_mr:exit50</code></td><td>RSI mean reversion</td><td>표준 지표</td><td>RSI(14) &lt; 30 -&gt; long; RSI(14) &gt; exit -&gt; flat</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/c65f546c8f50da968e744821efe3ce1b99dace77"><code>c65f546</code></a></td></tr>
+<tr><td>2026-09-06</td><td><code>rsi_mr:exit70</code></td><td>RSI mean reversion</td><td>표준 지표</td><td>RSI(14) &lt; 30 -&gt; long; RSI(14) &gt; exit -&gt; flat</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/c65f546c8f50da968e744821efe3ce1b99dace77"><code>c65f546</code></a></td></tr>
+<tr><td>2026-09-06</td><td><code>sma_cross:10-50</code></td><td>SMA crossover</td><td>표준 지표</td><td>fast SMA &gt; slow SMA -&gt; long</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/c65f546c8f50da968e744821efe3ce1b99dace77"><code>c65f546</code></a></td></tr>
+<tr><td>2026-09-06</td><td><code>sma_cross:20-100</code></td><td>SMA crossover</td><td>표준 지표</td><td>fast SMA &gt; slow SMA -&gt; long</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/c65f546c8f50da968e744821efe3ce1b99dace77"><code>c65f546</code></a></td></tr>
+<tr><td>2026-09-06</td><td><code>sma_cross:50-200</code></td><td>SMA crossover</td><td>표준 지표</td><td>fast SMA &gt; slow SMA -&gt; long</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/c65f546c8f50da968e744821efe3ce1b99dace77"><code>c65f546</code></a></td></tr>
+<tr><td>2026-09-06</td><td><code>supertrend:10-3</code></td><td>Supertrend</td><td>표준 지표</td><td>Supertrend(10,3) direction up -&gt; long</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/c65f546c8f50da968e744821efe3ce1b99dace77"><code>c65f546</code></a></td></tr>
+<tr><td>2026-09-06</td><td><code>tsmom:n30</code></td><td>Time-series momentum</td><td>표준 지표</td><td>close[t] &gt; close[t-n] -&gt; long</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/c65f546c8f50da968e744821efe3ce1b99dace77"><code>c65f546</code></a></td></tr>
+<tr><td>2026-09-06</td><td><code>tsmom:n90</code></td><td>Time-series momentum</td><td>표준 지표</td><td>close[t] &gt; close[t-n] -&gt; long</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/c65f546c8f50da968e744821efe3ce1b99dace77"><code>c65f546</code></a></td></tr>
+<tr><td>2026-09-06</td><td><code>vol_breakout:k0.5</code></td><td>Larry Williams volatility breakout</td><td>표준 지표</td><td>v1 spec.md §4B: open + k*(prior day range) intrabar breakout, 1-bar hold</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/c65f546c8f50da968e744821efe3ce1b99dace77"><code>c65f546</code></a></td></tr>
+<tr><td>2026-09-06</td><td><code>vol_breakout:k0.7</code></td><td>Larry Williams volatility breakout</td><td>표준 지표</td><td>v1 spec.md §4B: open + k*(prior day range) intrabar breakout, 1-bar hold</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/c65f546c8f50da968e744821efe3ce1b99dace77"><code>c65f546</code></a></td></tr>
+<tr><td>2026-09-06</td><td><code>vol_breakout_trend:k0.5-sma20</code></td><td>Volatility breakout + trend filter</td><td>표준 지표</td><td>v1 §4B, gated on open &gt; SMA(20) of the prior bar</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/c65f546c8f50da968e744821efe3ce1b99dace77"><code>c65f546</code></a></td></tr>
+<tr><td>2026-09-07</td><td><code>bb_squeeze:bb20.2-look120-conf5</code></td><td>Bollinger squeeze breakout</td><td>인기 조합</td><td>bandwidth at/under its own prior 120-bar low (&#x27;squeeze&#x27;) within the last 5 bars AND close &gt; upper band(20,2) -&gt; long; close &lt; middle band -&gt; flat</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db"><code>ccc7ff6</code></a></td></tr>
+<tr><td>2026-09-07</td><td><code>ema200_macd:ema200-macd12.26.9</code></td><td>EMA200 trend + MACD cross</td><td>인기 조합</td><td>close &gt; EMA200 AND MACD(12,26,9) line &gt; signal -&gt; long; MACD line &lt; signal OR close &lt; EMA200 -&gt; flat</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db"><code>ccc7ff6</code></a></td></tr>
+<tr><td>2026-09-07</td><td><code>ema_9_21:9-21</code></td><td>EMA 9/21 crossover</td><td>인기 조합</td><td>EMA9 &gt; EMA21 -&gt; long, else flat</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db"><code>ccc7ff6</code></a></td></tr>
+<tr><td>2026-09-07</td><td><code>heikin_ashi_trend:conf2</code></td><td>Heikin-Ashi colour</td><td>인기 조합</td><td>2 consecutive HA close &gt; HA open -&gt; long; first HA close &lt; HA open -&gt; flat</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db"><code>ccc7ff6</code></a></td></tr>
+<tr><td>2026-09-07</td><td><code>ichimoku_cloud:9-26-52</code></td><td>Ichimoku cloud breakout</td><td>인기 조합</td><td>close &gt; cloud top -&gt; long; close &lt; cloud bottom -&gt; flat (cloud shifted +26 bars, no lookahead)</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db"><code>ccc7ff6</code></a></td></tr>
+<tr><td>2026-09-07</td><td><code>rsi_uptrend:rsi14-sma200</code></td><td>RSI dip in uptrend</td><td>인기 조합</td><td>RSI(14) &lt; 30 AND close &gt; SMA200 -&gt; long; RSI(14) &gt; 70 OR close &lt; SMA200 -&gt; flat</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db"><code>ccc7ff6</code></a></td></tr>
+<tr><td>2026-09-07</td><td><code>supertrend_ema200:st10.3-ema200</code></td><td>Supertrend + EMA200 filter</td><td>인기 조합</td><td>Supertrend(10,3) up AND close &gt; EMA200 -&gt; long; Supertrend flips down -&gt; flat</td><td><a href="https://github.com/getjogak-sketch/deadoralive/commit/ccc7ff6bf9dfb86795ca5378a1ed28744f7fb8db"><code>ccc7ff6</code></a></td></tr></tbody>
+    </table></div>
+  </section>
+</main>
+<footer class="bottom">
+  <div><a href="index.html">&larr; 결과표로 돌아가기</a> &middot; <a href="../registry.html">English</a>
+  &middot; <a href="methodology.html">어떻게 계산했나</a>
+  &middot; <a href="places.html">이 엔진이 공개되는 곳</a></div>
+</footer>
+<div class="disclaimer-block">본 페이지는 무료로 제공되는 정보·교육 목적의 자료이며, 투자 자문이나 특정 자산의 매수·매도 권유가 아닙니다. 과거 백테스트 결과는 미래 수익을 보장하지 않으며, 모든 투자 판단과 책임은 이용자 본인에게 있습니다. 운영자는 유사투자자문업자가 아니며 어떠한 수익도 보장하지 않습니다.</div>
+<script data-goatcounter="https://jogak.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

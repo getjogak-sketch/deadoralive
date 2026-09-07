@@ -278,6 +278,8 @@ core weekly pipeline (`fetch_data.py` → `tests.py` → `run_weekly.py`) to run
 **Live now — no setup needed:**
 - The site itself: English/crypto (`docs/index.html`), Korean/Upbit (`docs/ko/index.html`),
   Stocks/SPY+QQQ (`docs/stocks/index.html`).
+- The pre-registration ledger (`docs/registry.html`, `docs/ko/registry.html`) — see "Pre-registration
+  ledger" below.
 - The machine-readable JSON API (`docs/api/v1/<edition>/latest.json`, spec_v3 §B).
 - The "Check my strategy" GitHub Issues bot (spec_v3 §E).
 - One static page per (strategy variant, asset) for search (`docs/s/`, `docs/ko/s/`,
@@ -307,3 +309,30 @@ network-blocked here exactly like Bitstamp/Upbit/Stooq/Yahoo already are — `pu
 against each provider's own documented request format and unit-tested against a monkeypatched
 `requests.post` (`tests.py`'s `test_publish_payload_shapes_fake_http`), but has never been
 exercised against a live endpoint.
+
+## Pre-registration ledger
+
+`REGISTRY.md` is the rulebook: every strategy variant enters with its exact rule text, fixed
+parameters, registration date, and the git commit that added it — the same idea as pre-registering
+a clinical trial, so results can't be curve-fit after the fact. Once an entry exists it never
+changes; a correction is always a new, separately dated entry.
+
+- `registry_ledger.json` (repo root): one entry per tradeable registry variant (the same universe
+  `verdict.py` ever badges — REFERENCE rows excluded), built once by `ledger.py` from
+  `registry.py` + `git log --diff-filter=A -- registry.py` (both of registry.py's two commits
+  added one whole group each — `REGISTRY`+`REFERENCE` on 2026-09-06, `POPULAR_COMBOS` on
+  2026-09-07 — so there's no date ambiguity to resolve here). `ledger.py` is a one-time/append-only
+  generator (`python3 ledger.py`), never run automatically by the weekly pipeline — a ledger entry
+  must not shift just because `run_weekly.py` ran again.
+- `registry_ledger.snapshot.json`: a checked-in copy of the ledger frozen at last review.
+  `tests.py`'s `test_ledger_immutable_against_snapshot` fails the whole suite (which blocks every
+  weekly run) if any entry present in the snapshot differs from the live ledger — new entries are
+  fine, changed old ones are not. `test_ledger_matches_registry_bijection` checks the ledger and
+  `registry.py` never drift apart (every variant has exactly one entry, and vice versa).
+- `docs/registry.html` / `docs/ko/registry.html`: the ledger rendered as a table (sorted by
+  registration date), REGISTRY.md's rules at the top, and how to embed a verdict badge (see
+  "Verdict badges" below). Linked from every page's footer and from methodology's "How strategies
+  get in" section.
+- `.github/ISSUE_TEMPLATE/propose-strategy.yml`: a queue (not automated) for readers to propose a
+  strategy — rule text, params, source. An accepted proposal is registered, dated, before any
+  backtest runs for it, exactly like every other entry.

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bollinger mean reversion (20, 2) on ETH — does it still work in 2026? After-fees backtest, updated weekly</title>
+<title>Bollinger Bands strategy: Bollinger mean reversion (20, 2) on ETH — does it still work in 2026? After-fees backtest, updated weekly</title>
 <meta name="description" content="Bollinger mean reversion (20, 2) on ETH is currently rated DEAD on the daily (1d) out-of-sample window (as of 2026-09-07): OOS profit factor 0.66, return -35.5%, max drawdown 59.1%.">
 <link rel="canonical" href="https://getjogak-sketch.github.io/deadoralive/s/bb-mr-20-2-ethusd.html">
 <link rel="alternate" hreflang="x-default" href="https://getjogak-sketch.github.io/deadoralive/s/bb-mr-20-2-ethusd.html"><link rel="alternate" hreflang="en" href="https://getjogak-sketch.github.io/deadoralive/s/bb-mr-20-2-ethusd.html"><link rel="alternate" hreflang="ko" href="https://getjogak-sketch.github.io/deadoralive/ko/s/bb-mr-20-2-krw-eth.html">
@@ -64,30 +64,33 @@ footer.bottom .disclaimer { margin-top: 0.75rem; }
 .interp { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.1rem; margin: 1rem 0; }
 .histline { font-size: 0.82rem; color: var(--muted); }
 .tfblock { margin: 1.5rem 0; }
+.sparkline { display: inline-flex; align-items: center; gap: 0.3rem; margin-left: 0.5rem; }
+.sparkline svg { vertical-align: middle; }
 </style>
 </head>
 
 <body class="stratpage">
 <header class="top">
-  <h1>Bollinger mean reversion (20, 2) on ETH — does it still work in 2026? After-fees backtest, updated weekly</h1>
+  <h1>Bollinger Bands strategy: Bollinger mean reversion (20, 2) on ETH — does it still work in 2026? After-fees backtest, updated weekly</h1>
   <p class="meta">as_of: <strong>2026-09-07</strong> &middot;
      <a href="../index.html">Back to the full table</a></p>
 </header>
 <main>
   <p><strong>Rule:</strong> close &lt; lower band(20,2) -&gt; long; close &gt; middle band -&gt; flat</p>
+  
   <div class="disclaimer-block">Educational / informational content only. This is not investment advice, and nothing here is a recommendation to buy or sell any asset. Past backtested performance, especially net-of-cost historical simulation, does not guarantee future results.</div>
   
 <div class="tfblock">
   <h2>daily (1d) &mdash; Verdict: <span class="badge" style="background:var(--dead-bg);color:var(--dead-fg)">DEAD</span></h2>
   <table class='scorecard'><thead><tr><th>Metric</th><th>In-sample (IS)</th><th>Out-of-sample (OOS)</th></tr></thead><tbody><tr><td>Total return</td><td>-25.5%</td><td>-35.5%</td></tr><tr><td>CAGR</td><td>-4.1%</td><td>-19.7%</td></tr><tr><td>Profit factor</td><td>1.14</td><td>0.66</td></tr><tr><td>Sharpe</td><td>0.16</td><td>-0.32</td></tr><tr><td>Max drawdown</td><td>81.3%</td><td>59.1%</td></tr><tr><td>Trades</td><td>42</td><td>12</td></tr><tr><td>Win rate</td><td>66.7%</td><td>58.3%</td></tr><tr><td>Avg trade return</td><td>0.9%</td><td>-2.5%</td></tr><tr><td>Time in market</td><td>26.5%</td><td>28.5%</td></tr><tr><td>Buy &amp; hold (OOS)</td><td colspan='2'>6.0% return, 67.6% MDD</td></tr><tr><td>Fee drag (OOS)</td><td colspan='2'>1.6%</td></tr></tbody></table>
   
-  <p class="histline">History (1d): 2026-09-06: DEAD &rarr; 2026-09-07: DEAD</p>
+  <p class="histline">History (1d): 2026-09-06: DEAD &rarr; 2026-09-07: DEAD </p>
 </div>
 <div class="tfblock">
   <h2>4-hour (4h) &mdash; Verdict: <span class="badge" style="background:var(--dead-bg);color:var(--dead-fg)">DEAD</span></h2>
   <table class='scorecard'><thead><tr><th>Metric</th><th>In-sample (IS)</th><th>Out-of-sample (OOS)</th></tr></thead><tbody><tr><td>Total return</td><td>-96.0%</td><td>-37.5%</td></tr><tr><td>CAGR</td><td>-36.7%</td><td>-21.0%</td></tr><tr><td>Profit factor</td><td>0.70</td><td>0.77</td></tr><tr><td>Sharpe</td><td>-0.50</td><td>-0.38</td></tr><tr><td>Max drawdown</td><td>97.2%</td><td>51.9%</td></tr><tr><td>Trades</td><td>268</td><td>75</td></tr><tr><td>Win rate</td><td>64.6%</td><td>61.3%</td></tr><tr><td>Avg trade return</td><td>-0.9%</td><td>-0.5%</td></tr><tr><td>Time in market</td><td>26.4%</td><td>27.1%</td></tr><tr><td>Buy &amp; hold (OOS)</td><td colspan='2'>11.7% return, 68.1% MDD</td></tr><tr><td>Fee drag (OOS)</td><td colspan='2'>10.1%</td></tr></tbody></table>
   
-  <p class="histline">History (4h): 2026-09-06: DEAD &rarr; 2026-09-07: DEAD</p>
+  <p class="histline">History (4h): 2026-09-06: DEAD &rarr; 2026-09-07: DEAD </p>
 </div>
   <div class="interp">
     <h3>What the numbers say (no opinions, no advice)</h3>
@@ -96,6 +99,7 @@ footer.bottom .disclaimer { margin-top: 0.75rem; }
   <p>
     <a href="../index.html">Back to the full table</a> &middot;
     <a href="../methodology.html">Methodology</a> &middot;
+    <a href="../registry.html">Strategy registry</a> &middot;
     <a href="https://github.com/getjogak-sketch/deadoralive/issues/new?template=check-strategy.yml">Check your own strategy</a> &middot; <a href="https://buttondown.com/jogak">Get weekly updates</a> &middot;
     <a href="index.html">All strategy pages</a>
   </p>

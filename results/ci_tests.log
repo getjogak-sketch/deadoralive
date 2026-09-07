@@ -1,3 +1,4 @@
+[PASS] ledger immutability supertrend:10-3.registered_commit: unchanged since snapshot
 [PASS] ledger immutability supertrend:10-3.rule_text: unchanged since snapshot
 [PASS] ledger immutability supertrend:10-3.strategy_id: unchanged since snapshot
 [PASS] ledger immutability supertrend:10-3.strategy_name: unchanged since snapshot
@@ -196,5 +197,4 @@ mastodon: sent
 [PASS] publish mastodon: posts {status: ...} with Bearer auth
 [PASS] publish: no subcommand exceeded Bluesky's 300-char post limit
 
-1 TEST(S) FAILED:
- - check_issue: extended check notes ETHUSD was skipped (no local data in this dev env): 
+ALL TESTS PASSED (pandas-engine tests; run crosscheck_bt.py separately for §6.2)

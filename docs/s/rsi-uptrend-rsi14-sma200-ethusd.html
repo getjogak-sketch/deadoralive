@@ -64,6 +64,8 @@ footer.bottom .disclaimer { margin-top: 0.75rem; }
 .interp { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.1rem; margin: 1rem 0; }
 .histline { font-size: 0.82rem; color: var(--muted); }
 .tfblock { margin: 1.5rem 0; }
+.sparkline { display: inline-flex; align-items: center; gap: 0.3rem; margin-left: 0.5rem; }
+.sparkline svg { vertical-align: middle; }
 </style>
 </head>
 
@@ -75,19 +77,20 @@ footer.bottom .disclaimer { margin-top: 0.75rem; }
 </header>
 <main>
   <p><strong>Rule:</strong> RSI(14) &lt; 30 AND close &gt; SMA200 -&gt; long; RSI(14) &gt; 70 OR close &lt; SMA200 -&gt; flat</p>
+  
   <div class="disclaimer-block">Educational / informational content only. This is not investment advice, and nothing here is a recommendation to buy or sell any asset. Past backtested performance, especially net-of-cost historical simulation, does not guarantee future results.</div>
   
 <div class="tfblock">
   <h2>daily (1d) &mdash; Verdict: <span class="badge" style="background:var(--toofew-bg);color:var(--toofew-fg)">TOO FEW TRADES</span></h2>
   <table class='scorecard'><thead><tr><th>Metric</th><th>In-sample (IS)</th><th>Out-of-sample (OOS)</th></tr></thead><tbody><tr><td>Total return</td><td>-14.1%</td><td>0.0%</td></tr><tr><td>CAGR</td><td>-2.1%</td><td>0.0%</td></tr><tr><td>Profit factor</td><td>0.00</td><td>-</td></tr><tr><td>Sharpe</td><td>-0.23</td><td>0.00</td></tr><tr><td>Max drawdown</td><td>20.1%</td><td>0.0%</td></tr><tr><td>Trades</td><td>2</td><td>0</td></tr><tr><td>Win rate</td><td>0.0%</td><td>0.0%</td></tr><tr><td>Avg trade return</td><td>-7.3%</td><td>0.0%</td></tr><tr><td>Time in market</td><td>1.2%</td><td>0.0%</td></tr><tr><td>Buy &amp; hold (OOS)</td><td colspan='2'>6.0% return, 67.6% MDD</td></tr><tr><td>Fee drag (OOS)</td><td colspan='2'>0.0%</td></tr></tbody></table>
   <h3>Robustness (nearby parameter grid, diagnostic only)</h3><p><span class="badge robustness-badge" style="background:var(--toofew-bg);color:var(--toofew-fg)" title="n_sma=150 → PF=n/a (n=0); n_sma=200 → PF=n/a (n=0); n_sma=250 → PF=0.00 (n=1)">0/3</span> 0/3 cleared &mdash; This grid never changes the verdict above and never selects parameters — it only shows whether nearby, never-registered parameter values would also have cleared OOS PF &ge; 1.0 with &ge; 10 trades.</p><ul class='griddump'><li>n_sma=150 &rarr; PF=n/a (n=0)</li><li>n_sma=200 &rarr; PF=n/a (n=0)</li><li>n_sma=250 &rarr; PF=0.00 (n=1)</li></ul>
-  <p class="histline">History (1d): 2026-09-06: TOO FEW TRADES &rarr; 2026-09-07: TOO FEW TRADES</p>
+  <p class="histline">History (1d): 2026-09-06: TOO FEW TRADES &rarr; 2026-09-07: TOO FEW TRADES </p>
 </div>
 <div class="tfblock">
   <h2>4-hour (4h) &mdash; Verdict: <span class="badge" style="background:var(--toofew-bg);color:var(--toofew-fg)">TOO FEW TRADES</span></h2>
   <table class='scorecard'><thead><tr><th>Metric</th><th>In-sample (IS)</th><th>Out-of-sample (OOS)</th></tr></thead><tbody><tr><td>Total return</td><td>-1.6%</td><td>3.3%</td></tr><tr><td>CAGR</td><td>-0.2%</td><td>1.6%</td></tr><tr><td>Profit factor</td><td>1.16</td><td>1.55</td></tr><tr><td>Sharpe</td><td>0.08</td><td>0.22</td></tr><tr><td>Max drawdown</td><td>47.4%</td><td>14.6%</td></tr><tr><td>Trades</td><td>26</td><td>4</td></tr><tr><td>Win rate</td><td>34.6%</td><td>25.0%</td></tr><tr><td>Avg trade return</td><td>0.7%</td><td>1.0%</td></tr><tr><td>Time in market</td><td>4.1%</td><td>2.2%</td></tr><tr><td>Buy &amp; hold (OOS)</td><td colspan='2'>11.7% return, 68.1% MDD</td></tr><tr><td>Fee drag (OOS)</td><td colspan='2'>0.8%</td></tr></tbody></table>
   <h3>Robustness (nearby parameter grid, diagnostic only)</h3><p><span class="badge robustness-badge" style="background:var(--toofew-bg);color:var(--toofew-fg)" title="n_sma=150 → PF=0.00 (n=4); n_sma=200 → PF=1.55 (n=4); n_sma=250 → PF=1.87 (n=6)">0/3</span> 0/3 cleared &mdash; This grid never changes the verdict above and never selects parameters — it only shows whether nearby, never-registered parameter values would also have cleared OOS PF &ge; 1.0 with &ge; 10 trades.</p><ul class='griddump'><li>n_sma=150 &rarr; PF=0.00 (n=4)</li><li>n_sma=200 &rarr; PF=1.55 (n=4)</li><li>n_sma=250 &rarr; PF=1.87 (n=6)</li></ul>
-  <p class="histline">History (4h): 2026-09-06: TOO FEW TRADES &rarr; 2026-09-07: TOO FEW TRADES</p>
+  <p class="histline">History (4h): 2026-09-06: TOO FEW TRADES &rarr; 2026-09-07: TOO FEW TRADES </p>
 </div>
   <div class="interp">
     <h3>What the numbers say (no opinions, no advice)</h3>
@@ -96,6 +99,7 @@ footer.bottom .disclaimer { margin-top: 0.75rem; }
   <p>
     <a href="../index.html">Back to the full table</a> &middot;
     <a href="../methodology.html">Methodology</a> &middot;
+    <a href="../registry.html">Strategy registry</a> &middot;
     <a href="https://github.com/getjogak-sketch/deadoralive/issues/new?template=check-strategy.yml">Check your own strategy</a> &middot; <a href="https://buttondown.com/jogak">Get weekly updates</a> &middot;
     <a href="index.html">All strategy pages</a>
   </p>

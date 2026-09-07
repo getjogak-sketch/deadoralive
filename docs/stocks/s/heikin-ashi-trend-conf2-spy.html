@@ -64,6 +64,8 @@ footer.bottom .disclaimer { margin-top: 0.75rem; }
 .interp { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.1rem; margin: 1rem 0; }
 .histline { font-size: 0.82rem; color: var(--muted); }
 .tfblock { margin: 1.5rem 0; }
+.sparkline { display: inline-flex; align-items: center; gap: 0.3rem; margin-left: 0.5rem; }
+.sparkline svg { vertical-align: middle; }
 </style>
 </head>
 
@@ -75,13 +77,14 @@ footer.bottom .disclaimer { margin-top: 0.75rem; }
 </header>
 <main>
   <p><strong>Rule:</strong> 2 consecutive HA close &gt; HA open -&gt; long; first HA close &lt; HA open -&gt; flat</p>
+  
   <div class="disclaimer-block">Educational / informational content only. This is not investment advice, and nothing here is a recommendation to buy or sell any asset. Past backtested performance, especially net-of-cost historical simulation, does not guarantee future results.</div>
   
 <div class="tfblock">
   <h2>daily (1d) &mdash; Verdict: <span class="badge" style="background:var(--alive-bg);color:var(--alive-fg)">ALIVE</span></h2>
   <table class='scorecard'><thead><tr><th>Metric</th><th>In-sample (IS)</th><th>Out-of-sample (OOS)</th></tr></thead><tbody><tr><td>Total return</td><td>-39.4%</td><td>17.7%</td></tr><tr><td>CAGR</td><td>-2.0%</td><td>8.5%</td></tr><tr><td>Profit factor</td><td>0.91</td><td>1.78</td></tr><tr><td>Sharpe</td><td>-0.14</td><td>1.06</td></tr><tr><td>Max drawdown</td><td>62.3%</td><td>7.0%</td></tr><tr><td>Trades</td><td>631</td><td>50</td></tr><tr><td>Win rate</td><td>43.6%</td><td>52.0%</td></tr><tr><td>Avg trade return</td><td>-0.1%</td><td>0.3%</td></tr><tr><td>Time in market</td><td>44.4%</td><td>48.7%</td></tr><tr><td>Buy &amp; hold (OOS)</td><td colspan='2'>39.9% return, 19.0% MDD</td></tr><tr><td>Fee drag (OOS)</td><td colspan='2'>2.4%</td></tr></tbody></table>
   <h3>Robustness (nearby parameter grid, diagnostic only)</h3><p><span class="badge robustness-badge" style="background:var(--alive-bg);color:var(--alive-fg)" title="n_confirm=2 → PF=1.78 (n=50)">1/1</span> 1/1 cleared &mdash; This grid never changes the verdict above and never selects parameters — it only shows whether nearby, never-registered parameter values would also have cleared OOS PF &ge; 1.0 with &ge; 10 trades.</p><ul class='griddump'><li>n_confirm=2 &rarr; PF=1.78 (n=50)</li></ul>
-  <p class="histline">First recorded verdict this week.</p>
+  <p class="histline">First recorded verdict this week. </p>
 </div>
   <div class="interp">
     <h3>What the numbers say (no opinions, no advice)</h3>
@@ -90,6 +93,7 @@ footer.bottom .disclaimer { margin-top: 0.75rem; }
   <p>
     <a href="../index.html">Back to the full table</a> &middot;
     <a href="../methodology.html">Methodology</a> &middot;
+    <a href="../../registry.html">Strategy registry</a> &middot;
     <a href="https://github.com/getjogak-sketch/deadoralive/issues/new?template=check-strategy.yml">Check your own strategy</a> &middot; <a href="https://buttondown.com/jogak">Get weekly updates</a> &middot;
     <a href="index.html">All strategy pages</a>
   </p>

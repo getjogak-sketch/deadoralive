@@ -11,124 +11,62 @@
   "prev_as_of": "2026-09-06",
   "flips": [],
   "biggest_fee_drag": {
-    "strategy_id": "vol_breakout",
-    "strategy_name": "Larry Williams volatility breakout",
-    "type": "onebar",
-    "params": "k0.5",
-    "asset": "KRW-BTC",
-    "timeframe": "4h",
-    "as_of": "2026-09-07",
-    "verdict": "DEAD",
-    "is": {
-      "total_return": -0.9999914214233493,
-      "cagr": -0.8138891923706595,
-      "bh_return": 14.03310679911212,
-      "n_trades": 6315,
-      "win_rate": 32.193190815518605,
-      "profit_factor": 0.6216048953733782,
-      "mdd": 99.99914958324112,
-      "bh_mdd": 86.97711703833261,
-      "sharpe": -4.504670085939461,
-      "exposure": 68.1605791378743,
-      "max_consec_loss": 28,
-      "avg_trade_return": -0.001775901645370829
-    },
-    "oos": {
-      "total_return": -0.9527999291827776,
-      "cagr": -0.7825927914967019,
-      "bh_return": 0.4670130667767953,
-      "n_trades": 1766,
-      "win_rate": 30.91732729331823,
-      "profit_factor": 0.5052264281160266,
-      "mdd": 95.71477792226388,
-      "bh_mdd": 50.3298141962772,
-      "sharpe": -6.699055545493103,
-      "exposure": 66.20264719306252,
-      "max_consec_loss": 15,
-      "avg_trade_return": -0.001699444066094017,
-      "fee_drag": 1.566680048070171
-    },
-    "suspicious": false,
-    "robustness": {
-      "grid": [
-        {
-          "params": "k=0.4",
-          "oos_pf": 0.47825252001211505,
-          "oos_n_trades": 2177
-        },
-        {
-          "params": "k=0.5",
-          "oos_pf": 0.5052264281160266,
-          "oos_n_trades": 1766
-        },
-        {
-          "params": "k=0.6",
-          "oos_pf": 0.5244385390874924,
-          "oos_n_trades": 1460
-        }
-      ],
-      "share_pf_ge_1": 0.0,
-      "n_pass": 0,
-      "n_total": 3,
-      "note": "diagnostic; verdict uses registered params only"
-    },
-    "edition": "ko"
-  },
-  "best_pf": {
-    "strategy_id": "above_sma",
-    "strategy_name": "Price above SMA",
-    "type": "state",
-    "params": "n200",
-    "asset": "KRW-BTC",
-    "timeframe": "4h",
-    "as_of": "2026-09-07",
+    "strategy_id": "dca_bot",
+    "strategy_name": "DCA bot (3Commas-style safety orders)",
+    "type": "lotsim",
+    "params": "sostep1.5",
+    "asset": "KRW-ETH",
+    "timeframe": "1d",
+    "as_of": "2026-09-06",
     "verdict": "ALIVE",
     "is": {
-      "total_return": 89.15492095423957,
-      "cagr": 0.9132226170269824,
-      "bh_return": 14.03310679911212,
-      "n_trades": 163,
-      "win_rate": 15.950920245398773,
-      "profit_factor": 4.3773734641028055,
-      "mdd": 66.91765332764068,
-      "bh_mdd": 86.97711703833261,
-      "sharpe": 1.6151815159668914,
-      "exposure": 51.181309641329385,
-      "max_consec_loss": 28,
-      "avg_trade_return": 0.046970708484644075
+      "total_return": 20.309178623189332,
+      "cagr": 0.5550576012590578,
+      "bh_return": 8.423948485532065,
+      "n_trades": 563,
+      "win_rate": 99.82238010657194,
+      "profit_factor": 20.64314286962024,
+      "mdd": 73.25565275861968,
+      "bh_mdd": 95.5905695611578,
+      "sharpe": 1.3116582235595196,
+      "exposure": 77.73823645709767,
+      "max_consec_loss": 1,
+      "avg_trade_return": 0.013283898498571511,
+      "max_deal_dd": 0.9036915059701934
     },
     "oos": {
-      "total_return": 0.7443715269210145,
-      "cagr": 0.32057889126942585,
-      "bh_return": 0.4670130667767953,
-      "n_trades": 57,
-      "win_rate": 12.280701754385964,
-      "profit_factor": 2.444750242979059,
-      "mdd": 23.257719693266964,
-      "bh_mdd": 50.3298141962772,
-      "sharpe": 1.2288572065646606,
-      "exposure": 53.60565951620264,
-      "max_consec_loss": 16,
-      "avg_trade_return": 0.013379949561177515,
-      "fee_drag": 0.21063664275347316
+      "total_return": 11.055590949988893,
+      "cagr": 2.46620883488966,
+      "bh_return": 0.06059013944763736,
+      "n_trades": 518,
+      "win_rate": 100.0,
+      "profit_factor": "inf",
+      "mdd": 23.910118694116143,
+      "bh_mdd": 64.29856115107914,
+      "sharpe": 7.386793547308232,
+      "exposure": 29.138166894664842,
+      "max_consec_loss": 0,
+      "avg_trade_return": 0.0139849999999999,
+      "fee_drag": 2.7883689723027736,
+      "max_deal_dd": 0.3683011176533653
     },
-    "suspicious": false,
+    "suspicious": true,
     "robustness": {
       "grid": [
         {
-          "params": "n=150",
-          "oos_pf": 2.1480704662708217,
-          "oos_n_trades": 66
+          "params": "so_step_pct=1.125",
+          "oos_pf": 27.326419185781173,
+          "oos_n_trades": 403
         },
         {
-          "params": "n=200",
-          "oos_pf": 2.444750242979059,
-          "oos_n_trades": 57
+          "params": "so_step_pct=1.5",
+          "oos_pf": "inf",
+          "oos_n_trades": 518
         },
         {
-          "params": "n=250",
-          "oos_pf": 1.9780829296869713,
-          "oos_n_trades": 70
+          "params": "so_step_pct=1.875",
+          "oos_pf": 20.314698572369892,
+          "oos_n_trades": 395
         }
       ],
       "share_pf_ge_1": 1.0,
@@ -136,104 +74,145 @@
       "n_total": 3,
       "note": "diagnostic; verdict uses registered params only"
     },
+    "group": "bot_templates",
+    "edition": "ko"
+  },
+  "best_pf": {
+    "strategy_id": "dca_bot",
+    "strategy_name": "DCA bot (3Commas-style safety orders)",
+    "type": "lotsim",
+    "params": "sostep2.5",
+    "asset": "KRW-ETH",
+    "timeframe": "1d",
+    "as_of": "2026-09-06",
+    "verdict": "ALIVE",
+    "is": {
+      "total_return": 38.01523037525805,
+      "cagr": 0.696899719906785,
+      "bh_return": 8.423948485532065,
+      "n_trades": 1038,
+      "win_rate": 99.90366088631984,
+      "profit_factor": 38.896171966750316,
+      "mdd": 73.09028032824313,
+      "bh_mdd": 95.5905695611578,
+      "sharpe": 1.7868536805586976,
+      "exposure": 58.95610913404508,
+      "max_consec_loss": 1,
+      "avg_trade_return": 0.013612326409227804,
+      "max_deal_dd": 0.9016992520384185
+    },
+    "oos": {
+      "total_return": 1.7076695599490206,
+      "cagr": 0.6443790619410712,
+      "bh_return": 0.06059013944763736,
+      "n_trades": 374,
+      "win_rate": 99.73262032085562,
+      "profit_factor": 19.37892827671295,
+      "mdd": 39.88780090593348,
+      "bh_mdd": 64.29856115107914,
+      "sharpe": 2.1163077288773,
+      "exposure": 48.837209302325576,
+      "max_consec_loss": 1,
+      "avg_trade_return": 0.01322787638923606,
+      "fee_drag": 0.33249353130212667,
+      "max_deal_dd": 0.5084515511652623
+    },
+    "suspicious": true,
+    "robustness": {
+      "grid": [
+        {
+          "params": "so_step_pct=1.875",
+          "oos_pf": 20.314698572369892,
+          "oos_n_trades": 395
+        },
+        {
+          "params": "so_step_pct=2.5",
+          "oos_pf": 19.37892827671295,
+          "oos_n_trades": 374
+        },
+        {
+          "params": "so_step_pct=3.125",
+          "oos_pf": 3037.7797450000826,
+          "oos_n_trades": 435
+        }
+      ],
+      "share_pf_ge_1": 1.0,
+      "n_pass": 3,
+      "n_total": 3,
+      "note": "diagnostic; verdict uses registered params only"
+    },
+    "group": "bot_templates",
     "edition": "ko"
   },
   "worst_pf": {
-    "strategy_id": "vol_breakout_trend",
-    "strategy_name": "Volatility breakout + trend filter",
-    "type": "onebar",
-    "params": "k0.5-sma20",
-    "asset": "KRW-BTC",
-    "timeframe": "4h",
-    "as_of": "2026-09-07",
+    "strategy_id": "grid_bot",
+    "strategy_name": "Grid bot (Pionex-style spot grid)",
+    "type": "lotsim",
+    "params": "range10-grid20",
+    "asset": "KRW-ETH",
+    "timeframe": "1d",
+    "as_of": "2026-09-06",
     "verdict": "DEAD",
     "is": {
-      "total_return": -0.9814859894673851,
-      "cagr": -0.43726858738719365,
-      "bh_return": 14.03310679911212,
-      "n_trades": 3298,
-      "win_rate": 33.747725894481505,
-      "profit_factor": 0.7427610244854113,
-      "mdd": 98.73224591600619,
-      "bh_mdd": 86.97711703833261,
-      "sharpe": -2.0782355174976663,
-      "exposure": 35.66304705495229,
+      "total_return": -0.9288976712326917,
+      "cagr": -0.3171942164479872,
+      "bh_return": 8.423948485532065,
+      "n_trades": 3786,
+      "win_rate": 74.61701003697834,
+      "profit_factor": 0.40615810507712546,
+      "mdd": 93.80802154519989,
+      "bh_mdd": 95.5905695611578,
+      "sharpe": -1.7361562420354582,
+      "exposure": 53.77619612495057,
       "max_consec_loss": 20,
-      "avg_trade_return": -0.001139082218639586
+      "avg_trade_return": -0.013393051498016003,
+      "max_deal_dd": null
     },
     "oos": {
-      "total_return": -0.8197683062986032,
-      "cagr": -0.5752969244724695,
-      "bh_return": 0.4670130667767953,
-      "n_trades": 931,
-      "win_rate": 31.793770139634802,
-      "profit_factor": 0.4840817833138691,
-      "mdd": 82.48414044216223,
-      "bh_mdd": 50.3298141962772,
-      "sharpe": -5.136837400612714,
-      "exposure": 34.64171611136467,
-      "max_consec_loss": 15,
-      "avg_trade_return": -0.0018104036821007116,
-      "fee_drag": 0.9798478235107217
+      "total_return": -0.3589247613475567,
+      "cagr": -0.1990847287558063,
+      "bh_return": 0.06059013944763736,
+      "n_trades": 898,
+      "win_rate": 77.28285077951003,
+      "profit_factor": 0.44511014798083937,
+      "mdd": 39.792182467867946,
+      "bh_mdd": 64.29856115107914,
+      "sharpe": -1.6478416553326005,
+      "exposure": 51.162790697674424,
+      "max_consec_loss": 18,
+      "avg_trade_return": -0.009670844058066145,
+      "fee_drag": 0.06042210018999661,
+      "max_deal_dd": null
     },
     "suspicious": false,
     "robustness": {
       "grid": [
         {
-          "params": "k=0.4, sma_n=15",
-          "oos_pf": 0.4651146701042047,
-          "oos_n_trades": 1148
+          "params": "range_pct=7.5",
+          "oos_pf": 0.3781233725289154,
+          "oos_n_trades": 1323
         },
         {
-          "params": "k=0.4, sma_n=20",
-          "oos_pf": 0.45184606827539225,
-          "oos_n_trades": 1144
+          "params": "range_pct=10.0",
+          "oos_pf": 0.44511014798083937,
+          "oos_n_trades": 898
         },
         {
-          "params": "k=0.4, sma_n=25",
-          "oos_pf": 0.4952354914278757,
-          "oos_n_trades": 1150
-        },
-        {
-          "params": "k=0.5, sma_n=15",
-          "oos_pf": 0.5102656962656311,
-          "oos_n_trades": 934
-        },
-        {
-          "params": "k=0.5, sma_n=20",
-          "oos_pf": 0.4840817833138691,
-          "oos_n_trades": 931
-        },
-        {
-          "params": "k=0.5, sma_n=25",
-          "oos_pf": 0.5293264587677285,
-          "oos_n_trades": 940
-        },
-        {
-          "params": "k=0.6, sma_n=15",
-          "oos_pf": 0.532240333421298,
-          "oos_n_trades": 773
-        },
-        {
-          "params": "k=0.6, sma_n=20",
-          "oos_pf": 0.4869355456557286,
-          "oos_n_trades": 776
-        },
-        {
-          "params": "k=0.6, sma_n=25",
-          "oos_pf": 0.534625496344179,
-          "oos_n_trades": 786
+          "params": "range_pct=12.5",
+          "oos_pf": 0.5768545506313382,
+          "oos_n_trades": 733
         }
       ],
       "share_pf_ge_1": 0.0,
       "n_pass": 0,
-      "n_total": 9,
+      "n_total": 3,
       "note": "diagnostic; verdict uses registered params only"
     },
+    "group": "bot_templates",
     "edition": "ko"
   },
-  "n_rows": 116,
+  "n_rows": 140,
   "title": "2026-09-07 \uc8fc\uac04 \uc694\uc57d: \uc0dd\uc874 20 / \uc57d\ud654 32 / \uc0ac\ub9dd 19 \u2014 \uc774\ubc88 \uc8fc \ubcc0\uacbd \uc0ac\ud56d",
-  "markdown": "# 2026-09-07 \uc8fc\uac04 \uc694\uc57d: \uc0dd\uc874 20 / \uc57d\ud654 32 / \uc0ac\ub9dd 19 \u2014 \uc774\ubc88 \uc8fc \ubcc0\uacbd \uc0ac\ud56d\n\n- \uc774\ubc88 \uc2e4\ud589\uc740 \uc804\ub7b5\u00b7\uc790\uc0b0\u00b7\uc2dc\uac04\ub300 \uc870\ud569 116\uac74\uc744 \ub2e4\ub918\uc2b5\ub2c8\ub2e4: \uc0dd\uc874 20\uac74, \uc57d\ud654 32\uac74, \uc0ac\ub9dd 19\uac74, \ud45c\ubcf8 \ubd80\uc871 17\uac74\uc785\ub2c8\ub2e4.\n- 2026-09-06 \uc2e4\ud589 \uc774\ud6c4 \ubc14\ub010 \ud310\uc815\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.\n- \uac70\ub798\uac00 30\ud68c \uc774\uc0c1\uc778 \uc870\ud569\uc758 \ud45c\ubcf8\uc678 \uc21c\uc190\uc775\ube44 \uc911, \uac00\uc7a5 \ub192\uc740 \uac12\uc740 2.44(\uc774\ub3d9\ud3c9\uade0\uc120 \uc704\uc5d0\uc11c\ub9cc \ubcf4\uc720 (Price above SMA)(n200) KRW-BTC (\ube44\ud2b8\ucf54\uc778) 4\uc2dc\uac04\ubd09 (4h)), \uac00\uc7a5 \ub0ae\uc740 \uac12\uc740 0.48(\ubcc0\ub3d9\uc131 \ub3cc\ud30c + \ucd94\uc138 \ud544\ud130 (Volatility breakout + trend filter)(k0.5-sma20) KRW-BTC (\ube44\ud2b8\ucf54\uc778) 4\uc2dc\uac04\ubd09 (4h))\uc774\uc5c8\uc2b5\ub2c8\ub2e4.\n\n\ubcf8 \uc694\uc57d\uc740 \uc774\ubbf8 \uacf5\uac1c\ub41c \uc218\uce58\ub97c \ub2e4\uc2dc \uc815\ub9ac\ud55c \uac83\uc774\uba70 \ud22c\uc790 \uc790\ubb38\uc774 \uc544\ub2d9\ub2c8\ub2e4.",
-  "html_body": "<ul><li>\uc774\ubc88 \uc2e4\ud589\uc740 \uc804\ub7b5\u00b7\uc790\uc0b0\u00b7\uc2dc\uac04\ub300 \uc870\ud569 116\uac74\uc744 \ub2e4\ub918\uc2b5\ub2c8\ub2e4: \uc0dd\uc874 20\uac74, \uc57d\ud654 32\uac74, \uc0ac\ub9dd 19\uac74, \ud45c\ubcf8 \ubd80\uc871 17\uac74\uc785\ub2c8\ub2e4.</li><li>2026-09-06 \uc2e4\ud589 \uc774\ud6c4 \ubc14\ub010 \ud310\uc815\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.</li><li>\uac70\ub798\uac00 30\ud68c \uc774\uc0c1\uc778 \uc870\ud569\uc758 \ud45c\ubcf8\uc678 \uc21c\uc190\uc775\ube44 \uc911, \uac00\uc7a5 \ub192\uc740 \uac12\uc740 2.44(\uc774\ub3d9\ud3c9\uade0\uc120 \uc704\uc5d0\uc11c\ub9cc \ubcf4\uc720 (Price above SMA)(n200) KRW-BTC (\ube44\ud2b8\ucf54\uc778) 4\uc2dc\uac04\ubd09 (4h)), \uac00\uc7a5 \ub0ae\uc740 \uac12\uc740 0.48(\ubcc0\ub3d9\uc131 \ub3cc\ud30c + \ucd94\uc138 \ud544\ud130 (Volatility breakout + trend filter)(k0.5-sma20) KRW-BTC (\ube44\ud2b8\ucf54\uc778) 4\uc2dc\uac04\ubd09 (4h))\uc774\uc5c8\uc2b5\ub2c8\ub2e4.</li></ul>"
+  "markdown": "# 2026-09-07 \uc8fc\uac04 \uc694\uc57d: \uc0dd\uc874 20 / \uc57d\ud654 32 / \uc0ac\ub9dd 19 \u2014 \uc774\ubc88 \uc8fc \ubcc0\uacbd \uc0ac\ud56d\n\n- \uc774\ubc88 \uc2e4\ud589\uc740 \uc804\ub7b5\u00b7\uc790\uc0b0\u00b7\uc2dc\uac04\ub300 \uc870\ud569 140\uac74\uc744 \ub2e4\ub918\uc2b5\ub2c8\ub2e4: \uc0dd\uc874 20\uac74, \uc57d\ud654 32\uac74, \uc0ac\ub9dd 19\uac74, \ud45c\ubcf8 \ubd80\uc871 17\uac74\uc785\ub2c8\ub2e4.\n- 2026-09-06 \uc2e4\ud589 \uc774\ud6c4 \ubc14\ub010 \ud310\uc815\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.\n- \uac70\ub798\uac00 30\ud68c \uc774\uc0c1\uc778 \uc870\ud569\uc758 \ud45c\ubcf8\uc678 \uc21c\uc190\uc775\ube44 \uc911, \uac00\uc7a5 \ub192\uc740 \uac12\uc740 19.38(\ubd84\ud560\ub9e4\uc218 \ubd07, 3\ucee4\ub9e8\uc2a4 \ubc29\uc2dd (DCA bot, 3Commas-style safety orders)(sostep2.5) KRW-ETH (\uc774\ub354\ub9ac\uc6c0) \uc77c\ubd09 (1d)), \uac00\uc7a5 \ub0ae\uc740 \uac12\uc740 0.45(\uadf8\ub9ac\ub4dc \ubd07, \ud30c\uc774\uc624\ub125\uc2a4 \ubc29\uc2dd (Grid bot, Pionex-style spot grid)(range10-grid20) KRW-ETH (\uc774\ub354\ub9ac\uc6c0) \uc77c\ubd09 (1d))\uc774\uc5c8\uc2b5\ub2c8\ub2e4.\n\n\ubcf8 \uc694\uc57d\uc740 \uc774\ubbf8 \uacf5\uac1c\ub41c \uc218\uce58\ub97c \ub2e4\uc2dc \uc815\ub9ac\ud55c \uac83\uc774\uba70 \ud22c\uc790 \uc790\ubb38\uc774 \uc544\ub2d9\ub2c8\ub2e4.",
+  "html_body": "<ul><li>\uc774\ubc88 \uc2e4\ud589\uc740 \uc804\ub7b5\u00b7\uc790\uc0b0\u00b7\uc2dc\uac04\ub300 \uc870\ud569 140\uac74\uc744 \ub2e4\ub918\uc2b5\ub2c8\ub2e4: \uc0dd\uc874 20\uac74, \uc57d\ud654 32\uac74, \uc0ac\ub9dd 19\uac74, \ud45c\ubcf8 \ubd80\uc871 17\uac74\uc785\ub2c8\ub2e4.</li><li>2026-09-06 \uc2e4\ud589 \uc774\ud6c4 \ubc14\ub010 \ud310\uc815\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.</li><li>\uac70\ub798\uac00 30\ud68c \uc774\uc0c1\uc778 \uc870\ud569\uc758 \ud45c\ubcf8\uc678 \uc21c\uc190\uc775\ube44 \uc911, \uac00\uc7a5 \ub192\uc740 \uac12\uc740 19.38(\ubd84\ud560\ub9e4\uc218 \ubd07, 3\ucee4\ub9e8\uc2a4 \ubc29\uc2dd (DCA bot, 3Commas-style safety orders)(sostep2.5) KRW-ETH (\uc774\ub354\ub9ac\uc6c0) \uc77c\ubd09 (1d)), \uac00\uc7a5 \ub0ae\uc740 \uac12\uc740 0.45(\uadf8\ub9ac\ub4dc \ubd07, \ud30c\uc774\uc624\ub125\uc2a4 \ubc29\uc2dd (Grid bot, Pionex-style spot grid)(range10-grid20) KRW-ETH (\uc774\ub354\ub9ac\uc6c0) \uc77c\ubd09 (1d))\uc774\uc5c8\uc2b5\ub2c8\ub2e4.</li></ul>"
 }

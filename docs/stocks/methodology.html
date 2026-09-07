@@ -66,6 +66,7 @@ footer.bottom .disclaimer { margin-top: 0.75rem; }
        except the single "Fee drag" column, which is explicitly labeled gross/illustrative.</p>
     <div class="tablewrap"><table><thead><tr><th>Asset</th><th>One-way cost</th></tr></thead>
     <tbody><tr><td>SPY</td><td>0.02%</td></tr><tr><td>QQQ</td><td>0.02%</td></tr></tbody></table></div>
+    
   </section>
 
   <section class="assetblock">
@@ -133,6 +134,17 @@ footer.bottom .disclaimer { margin-top: 0.75rem; }
   </section>
 
   <section class="assetblock">
+    <h2>How strategies get in</h2>
+    <p>Every strategy below is pre-registered: its exact rule text and fixed parameters are
+       written down and dated <strong>before</strong> any result is computed, the same way a
+       clinical trial is pre-registered &mdash; and once registered, an entry never changes; a
+       correction is always a new, separately dated entry. See the
+       <a href="../registry.html">strategy registry</a> for the full dated ledger (every variant,
+       its registration date, and the commit that added it) and
+       <a href="https://github.com/getjogak-sketch/deadoralive/issues/new?template=propose-strategy.yml">propose a strategy</a> to suggest one.</p>
+  </section>
+
+  <section class="assetblock">
     <h2>Strategy registry</h2>
     <div class="tablewrap"><table>
       <thead><tr><th>id</th><th>Name</th><th>Type</th><th>Rule</th><th>Params</th></tr></thead>
@@ -176,6 +188,26 @@ footer.bottom .disclaimer { margin-top: 0.75rem; }
   </section>
 
   <section class="assetblock">
+    <h2>Bot templates &mdash; grid and DCA bots as commonly configured</h2>
+    <p>A third, separately pre-registered group: grid bots and DCA (safety-order) bots as they are
+       commonly configured on Pionex / 3Commas. Long-only spot, no leverage, the same cost model
+       and verdict thresholds as every strategy above &mdash; but simulated with a purpose-built
+       LOT-BASED engine (<code>bot_engine.py</code>) instead of the single-position state machine
+       every other strategy on this page uses, since a grid or DCA bot holds many small,
+       independently funded lots at once rather than one all-in position. "Trades" means completed
+       lot sells for the grid bot, or closed deals for the DCA bots. The robustness map (above)
+       applies only to <code>range_pct</code> (grid bot) and <code>so_step_pct</code> (DCA bots);
+       every other number (grid count, order sizing, take-profit/stop-loss percentages) is a fixed
+       constant, never varied by the grid.</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>id</th><th>Name</th><th>Type</th><th>Rule</th><th>Params</th></tr></thead>
+      <tbody><tr><td>grid_bot</td><td>Grid bot (Pionex-style spot grid)</td><td>lotsim</td><td>20 fixed grid levels spanning +/-range_pct around the price at activation (and after every reset); each level below the activation price is funded with capital/20 and buys when the bar&#x27;s low reaches it, then sells (and re-arms) when the bar&#x27;s high reaches one grid step above; if the close ever exits the grid&#x27;s range, every open lot is liquidated at that close and the grid re-activates, re-centered on that close, the next bar</td><td>range10-grid20, range20-grid20, range30-grid20</td></tr>
+<tr><td>dca_bot</td><td>DCA bot (3Commas-style safety orders)</td><td>lotsim</td><td>base order = 10% of capital at the next deal&#x27;s open; up to 5 safety orders, each 1.5x the previous order&#x27;s size, spaced so_step_pct apart (compounding) below the base order&#x27;s own fill price, filling when the bar&#x27;s low reaches their level (a safety order the remaining capital cannot fund is skipped); take-profit sells the whole deal when the bar&#x27;s high reaches 1.5% above the average entry price; no stop-loss; a new deal starts the moment none is open</td><td>sostep1.5, sostep2.5</td></tr>
+<tr><td>dca_bot_sl</td><td>DCA bot with stop-loss (3Commas-style)</td><td>lotsim</td><td>same as the DCA bot above (so_step_pct=2.5 only), plus a -15% stop-loss on the average entry price that sells the whole deal when the bar&#x27;s low reaches it</td><td>sostep2.5-sl15</td></tr></tbody>
+    </table></div>
+  </section>
+
+  <section class="assetblock">
     <h2>Check your own strategy</h2>
     <p>Open a <a href="https://github.com/getjogak-sketch/deadoralive/issues/new?template=check-strategy.yml">GitHub issue with the "Check my
        strategy" template</a> to run one strategy id/parameter combination through this same
@@ -183,6 +215,19 @@ footer.bottom .disclaimer { margin-top: 0.75rem; }
        repo. A bot replies on the issue with the scorecard and closes it automatically &mdash;
        there is no server, nothing is stored beyond that comment, and the result is exactly as
        automated and non-advisory as the rest of this page.</p>
+  </section>
+
+  <section class="assetblock">
+    <h2>Extended check (paid)</h2>
+    <p>The free check above runs one strategy/parameter combination on one asset and timeframe.
+       Pasting a Gumroad license key into the same issue form's optional field, instead, runs
+       that strategy on <em>every</em> asset and timeframe of the edition you picked, and adds
+       the full out-of-sample trade list, a wider 5&times;5 parameter-neighbourhood robustness
+       grid (&plusmn;25%/&plusmn;50% per parameter, instead of the free check's 3&times;3), and
+       an out-of-sample monthly-returns table. It is still exactly the same engine, cost model,
+       and verdict thresholds as every other number on this site &mdash; software output, not
+       investment advice, and not a signal to act on. Price: see Gumroad. An unrecognized,
+       expired, or refunded key simply falls back to the free check above, with a note saying so.</p>
   </section>
 
   <section class="assetblock">
@@ -196,6 +241,8 @@ footer.bottom .disclaimer { margin-top: 0.75rem; }
 </main>
 <footer class="bottom">
   <div><a href="index.html">&larr; back to results</a>
+  &middot; <a href="../registry.html">Strategy registry</a>
+  &middot; <a href="../index-history.html">Strategy Decay Index</a>
   &middot; <a href="https://github.com/getjogak-sketch/deadoralive/issues/new?template=check-strategy.yml">Check your own strategy</a>
   &middot; <a href="s/index.html">All strategy pages</a>
   &middot; <a href="../places.html">Places this is published to</a></div>

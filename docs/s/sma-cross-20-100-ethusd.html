@@ -64,6 +64,8 @@ footer.bottom .disclaimer { margin-top: 0.75rem; }
 .interp { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.1rem; margin: 1rem 0; }
 .histline { font-size: 0.82rem; color: var(--muted); }
 .tfblock { margin: 1.5rem 0; }
+.sparkline { display: inline-flex; align-items: center; gap: 0.3rem; margin-left: 0.5rem; }
+.sparkline svg { vertical-align: middle; }
 </style>
 </head>
 
@@ -75,19 +77,20 @@ footer.bottom .disclaimer { margin-top: 0.75rem; }
 </header>
 <main>
   <p><strong>Rule:</strong> fast SMA &gt; slow SMA -&gt; long</p>
+  
   <div class="disclaimer-block">Educational / informational content only. This is not investment advice, and nothing here is a recommendation to buy or sell any asset. Past backtested performance, especially net-of-cost historical simulation, does not guarantee future results.</div>
   
 <div class="tfblock">
   <h2>daily (1d) &mdash; Verdict: <span class="badge" style="background:var(--toofew-bg);color:var(--toofew-fg)">TOO FEW TRADES</span></h2>
   <table class='scorecard'><thead><tr><th>Metric</th><th>In-sample (IS)</th><th>Out-of-sample (OOS)</th></tr></thead><tbody><tr><td>Total return</td><td>930.1%</td><td>94.3%</td></tr><tr><td>CAGR</td><td>39.1%</td><td>39.3%</td></tr><tr><td>Profit factor</td><td>7.93</td><td>6.93</td></tr><tr><td>Sharpe</td><td>0.83</td><td>0.99</td></tr><tr><td>Max drawdown</td><td>72.5%</td><td>32.7%</td></tr><tr><td>Trades</td><td>13</td><td>4</td></tr><tr><td>Win rate</td><td>46.2%</td><td>75.0%</td></tr><tr><td>Avg trade return</td><td>67.2%</td><td>20.6%</td></tr><tr><td>Time in market</td><td>54.1%</td><td>41.3%</td></tr><tr><td>Buy &amp; hold (OOS)</td><td colspan='2'>6.0% return, 67.6% MDD</td></tr><tr><td>Fee drag (OOS)</td><td colspan='2'>1.6%</td></tr></tbody></table>
   <h3>Robustness (nearby parameter grid, diagnostic only)</h3><p><span class="badge robustness-badge" style="background:var(--toofew-bg);color:var(--toofew-fg)" title="n_fast=15, n_slow=75 → PF=4.20 (n=5); n_fast=15, n_slow=100 → PF=8.07 (n=4); n_fast=15, n_slow=125 → PF=1.90 (n=4); n_fast=20, n_slow=75 → PF=3.04 (n=5); n_fast=20, n_slow=100 → PF=6.93 (n=4); n_fast=20, n_slow=125 → PF=1.97 (n=4); n_fast=25, n_slow=75 → PF=2.58 (n=6); n_fast=25, n_slow=100 → PF=7.84 (n=4); n_fast=25, n_slow=125 → PF=1.97 (n=4)">0/9</span> 0/9 cleared &mdash; This grid never changes the verdict above and never selects parameters — it only shows whether nearby, never-registered parameter values would also have cleared OOS PF &ge; 1.0 with &ge; 10 trades.</p><ul class='griddump'><li>n_fast=15, n_slow=75 &rarr; PF=4.20 (n=5)</li><li>n_fast=15, n_slow=100 &rarr; PF=8.07 (n=4)</li><li>n_fast=15, n_slow=125 &rarr; PF=1.90 (n=4)</li><li>n_fast=20, n_slow=75 &rarr; PF=3.04 (n=5)</li><li>n_fast=20, n_slow=100 &rarr; PF=6.93 (n=4)</li><li>n_fast=20, n_slow=125 &rarr; PF=1.97 (n=4)</li><li>n_fast=25, n_slow=75 &rarr; PF=2.58 (n=6)</li><li>n_fast=25, n_slow=100 &rarr; PF=7.84 (n=4)</li><li>n_fast=25, n_slow=125 &rarr; PF=1.97 (n=4)</li></ul>
-  <p class="histline">History (1d): 2026-09-06: TOO FEW TRADES &rarr; 2026-09-07: TOO FEW TRADES</p>
+  <p class="histline">History (1d): 2026-09-06: TOO FEW TRADES &rarr; 2026-09-07: TOO FEW TRADES </p>
 </div>
 <div class="tfblock">
   <h2>4-hour (4h) &mdash; Verdict: <span class="badge" style="background:var(--fading-bg);color:var(--fading-fg)">FADING</span></h2>
   <table class='scorecard'><thead><tr><th>Metric</th><th>In-sample (IS)</th><th>Out-of-sample (OOS)</th></tr></thead><tbody><tr><td>Total return</td><td>3763.8%</td><td>-8.6%</td></tr><tr><td>CAGR</td><td>67.8%</td><td>-4.4%</td></tr><tr><td>Profit factor</td><td>2.47</td><td>1.16</td></tr><tr><td>Sharpe</td><td>1.13</td><td>0.11</td></tr><tr><td>Max drawdown</td><td>71.1%</td><td>56.1%</td></tr><tr><td>Trades</td><td>90</td><td>33</td></tr><tr><td>Win rate</td><td>37.8%</td><td>30.3%</td></tr><tr><td>Avg trade return</td><td>6.6%</td><td>0.7%</td></tr><tr><td>Time in market</td><td>50.9%</td><td>49.8%</td></tr><tr><td>Buy &amp; hold (OOS)</td><td colspan='2'>11.7% return, 68.1% MDD</td></tr><tr><td>Fee drag (OOS)</td><td colspan='2'>6.2%</td></tr></tbody></table>
   <h3>Robustness (nearby parameter grid, diagnostic only)</h3><p><span class="badge robustness-badge" style="background:var(--alive-bg);color:var(--alive-fg)" title="n_fast=15, n_slow=75 → PF=1.07 (n=44); n_fast=15, n_slow=100 → PF=1.11 (n=34); n_fast=15, n_slow=125 → PF=1.00 (n=32); n_fast=20, n_slow=75 → PF=1.25 (n=41); n_fast=20, n_slow=100 → PF=1.16 (n=33); n_fast=20, n_slow=125 → PF=1.04 (n=29); n_fast=25, n_slow=75 → PF=1.61 (n=35); n_fast=25, n_slow=100 → PF=1.21 (n=32); n_fast=25, n_slow=125 → PF=1.14 (n=26)">9/9</span> 9/9 cleared &mdash; This grid never changes the verdict above and never selects parameters — it only shows whether nearby, never-registered parameter values would also have cleared OOS PF &ge; 1.0 with &ge; 10 trades.</p><ul class='griddump'><li>n_fast=15, n_slow=75 &rarr; PF=1.07 (n=44)</li><li>n_fast=15, n_slow=100 &rarr; PF=1.11 (n=34)</li><li>n_fast=15, n_slow=125 &rarr; PF=1.00 (n=32)</li><li>n_fast=20, n_slow=75 &rarr; PF=1.25 (n=41)</li><li>n_fast=20, n_slow=100 &rarr; PF=1.16 (n=33)</li><li>n_fast=20, n_slow=125 &rarr; PF=1.04 (n=29)</li><li>n_fast=25, n_slow=75 &rarr; PF=1.61 (n=35)</li><li>n_fast=25, n_slow=100 &rarr; PF=1.21 (n=32)</li><li>n_fast=25, n_slow=125 &rarr; PF=1.14 (n=26)</li></ul>
-  <p class="histline">History (4h): 2026-09-06: FADING &rarr; 2026-09-07: FADING</p>
+  <p class="histline">History (4h): 2026-09-06: FADING &rarr; 2026-09-07: FADING </p>
 </div>
   <div class="interp">
     <h3>What the numbers say (no opinions, no advice)</h3>
@@ -96,6 +99,7 @@ footer.bottom .disclaimer { margin-top: 0.75rem; }
   <p>
     <a href="../index.html">Back to the full table</a> &middot;
     <a href="../methodology.html">Methodology</a> &middot;
+    <a href="../registry.html">Strategy registry</a> &middot;
     <a href="https://github.com/getjogak-sketch/deadoralive/issues/new?template=check-strategy.yml">Check your own strategy</a> &middot; <a href="https://buttondown.com/jogak">Get weekly updates</a> &middot;
     <a href="index.html">All strategy pages</a>
   </p>

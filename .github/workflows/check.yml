@@ -38,10 +38,10 @@ jobs:
           ISSUE_BODY: ${{ github.event.issue.body }}
         run: printf '%s' "$ISSUE_BODY" > /tmp/issue_body.txt
 
-      - name: Run tests (hard gate — never run an unverified engine against a live issue)
+      - name: "Run tests (hard gate)"
         run: python tests.py
 
-      - name: Parse, validate, and backtest this one issue (dry-run: no GitHub calls yet)
+      - name: "Parse, validate, and backtest this one issue (dry-run, no GitHub calls yet)"
         id: render
         run: |
           python check_issue.py --body /tmp/issue_body.txt --dry-run > /tmp/comment.md

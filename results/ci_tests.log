@@ -1,0 +1,200 @@
+[PASS] ledger immutability supertrend:10-3.rule_text: unchanged since snapshot
+[PASS] ledger immutability supertrend:10-3.strategy_id: unchanged since snapshot
+[PASS] ledger immutability supertrend:10-3.strategy_name: unchanged since snapshot
+[PASS] ledger immutability tsmom:n30.params: unchanged since snapshot
+[PASS] ledger immutability tsmom:n30.params_str: unchanged since snapshot
+[PASS] ledger immutability tsmom:n30.source: unchanged since snapshot
+[PASS] ledger immutability tsmom:n30.registered_on: unchanged since snapshot
+[PASS] ledger immutability tsmom:n30.registered_commit: unchanged since snapshot
+[PASS] ledger immutability tsmom:n30.rule_text: unchanged since snapshot
+[PASS] ledger immutability tsmom:n30.strategy_id: unchanged since snapshot
+[PASS] ledger immutability tsmom:n30.strategy_name: unchanged since snapshot
+[PASS] ledger immutability tsmom:n90.params: unchanged since snapshot
+[PASS] ledger immutability tsmom:n90.params_str: unchanged since snapshot
+[PASS] ledger immutability tsmom:n90.source: unchanged since snapshot
+[PASS] ledger immutability tsmom:n90.registered_on: unchanged since snapshot
+[PASS] ledger immutability tsmom:n90.registered_commit: unchanged since snapshot
+[PASS] ledger immutability tsmom:n90.rule_text: unchanged since snapshot
+[PASS] ledger immutability tsmom:n90.strategy_id: unchanged since snapshot
+[PASS] ledger immutability tsmom:n90.strategy_name: unchanged since snapshot
+[PASS] ledger immutability vol_breakout:k0.5.params: unchanged since snapshot
+[PASS] ledger immutability vol_breakout:k0.5.params_str: unchanged since snapshot
+[PASS] ledger immutability vol_breakout:k0.5.source: unchanged since snapshot
+[PASS] ledger immutability vol_breakout:k0.5.registered_on: unchanged since snapshot
+[PASS] ledger immutability vol_breakout:k0.5.registered_commit: unchanged since snapshot
+[PASS] ledger immutability vol_breakout:k0.5.rule_text: unchanged since snapshot
+[PASS] ledger immutability vol_breakout:k0.5.strategy_id: unchanged since snapshot
+[PASS] ledger immutability vol_breakout:k0.5.strategy_name: unchanged since snapshot
+[PASS] ledger immutability vol_breakout:k0.7.params: unchanged since snapshot
+[PASS] ledger immutability vol_breakout:k0.7.params_str: unchanged since snapshot
+[PASS] ledger immutability vol_breakout:k0.7.source: unchanged since snapshot
+[PASS] ledger immutability vol_breakout:k0.7.registered_on: unchanged since snapshot
+[PASS] ledger immutability vol_breakout:k0.7.registered_commit: unchanged since snapshot
+[PASS] ledger immutability vol_breakout:k0.7.rule_text: unchanged since snapshot
+[PASS] ledger immutability vol_breakout:k0.7.strategy_id: unchanged since snapshot
+[PASS] ledger immutability vol_breakout:k0.7.strategy_name: unchanged since snapshot
+[PASS] ledger immutability vol_breakout_trend:k0.5-sma20.params: unchanged since snapshot
+[PASS] ledger immutability vol_breakout_trend:k0.5-sma20.params_str: unchanged since snapshot
+[PASS] ledger immutability vol_breakout_trend:k0.5-sma20.source: unchanged since snapshot
+[PASS] ledger immutability vol_breakout_trend:k0.5-sma20.registered_on: unchanged since snapshot
+[PASS] ledger immutability vol_breakout_trend:k0.5-sma20.registered_commit: unchanged since snapshot
+[PASS] ledger immutability vol_breakout_trend:k0.5-sma20.rule_text: unchanged since snapshot
+[PASS] ledger immutability vol_breakout_trend:k0.5-sma20.strategy_id: unchanged since snapshot
+[PASS] ledger immutability vol_breakout_trend:k0.5-sma20.strategy_name: unchanged since snapshot
+[PASS] ledger immutability bb_squeeze:bb20.2-look120-conf5.params: unchanged since snapshot
+[PASS] ledger immutability bb_squeeze:bb20.2-look120-conf5.params_str: unchanged since snapshot
+[PASS] ledger immutability bb_squeeze:bb20.2-look120-conf5.source: unchanged since snapshot
+[PASS] ledger immutability bb_squeeze:bb20.2-look120-conf5.registered_on: unchanged since snapshot
+[PASS] ledger immutability bb_squeeze:bb20.2-look120-conf5.registered_commit: unchanged since snapshot
+[PASS] ledger immutability bb_squeeze:bb20.2-look120-conf5.rule_text: unchanged since snapshot
+[PASS] ledger immutability bb_squeeze:bb20.2-look120-conf5.strategy_id: unchanged since snapshot
+[PASS] ledger immutability bb_squeeze:bb20.2-look120-conf5.strategy_name: unchanged since snapshot
+[PASS] ledger immutability ema200_macd:ema200-macd12.26.9.params: unchanged since snapshot
+[PASS] ledger immutability ema200_macd:ema200-macd12.26.9.params_str: unchanged since snapshot
+[PASS] ledger immutability ema200_macd:ema200-macd12.26.9.source: unchanged since snapshot
+[PASS] ledger immutability ema200_macd:ema200-macd12.26.9.registered_on: unchanged since snapshot
+[PASS] ledger immutability ema200_macd:ema200-macd12.26.9.registered_commit: unchanged since snapshot
+[PASS] ledger immutability ema200_macd:ema200-macd12.26.9.rule_text: unchanged since snapshot
+[PASS] ledger immutability ema200_macd:ema200-macd12.26.9.strategy_id: unchanged since snapshot
+[PASS] ledger immutability ema200_macd:ema200-macd12.26.9.strategy_name: unchanged since snapshot
+[PASS] ledger immutability ema_9_21:9-21.params: unchanged since snapshot
+[PASS] ledger immutability ema_9_21:9-21.params_str: unchanged since snapshot
+[PASS] ledger immutability ema_9_21:9-21.source: unchanged since snapshot
+[PASS] ledger immutability ema_9_21:9-21.registered_on: unchanged since snapshot
+[PASS] ledger immutability ema_9_21:9-21.registered_commit: unchanged since snapshot
+[PASS] ledger immutability ema_9_21:9-21.rule_text: unchanged since snapshot
+[PASS] ledger immutability ema_9_21:9-21.strategy_id: unchanged since snapshot
+[PASS] ledger immutability ema_9_21:9-21.strategy_name: unchanged since snapshot
+[PASS] ledger immutability heikin_ashi_trend:conf2.params: unchanged since snapshot
+[PASS] ledger immutability heikin_ashi_trend:conf2.params_str: unchanged since snapshot
+[PASS] ledger immutability heikin_ashi_trend:conf2.source: unchanged since snapshot
+[PASS] ledger immutability heikin_ashi_trend:conf2.registered_on: unchanged since snapshot
+[PASS] ledger immutability heikin_ashi_trend:conf2.registered_commit: unchanged since snapshot
+[PASS] ledger immutability heikin_ashi_trend:conf2.rule_text: unchanged since snapshot
+[PASS] ledger immutability heikin_ashi_trend:conf2.strategy_id: unchanged since snapshot
+[PASS] ledger immutability heikin_ashi_trend:conf2.strategy_name: unchanged since snapshot
+[PASS] ledger immutability ichimoku_cloud:9-26-52.params: unchanged since snapshot
+[PASS] ledger immutability ichimoku_cloud:9-26-52.params_str: unchanged since snapshot
+[PASS] ledger immutability ichimoku_cloud:9-26-52.source: unchanged since snapshot
+[PASS] ledger immutability ichimoku_cloud:9-26-52.registered_on: unchanged since snapshot
+[PASS] ledger immutability ichimoku_cloud:9-26-52.registered_commit: unchanged since snapshot
+[PASS] ledger immutability ichimoku_cloud:9-26-52.rule_text: unchanged since snapshot
+[PASS] ledger immutability ichimoku_cloud:9-26-52.strategy_id: unchanged since snapshot
+[PASS] ledger immutability ichimoku_cloud:9-26-52.strategy_name: unchanged since snapshot
+[PASS] ledger immutability rsi_uptrend:rsi14-sma200.params: unchanged since snapshot
+[PASS] ledger immutability rsi_uptrend:rsi14-sma200.params_str: unchanged since snapshot
+[PASS] ledger immutability rsi_uptrend:rsi14-sma200.source: unchanged since snapshot
+[PASS] ledger immutability rsi_uptrend:rsi14-sma200.registered_on: unchanged since snapshot
+[PASS] ledger immutability rsi_uptrend:rsi14-sma200.registered_commit: unchanged since snapshot
+[PASS] ledger immutability rsi_uptrend:rsi14-sma200.rule_text: unchanged since snapshot
+[PASS] ledger immutability rsi_uptrend:rsi14-sma200.strategy_id: unchanged since snapshot
+[PASS] ledger immutability rsi_uptrend:rsi14-sma200.strategy_name: unchanged since snapshot
+[PASS] ledger immutability supertrend_ema200:st10.3-ema200.params: unchanged since snapshot
+[PASS] ledger immutability supertrend_ema200:st10.3-ema200.params_str: unchanged since snapshot
+[PASS] ledger immutability supertrend_ema200:st10.3-ema200.source: unchanged since snapshot
+[PASS] ledger immutability supertrend_ema200:st10.3-ema200.registered_on: unchanged since snapshot
+[PASS] ledger immutability supertrend_ema200:st10.3-ema200.registered_commit: unchanged since snapshot
+[PASS] ledger immutability supertrend_ema200:st10.3-ema200.rule_text: unchanged since snapshot
+[PASS] ledger immutability supertrend_ema200:st10.3-ema200.strategy_id: unchanged since snapshot
+[PASS] ledger immutability supertrend_ema200:st10.3-ema200.strategy_name: unchanged since snapshot
+[PASS] registry page: docs/registry.html written
+[PASS] registry page: docs/ko/registry.html written
+[PASS] registry page: has a <title>
+[PASS] registry page: links to propose-strategy.yml issue template
+[PASS] registry page: lists every ledger entry's id
+[PASS] registry page: 'Editions covered' section lists all four editions (M1)
+[PASS] registry page ko: no banned word '추천'
+[PASS] registry page ko: no banned word '수익 보장'
+[PASS] registry page ko: no banned word '확실'
+[PASS] registry page ko: no banned word '필승'
+[PASS] registry page ko: carries the Korean disclaimer
+[PASS] registry page ko: disclaimer appears at top and bottom
+[PASS] registry page ko: '검사 대상 에디션' section mentions the macro edition (M1)
+[PASS] decay: en pattern ignores the ko_-prefixed file and the .txt file
+[PASS] decay: points sorted ascending by as_of
+[PASS] decay: week1 shares (20/30/40/10 of 100)
+[PASS] decay: week1 decay_index = dead / (alive+fading+dead) = 40/90
+[PASS] decay: week3 (all TOO FEW) has decay_index=None, not 0 or an error
+[PASS] decay: ko pattern picks up ko_2026-08-08.json, and its all-zero tally is skipped
+[PASS] decay: write_index_history writes a file
+[PASS] decay: load_index_history round-trips what was written
+[PASS] index-history page: docs/index-history.html written
+[PASS] index-history page: docs/ko/index-history.html written
+[PASS] index-history page: has an <svg> chart (en has archived data)
+[PASS] index-history page: mentions en, stocks, and macro edition labels (M1)
+[PASS] index-history page ko: no banned word '추천'
+[PASS] index-history page ko: no banned word '수익 보장'
+[PASS] index-history page ko: no banned word '확실'
+[PASS] index-history page ko: no banned word '필승'
+[PASS] index-history page ko: carries the Korean disclaimer
+[PASS] sparkline: NOT shown with only 2 history points
+[PASS] sparkline: shown with 3 history points
+[PASS] sparkline: contains an <svg>
+[PASS] badge: is an <svg>...</svg>
+[PASS] badge: subject label is the fixed 'Dead or Alive'
+[PASS] badge: value segment states verdict + rounded PF
+[PASS] badge: uses a concrete hex colour, not an unresolvable var(--...) reference
+[PASS] badge: no endorsement/advice language in the rendered text
+[PASS] badge: a reference row (verdict=None) renders 'no verdict', not a crash
+[PASS] badge: an 'inf' OOS PF renders as n/a rather than crashing on the format spec
+[PASS] badge colour ALIVE: bg/fg are 6-digit hex
+[PASS] badge colour FADING: bg/fg are 6-digit hex
+[PASS] badge colour DEAD: bg/fg are 6-digit hex
+[PASS] badge colour TOO FEW TRADES: bg/fg are 6-digit hex
+[PASS] badge colour: all four verdicts get a visually distinct background
+[PASS] badge filename: <id>-<params-slug>-<asset>-<tf>.svg, dots slugged out of params only
+[PASS] write_badges_for_payload: one badge per non-reference row
+[PASS] write_badges_for_payload: file count matches (+1 for summary.svg)
+[PASS] write_badges_for_payload: summary.svg was written
+[PASS] write_badges_for_payload: a known row's expected filename exists on disk
+[PASS] write_badges_for_payload: that badge's verdict string appears in its own SVG
+[PASS] write_badges_for_payload: summary.svg states 'N alive / total'
+[PASS] write_badges_for_payload: payload=None (e.g. ko/stocks with no data) writes nothing
+[PASS] registry page: shows the badges/<edition>/... path convention
+[PASS] registry page: states the badge is not an endorsement
+[PASS] digest: first week (no history file at all) has no flips and first_week=True
+[PASS] digest: second week finds the previous snapshot
+[PASS] digest: detects exactly one verdict flip (sma_cross FADING -> ALIVE)
+[PASS] digest: best/worst OOS PF picked only among rows with >=30 trades
+[PASS] digest: title matches the required 'Week of <as_of>: N alive / ...' shape
+[PASS] digest: exactly 3 one-liners
+[PASS] digest: one-liner has no opinion/advice language (This run covers 2 strategy/asset/timefra...)
+[PASS] digest: one-liner has no opinion/advice language (1 verdict(s) changed since the 2026-09-0...)
+[PASS] digest: one-liner has no opinion/advice language (Among rows with at least 30 out-of-sampl...)
+[PASS] digest: build_for_edition returns a digest dict for en
+[PASS] digest: returns None for editions with no data
+[PASS] digest: per-as_of HTML page written
+[PASS] digest: digest index page written
+[PASS] digest: docs/feed.xml written
+[PASS] digest: feed.xml is RSS 2.0 with full HTML content per item
+[PASS] digest: docs/feed.json written
+[PASS] digest: feed.json is JSON Feed 1.1 with >=1 item
+skipped: BUTTONDOWN_API_KEY not set
+[PASS] publish buttondown: returns 0 with no secret
+skipped: BLUESKY_HANDLE/BLUESKY_APP_PASSWORD not set
+[PASS] publish bluesky: returns 0 with no secret
+skipped: MASTODON_INSTANCE/MASTODON_TOKEN not set
+[PASS] publish mastodon: returns 0 with no secret
+skipped: KAGGLE_USERNAME/KAGGLE_KEY not set
+[PASS] publish kaggle: returns 0 with no secret
+skipped: HF_TOKEN/HF_DATASET_REPO not set
+[PASS] publish huggingface: returns 0 with no secret
+skipped: BUTTONDOWN_API_KEY not set
+skipped: BLUESKY_HANDLE/BLUESKY_APP_PASSWORD not set
+skipped: MASTODON_INSTANCE/MASTODON_TOKEN not set
+skipped: KAGGLE_USERNAME/KAGGLE_KEY not set
+skipped: HF_TOKEN/HF_DATASET_REPO not set
+[PASS] publish all: returns 0 with no secrets at all
+buttondown (en): sent
+bluesky: sent
+mastodon: sent
+[PASS] publish buttondown: posts to api.buttondown.com/v1/emails
+[PASS] publish buttondown: Authorization: Token <key>
+[PASS] publish buttondown: body has subject/body/status=about_to_send
+[PASS] publish bluesky: createSession posts identifier/password
+[PASS] publish bluesky: creates an app.bsky.feed.post record with a link facet
+[PASS] publish mastodon: posts {status: ...} with Bearer auth
+[PASS] publish: no subcommand exceeded Bluesky's 300-char post limit
+
+1 TEST(S) FAILED:
+ - check_issue: extended check notes ETHUSD was skipped (no local data in this dev env): 

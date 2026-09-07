@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EMA crossover (12, 26) on BTC — does it still work in 2026? After-fees backtest, updated weekly</title>
+<meta name="description" content="EMA crossover (12, 26) on BTC is currently rated FADING on the daily (1d) out-of-sample window (as of 2026-09-05): OOS profit factor 2.21, return 47.8%, max drawdown 32.1%.">
+<link rel="canonical" href="https://getjogak-sketch.github.io/deadoralive/s/ema-cross-12-26-btcusd.html">
+<link rel="alternate" hreflang="x-default" href="https://getjogak-sketch.github.io/deadoralive/s/ema-cross-12-26-btcusd.html"><link rel="alternate" hreflang="en" href="https://getjogak-sketch.github.io/deadoralive/s/ema-cross-12-26-btcusd.html">
+<style>
+:root {
+  --bg: #ffffff; --fg: #14181f; --muted: #5b6270; --border: #e2e5ea; --card-bg: #f7f8fa;
+  --link: #1a56db;
+  --alive-bg: #d9f2e3; --alive-fg: #106a37;
+  --fading-bg: #fdf1c8; --fading-fg: #7a5b00;
+  --dead-bg: #e6e8eb; --dead-fg: #4b5160;
+  --toofew-bg: #f2f3f5; --toofew-fg: #8a909c;
+  --suspicious: #c0392b;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #10131a; --fg: #e7e9ee; --muted: #9aa1b0; --border: #2a2f3a; --card-bg: #171b24;
+    --link: #7aa2ff;
+    --alive-bg: #113a26; --alive-fg: #6bdc9c;
+    --fading-bg: #3a3210; --fading-fg: #f0d572;
+    --dead-bg: #262a33; --dead-fg: #a8adb8;
+    --toofew-bg: #1c2029; --toofew-fg: #6b7180;
+    --suspicious: #ff8a7a;
+  }
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; margin: 0; padding: 0 0 3rem 0; line-height: 1.45; }
+a { color: var(--link); }
+header.top { padding: 2rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border); }
+header.top h1 { margin: 0 0 0.25rem 0; font-size: 1.7rem; }
+header.top p.tagline { margin: 0 0 1rem 0; color: var(--muted); }
+.meta { color: var(--muted); font-size: 0.9rem; }
+.tally { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 1rem; }
+.tally span { padding: 0.3rem 0.7rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600; }
+main { max-width: 1200px; margin: 0 auto; padding: 0 1.25rem; }
+nav.jump { display: flex; gap: 0.75rem; flex-wrap: wrap; margin: 1.25rem 0; }
+nav.jump a { padding: 0.3rem 0.7rem; border: 1px solid var(--border); border-radius: 6px; text-decoration: none; font-size: 0.9rem; }
+section.assetblock { margin: 2.25rem 0; }
+section.assetblock h2 { border-bottom: 2px solid var(--border); padding-bottom: 0.4rem; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; min-width: 980px; font-size: 0.85rem; }
+th, td { padding: 0.5rem 0.6rem; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--border); }
+th:nth-child(1), td:nth-child(1), th:nth-child(2), td:nth-child(2) { text-align: left; }
+thead th { background: var(--card-bg); position: sticky; top: 0; }
+tbody tr:hover { background: var(--card-bg); }
+.badge { padding: 0.15rem 0.55rem; border-radius: 999px; font-weight: 700; font-size: 0.78rem; display: inline-block; }
+.ref-row { font-style: italic; color: var(--muted); }
+.suspicious { color: var(--suspicious); font-weight: 700; }
+.gross-note { font-size: 0.75rem; color: var(--muted); }
+footer.bottom { max-width: 1200px; margin: 2.5rem auto 0; padding: 1.25rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem; }
+footer.bottom .disclaimer { margin-top: 0.75rem; }
+
+.stratpage main { max-width: 860px; }
+.scorecard { border-collapse: collapse; width: 100%; margin: 0.75rem 0 1.25rem; font-size: 0.88rem; }
+.scorecard th, .scorecard td { border: 1px solid var(--border); padding: 0.4rem 0.6rem; text-align: right; }
+.scorecard th:first-child, .scorecard td:first-child { text-align: left; }
+.scorecard thead th { background: var(--card-bg); }
+.griddump { font-size: 0.8rem; color: var(--muted); }
+.interp { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.1rem; margin: 1rem 0; }
+.histline { font-size: 0.82rem; color: var(--muted); }
+.tfblock { margin: 1.5rem 0; }
+</style>
+</head>
+
+<body class="stratpage">
+<header class="top">
+  <h1>EMA crossover (12, 26) on BTC — does it still work in 2026? After-fees backtest, updated weekly</h1>
+  <p class="meta">as_of: <strong>2026-09-05</strong> &middot;
+     <a href="../index.html">Back to the full table</a></p>
+</header>
+<main>
+  <p><strong>Rule:</strong> EMA fast &gt; EMA slow -&gt; long</p>
+  <div class="disclaimer-block">Educational / informational content only. This is not investment advice, and nothing here is a recommendation to buy or sell any asset. Past backtested performance, especially net-of-cost historical simulation, does not guarantee future results.</div>
+  
+<div class="tfblock">
+  <h2>daily (1d) &mdash; Verdict: <span class="badge" style="background:var(--fading-bg);color:var(--fading-fg)">FADING</span></h2>
+  <table class='scorecard'><thead><tr><th>Metric</th><th>In-sample (IS)</th><th>Out-of-sample (OOS)</th></tr></thead><tbody><tr><td>Total return</td><td>3546.5%</td><td>47.8%</td></tr><tr><td>CAGR</td><td>66.5%</td><td>21.5%</td></tr><tr><td>Profit factor</td><td>4.89</td><td>2.21</td></tr><tr><td>Sharpe</td><td>1.25</td><td>0.81</td></tr><tr><td>Max drawdown</td><td>59.1%</td><td>32.1%</td></tr><tr><td>Trades</td><td>35</td><td>14</td></tr><tr><td>Win rate</td><td>37.1%</td><td>35.7%</td></tr><tr><td>Avg trade return</td><td>23.1%</td><td>3.8%</td></tr><tr><td>Time in market</td><td>51.2%</td><td>52.1%</td></tr><tr><td>Buy &amp; hold (OOS)</td><td colspan='2'>37.4% return, 53.1% MDD</td></tr><tr><td>Fee drag (OOS)</td><td colspan='2'>4.2%</td></tr></tbody></table>
+  <h3>Robustness (nearby parameter grid, diagnostic only)</h3><p><span class="badge robustness-badge" style="background:var(--alive-bg);color:var(--alive-fg)" title="n_fast=9, n_slow=20 → PF=2.62 (n=17); n_fast=9, n_slow=26 → PF=2.43 (n=16); n_fast=9, n_slow=32 → PF=2.43 (n=13); n_fast=12, n_slow=20 → PF=2.58 (n=15); n_fast=12, n_slow=26 → PF=2.21 (n=14); n_fast=12, n_slow=32 → PF=2.22 (n=13); n_fast=15, n_slow=20 → PF=2.27 (n=14); n_fast=15, n_slow=26 → PF=2.02 (n=14); n_fast=15, n_slow=32 → PF=2.96 (n=10)">9/9</span> 9/9 cleared &mdash; This grid never changes the verdict above and never selects parameters — it only shows whether nearby, never-registered parameter values would also have cleared OOS PF &ge; 1.0 with &ge; 10 trades.</p><ul class='griddump'><li>n_fast=9, n_slow=20 &rarr; PF=2.62 (n=17)</li><li>n_fast=9, n_slow=26 &rarr; PF=2.43 (n=16)</li><li>n_fast=9, n_slow=32 &rarr; PF=2.43 (n=13)</li><li>n_fast=12, n_slow=20 &rarr; PF=2.58 (n=15)</li><li>n_fast=12, n_slow=26 &rarr; PF=2.21 (n=14)</li><li>n_fast=12, n_slow=32 &rarr; PF=2.22 (n=13)</li><li>n_fast=15, n_slow=20 &rarr; PF=2.27 (n=14)</li><li>n_fast=15, n_slow=26 &rarr; PF=2.02 (n=14)</li><li>n_fast=15, n_slow=32 &rarr; PF=2.96 (n=10)</li></ul>
+  <p class="histline">First recorded verdict this week.</p>
+</div>
+<div class="tfblock">
+  <h2>4-hour (4h) &mdash; Verdict: <span class="badge" style="background:var(--dead-bg);color:var(--dead-fg)">DEAD</span></h2>
+  <table class='scorecard'><thead><tr><th>Metric</th><th>In-sample (IS)</th><th>Out-of-sample (OOS)</th></tr></thead><tbody><tr><td>Total return</td><td>2596.3%</td><td>-24.1%</td></tr><tr><td>CAGR</td><td>59.5%</td><td>-12.9%</td></tr><tr><td>Profit factor</td><td>1.97</td><td>0.88</td></tr><tr><td>Sharpe</td><td>1.21</td><td>-0.32</td></tr><tr><td>Max drawdown</td><td>69.2%</td><td>55.5%</td></tr><tr><td>Trades</td><td>251</td><td>87</td></tr><tr><td>Win rate</td><td>27.5%</td><td>26.4%</td></tr><tr><td>Avg trade return</td><td>2.0%</td><td>-0.2%</td></tr><tr><td>Time in market</td><td>52.5%</td><td>53.1%</td></tr><tr><td>Buy &amp; hold (OOS)</td><td colspan='2'>37.4% return, 53.6% MDD</td></tr><tr><td>Fee drag (OOS)</td><td colspan='2'>14.4%</td></tr></tbody></table>
+  <h3>Robustness (nearby parameter grid, diagnostic only)</h3><p><span class="badge robustness-badge" style="background:var(--fading-bg);color:var(--fading-fg)" title="n_fast=9, n_slow=20 → PF=1.00 (n=102); n_fast=9, n_slow=26 → PF=0.96 (n=97); n_fast=9, n_slow=32 → PF=0.98 (n=85); n_fast=12, n_slow=20 → PF=0.94 (n=98); n_fast=12, n_slow=26 → PF=0.88 (n=87); n_fast=12, n_slow=32 → PF=1.07 (n=71); n_fast=15, n_slow=20 → PF=0.96 (n=87); n_fast=15, n_slow=26 → PF=1.03 (n=73); n_fast=15, n_slow=32 → PF=1.11 (n=65)">3/9</span> 3/9 cleared &mdash; This grid never changes the verdict above and never selects parameters — it only shows whether nearby, never-registered parameter values would also have cleared OOS PF &ge; 1.0 with &ge; 10 trades.</p><ul class='griddump'><li>n_fast=9, n_slow=20 &rarr; PF=1.00 (n=102)</li><li>n_fast=9, n_slow=26 &rarr; PF=0.96 (n=97)</li><li>n_fast=9, n_slow=32 &rarr; PF=0.98 (n=85)</li><li>n_fast=12, n_slow=20 &rarr; PF=0.94 (n=98)</li><li>n_fast=12, n_slow=26 &rarr; PF=0.88 (n=87)</li><li>n_fast=12, n_slow=32 &rarr; PF=1.07 (n=71)</li><li>n_fast=15, n_slow=20 &rarr; PF=0.96 (n=87)</li><li>n_fast=15, n_slow=26 &rarr; PF=1.03 (n=73)</li><li>n_fast=15, n_slow=32 &rarr; PF=1.11 (n=65)</li></ul>
+  <p class="histline">First recorded verdict this week.</p>
+</div>
+  <div class="interp">
+    <h3>What the numbers say (no opinions, no advice)</h3>
+    <p>At daily (1d), the out-of-sample verdict as of 2026-09-05 is FADING: profit factor 2.21 across 14 trades, total return 47.8%, max drawdown 32.1%, versus buy-and-hold's 37.4% return and 53.1% drawdown over the same window. At 4-hour (4h), the out-of-sample verdict as of 2026-09-05 is DEAD: profit factor 0.88 across 87 trades, total return -24.1%, max drawdown 55.5%, versus buy-and-hold's 37.4% return and 53.6% drawdown over the same window. Trading cost reduced the daily (1d) out-of-sample return by 4.2% compared with the same signal at zero cost. Over the longer in-sample history before that 730-day out-of-sample window, the same rule's profit factor was 4.89 with a maximum drawdown of 59.1%.</p>
+  </div>
+  <p>
+    <a href="../index.html">Back to the full table</a> &middot;
+    <a href="../methodology.html">Methodology</a> &middot;
+    <a href="https://github.com/getjogak-sketch/deadoralive/issues/new?template=check-strategy.yml">Check your own strategy</a> &middot; <a href="https://buttondown.com/jogak">Get weekly updates</a> &middot;
+    <a href="index.html">All strategy pages</a>
+  </p>
+  <div class="disclaimer-block">Educational / informational content only. This is not investment advice, and nothing here is a recommendation to buy or sell any asset. Past backtested performance, especially net-of-cost historical simulation, does not guarantee future results.</div>
+</main>
+<script data-goatcounter="https://jogak.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

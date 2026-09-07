@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://getjogak-sketch.github.io/deadoralive/sitemap.xml

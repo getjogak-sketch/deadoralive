@@ -389,13 +389,13 @@ def main():
     # only the asset list, costs (config.COST["KRW-*"]), and output paths/language differ. See
     # _run_ko_edition below and config.py's EDITIONS/DATA_START_BY_ASSET for the rest.
     # -------------------------------------------------------------------------------------------
-    _run_ko_edition()
+    payload_ko = _run_ko_edition()
 
     # -------------------------------------------------------------------------------------------
     # Stocks edition (SPY/QQQ, daily) — spec_v3 §A, additive extension. Nothing above this line
     # (English/Korean crypto editions) is changed by this block.
     # -------------------------------------------------------------------------------------------
-    _run_stocks_edition()
+    payload_stocks = _run_stocks_edition()
 
     # -------------------------------------------------------------------------------------------
     # API docs (spec_v3 §B) — human-readable description of the docs/api/v1/ JSON tree written by
@@ -407,6 +407,35 @@ def main():
     build_site.build_api_index_html()
     print(f"Wrote {os.path.join(config.DOCS_DIR, 'api', 'v1', 'README.md')}")
     print(f"Wrote {os.path.join(config.DOCS_DIR, 'api', 'index.html')}")
+
+    # -------------------------------------------------------------------------------------------
+    # Programmatic SEO pages, sitemap, robots.txt (this task's §S1) — additive, read-only over the
+    # payloads already assembled above. `payload` here is the English edition's own payload dict,
+    # already in scope from this function's top half.
+    # -------------------------------------------------------------------------------------------
+    import seo_pages
+    edition_payloads = {"en": payload, "ko": payload_ko, "stocks": payload_stocks}
+    seo_manifest = seo_pages.build_all(edition_payloads)
+    n_en = len(seo_manifest.get("en", []))
+    n_ko = len(seo_manifest.get("ko", []))
+    n_stocks = len(seo_manifest.get("stocks", []))
+    print(f"Wrote {n_en} /s/ pages (en), {n_ko} /s/ pages (ko), {n_stocks} /s/ pages (stocks)")
+
+    extra_urls = [
+        (config.PAGES_URL.rstrip("/") + "/index.html", payload["as_of"]),
+        (config.PAGES_URL.rstrip("/") + "/methodology.html", payload["as_of"]),
+        (config.PAGES_URL.rstrip("/") + "/api/index.html", payload["as_of"]),
+    ]
+    if payload_ko:
+        extra_urls.append((config.PAGES_URL.rstrip("/") + "/ko/index.html", payload_ko["as_of"]))
+        extra_urls.append((config.PAGES_URL.rstrip("/") + "/ko/methodology.html", payload_ko["as_of"]))
+    if payload_stocks:
+        extra_urls.append((config.PAGES_URL.rstrip("/") + "/stocks/index.html", payload_stocks["as_of"]))
+        extra_urls.append((config.PAGES_URL.rstrip("/") + "/stocks/methodology.html", payload_stocks["as_of"]))
+    seo_pages.build_sitemap(seo_manifest, extra_urls)
+    seo_pages.build_robots()
+    print(f"Wrote {os.path.join(config.DOCS_DIR, 'sitemap.xml')}")
+    print(f"Wrote {os.path.join(config.DOCS_DIR, 'robots.txt')}")
 
     return 0
 
@@ -533,6 +562,8 @@ def _run_ko_edition():
     _write_api_v1(edition_key, payload)
     print(f"Wrote {os.path.join(config.DOCS_DIR, 'api', 'v1', edition_key, 'latest.json')} (spec_v3 §B)")
 
+    return payload
+
 
 def _run_stocks_edition():
     """Stocks edition (SPY/QQQ, daily) — spec_v3 §A. English-only, reuses the exact same
@@ -595,7 +626,7 @@ def _run_stocks_edition():
     if not all_rows:
         print("[run_weekly] [stocks] No SPY/QQQ data available this week — skipping the stocks "
               "edition's pages (not a failure for the crypto editions).")
-        return
+        return None
 
     tally = vd.tally([r["verdict"] for r in all_rows if r["verdict"] is not None])
     payload = {
@@ -642,6 +673,8 @@ def _run_stocks_edition():
 
     _write_api_v1("stocks", payload)
     print(f"Wrote {os.path.join(config.DOCS_DIR, 'api', 'v1', 'stocks', 'latest.json')} (spec_v3 §B)")
+
+    return payload
 
 
 if __name__ == "__main__":

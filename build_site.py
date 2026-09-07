@@ -346,7 +346,8 @@ def build_index(payload: dict, out_path: str | None = None, assets: list | None 
 </main>
 <footer class="bottom">
   <div><a href="methodology.html">Methodology</a>{repo_html}{signup_html}
-  &middot; <a href="{html.escape(_check_strategy_url())}">Check your own strategy</a></div>
+  &middot; <a href="{html.escape(_check_strategy_url())}">Check your own strategy</a>
+  &middot; <a href="s/index.html">All strategy pages</a></div>
   <div class="disclaimer">{html.escape(payload['legal_disclaimer'])}</div>
 </footer>
 {config.ANALYTICS_SNIPPET}
@@ -538,7 +539,8 @@ def build_methodology(out_path: str | None = None, assets: list | None = None,
 </main>
 <footer class="bottom">
   <div><a href="index.html">&larr; back to results</a>
-  &middot; <a href="{html.escape(_check_strategy_url())}">Check your own strategy</a></div>
+  &middot; <a href="{html.escape(_check_strategy_url())}">Check your own strategy</a>
+  &middot; <a href="s/index.html">All strategy pages</a></div>
   <div class="disclaimer">{html.escape(config.LEGAL_DISCLAIMER)}</div>
 </footer>
 {config.ANALYTICS_SNIPPET}
@@ -839,7 +841,8 @@ def build_index_ko(payload: dict, out_path: str | None = None):
 </main>
 <footer class="bottom">
   <div><a href="methodology.html">어떻게 계산했나</a>{repo_html}{signup_html} &middot; <a href="../index.html">English</a> &middot; <a href="../stocks/index.html">Stocks</a>
-  &middot; <a href="{html.escape(_check_strategy_url())}">내 전략도 검사해 보기</a></div>
+  &middot; <a href="{html.escape(_check_strategy_url())}">내 전략도 검사해 보기</a>
+  &middot; <a href="s/index.html">전략별 페이지 전체</a></div>
 </footer>
 {_disclaimer_block_ko()}
 {config.ANALYTICS_SNIPPET}
@@ -1048,7 +1051,8 @@ def build_methodology_ko(out_path: str | None = None):
 </main>
 <footer class="bottom">
   <div><a href="index.html">&larr; 결과표로 돌아가기</a> &middot; <a href="../methodology.html">English</a> &middot; <a href="../stocks/methodology.html">Stocks</a>
-  &middot; <a href="{html.escape(_check_strategy_url())}">내 전략도 검사해 보기</a></div>
+  &middot; <a href="{html.escape(_check_strategy_url())}">내 전략도 검사해 보기</a>
+  &middot; <a href="s/index.html">전략별 페이지 전체</a></div>
 </footer>
 {_disclaimer_block_ko()}
 {config.ANALYTICS_SNIPPET}
@@ -1095,7 +1099,8 @@ def build_empty_edition_page_ko(out_path: str | None = None, as_of: str | None =
 </main>
 <footer class="bottom">
   <div><a href="methodology.html">어떻게 계산했나</a> &middot; <a href="../index.html">English</a> &middot; <a href="../stocks/index.html">Stocks</a>
-  &middot; <a href="{html.escape(_check_strategy_url())}">내 전략도 검사해 보기</a></div>
+  &middot; <a href="{html.escape(_check_strategy_url())}">내 전략도 검사해 보기</a>
+  &middot; <a href="s/index.html">전략별 페이지 전체</a></div>
 </footer>
 {_disclaimer_block_ko()}
 {config.ANALYTICS_SNIPPET}
@@ -1324,7 +1329,8 @@ def build_api_index_html(out_path: str | None = None) -> str:
 </main>
 <footer class="bottom">
   <div><a href="../index.html">&larr; back to results</a>
-  &middot; <a href="{html.escape(_check_strategy_url())}">Check your own strategy</a></div>
+  &middot; <a href="{html.escape(_check_strategy_url())}">Check your own strategy</a>
+  &middot; <a href="../s/index.html">All strategy pages</a></div>
   <div class="disclaimer">{html.escape(config.LEGAL_DISCLAIMER)}</div>
 </footer>
 {config.ANALYTICS_SNIPPET}

@@ -925,6 +925,126 @@ def test_check_issue_dry_run_end_to_end():
           "check-issue-status: invalid" in bad_comment)
 
 
+# ---------------------------------------------------------------------------
+# S1: programmatic SEO pages (seo_pages.py) — exercised against the real BTCUSD payload this dev
+# box already has in results/latest.json (produced by an earlier run_weekly.py run), the same
+# pattern test_stocks_edition_pipeline uses above.
+# ---------------------------------------------------------------------------
+
+def test_seo_pages_strategy_page_count_and_shape():
+    import json as _json
+    import tempfile
+    import seo_pages as sp
+    import registry as _reg
+
+    latest_path = os.path.join(config.RESULTS_DIR, "latest.json")
+    if not os.path.exists(latest_path):
+        print("[SKIP] test_seo_pages_strategy_page_count_and_shape: no results/latest.json "
+              "(run run_weekly.py --offline first)")
+        return
+    with open(latest_path, encoding="utf-8") as f:
+        payload = _json.load(f)
+
+    orig_docs, orig_docs_ko, orig_docs_stocks = config.DOCS_DIR, config.DOCS_DIR_KO, config.DOCS_DIR_STOCKS
+    tmp = tempfile.mkdtemp()
+    config.DOCS_DIR = tmp
+    config.DOCS_DIR_KO = os.path.join(tmp, "ko")
+    config.DOCS_DIR_STOCKS = os.path.join(tmp, "stocks")
+    sp.EDITION_OUT_DIR["en"] = config.DOCS_DIR
+    sp.EDITION_OUT_DIR["ko"] = config.DOCS_DIR_KO
+    sp.EDITION_OUT_DIR["stocks"] = config.DOCS_DIR_STOCKS
+    try:
+        manifest = sp.build_all({"en": payload, "ko": None, "stocks": None})
+        n_assets = len({r["asset"] for r in payload["rows"]})
+        expected = (_reg.count_variants() + _reg.count_popular_combo_variants()) * n_assets
+        check("seo_pages: one page per (strategy variant incl. popular combos, asset)",
+              len(manifest["en"]) == expected, f"got {len(manifest['en'])}, expected {expected}")
+        check("seo_pages: ko/stocks produce zero pages when they have no data this run",
+              manifest["ko"] == [] and manifest["stocks"] == [])
+
+        sample = manifest["en"][0]
+        page_path = os.path.join(config.DOCS_DIR, "s", sample["filename"])
+        check("seo_pages: page file actually written", os.path.exists(page_path))
+        with open(page_path, encoding="utf-8") as f:
+            html_out = f.read()
+        check("seo_pages: has a <title>", "<title>" in html_out)
+        check("seo_pages: has a canonical link", 'rel="canonical"' in html_out)
+        check("seo_pages: has a meta description", 'name="description"' in html_out)
+        check("seo_pages: links back to the main table", 'href="../index.html"' in html_out)
+        check("seo_pages: links to methodology", 'href="../methodology.html"' in html_out)
+        check("seo_pages: links to the check-your-own-strategy issue template",
+              "issues/new?template=check-strategy.yml" in html_out)
+        check("seo_pages: carries the GoatCounter snippet", "goatcounter" in html_out)
+        check("seo_pages: carries the legal disclaimer", config.LEGAL_DISCLAIMER in html_out)
+
+        index_path = os.path.join(config.DOCS_DIR, "s", "index.html")
+        check("seo_pages: writes an /s/ index page", os.path.exists(index_path))
+
+        urls = [(config.PAGES_URL + "/index.html", payload["as_of"])]
+        sitemap_path = sp.build_sitemap(manifest, urls)
+        with open(sitemap_path, encoding="utf-8") as f:
+            sitemap_xml = f.read()
+        check("seo_pages: sitemap.xml is well-formed XML and non-trivial",
+              sitemap_xml.startswith("<?xml") and sitemap_xml.count("<url>") == len(manifest["en"]) + 1)
+
+        robots_path = sp.build_robots()
+        with open(robots_path, encoding="utf-8") as f:
+            robots_txt = f.read()
+        check("seo_pages: robots.txt allows all and points at the sitemap",
+              "Allow: /" in robots_txt and "Sitemap:" in robots_txt)
+    finally:
+        config.DOCS_DIR, config.DOCS_DIR_KO, config.DOCS_DIR_STOCKS = orig_docs, orig_docs_ko, orig_docs_stocks
+        sp.EDITION_OUT_DIR["en"] = orig_docs
+        sp.EDITION_OUT_DIR["ko"] = orig_docs_ko
+        sp.EDITION_OUT_DIR["stocks"] = orig_docs_stocks
+
+
+def test_seo_pages_no_banned_korean_words():
+    """A synthetic Korean payload (the real dev box has zero Upbit data offline — see README) run
+    through the exact same seo_pages code path as the real English one above, checked for the four
+    banned words the same way test_korean_page_disclaimer_and_banned_words already checks the main
+    Korean pages."""
+    import copy
+    import json as _json
+    import tempfile
+    import seo_pages as sp
+
+    latest_path = os.path.join(config.RESULTS_DIR, "latest.json")
+    if not os.path.exists(latest_path):
+        print("[SKIP] test_seo_pages_no_banned_korean_words: no results/latest.json")
+        return
+    with open(latest_path, encoding="utf-8") as f:
+        payload = _json.load(f)
+    ko_payload = copy.deepcopy(payload)
+    ko_payload["edition"] = "ko"
+    for r in ko_payload["rows"] + ko_payload["popular_combos"]:
+        r["asset"] = "KRW-BTC" if r["asset"] == "BTCUSD" else r["asset"]
+        r["edition"] = "ko"
+
+    orig_docs, orig_docs_ko = config.DOCS_DIR, config.DOCS_DIR_KO
+    tmp = tempfile.mkdtemp()
+    config.DOCS_DIR = tmp
+    config.DOCS_DIR_KO = os.path.join(tmp, "ko")
+    sp.EDITION_OUT_DIR["en"] = config.DOCS_DIR
+    sp.EDITION_OUT_DIR["ko"] = config.DOCS_DIR_KO
+    try:
+        manifest = sp.build_all({"ko": ko_payload})
+        check("seo_pages: ko synthetic payload produces pages", len(manifest["ko"]) > 0)
+        banned = ["추천", "수익 보장", "확실", "필승"]
+        for page in manifest["ko"]:
+            path = os.path.join(config.DOCS_DIR_KO, "s", page["filename"])
+            with open(path, encoding="utf-8") as f:
+                text = f.read()
+            for word in banned:
+                check(f"seo_pages ko: no banned word '{word}' in {page['filename']}",
+                      word not in text)
+    finally:
+        config.DOCS_DIR, config.DOCS_DIR_KO = orig_docs, orig_docs_ko
+        sp.EDITION_OUT_DIR["en"] = orig_docs
+        sp.EDITION_OUT_DIR["ko"] = orig_docs_ko
+
+
+
 if __name__ == "__main__":
     test_no_lookahead_ma_cross()
     test_no_lookahead_vol_breakout()
@@ -948,6 +1068,8 @@ if __name__ == "__main__":
     test_robustness_runtime_on_local_btc_data()
     test_check_issue_parser_validator()
     test_check_issue_dry_run_end_to_end()
+    test_seo_pages_strategy_page_count_and_shape()
+    test_seo_pages_no_banned_korean_words()
 
     print()
     if FAILURES:

@@ -335,7 +335,10 @@ def verify_gumroad_license(license_key: str) -> tuple[bool, str]:
     try:
         resp = requests.post(
             GUMROAD_VERIFY_URL,
-            data={"product_id": product_id, "license_key": license_key,
+            # Gumroad accepts either the API `product_id` (long, may contain '=') or the short
+            # `product_permalink` from the product URL (e.g. "itilsr"). Send whichever we were given.
+            data={("product_id" if (len(product_id) > 20 or "=" in product_id) else "product_permalink"): product_id,
+                  "license_key": license_key,
                   "increment_uses_count": "true"},
             timeout=20,
         )

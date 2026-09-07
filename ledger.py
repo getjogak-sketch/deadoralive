@@ -29,7 +29,9 @@ Task B1 (2026-09-07) added a third group, BOT_TEMPLATES (grid_bot/dca_bot/dca_bo
 one-time-hard-code convention: `_BOT_TEMPLATE_COMMIT` below is filled in with the actual commit
 hash that added `BOT_TEMPLATES` to registry.py via a small follow-up commit (the hash cannot be
 known before the commit that introduces it exists — see this task's own instruction), exactly the
-same chicken-and-egg step the original two commits above were already through once.
+same chicken-and-egg step the original two commits above were already through once:
+
+    01aacadd44d86bbf706a47125763709ca7835408  2026-09-07  Add BOT_TEMPLATES registry group
 """
 from __future__ import annotations
 import json
@@ -48,7 +50,7 @@ _POPULAR_COMBO_DATE = "2026-09-07"
 # Filled in by a small follow-up commit right after the commit that adds BOT_TEMPLATES to
 # registry.py (see this module's own docstring) — set to that commit's real hash, never rerun from
 # git history automatically.
-_BOT_TEMPLATE_COMMIT = "PENDING_COMMIT_HASH"
+_BOT_TEMPLATE_COMMIT = "01aacadd44d86bbf706a47125763709ca7835408"
 _BOT_TEMPLATE_DATE = "2026-09-07"
 
 

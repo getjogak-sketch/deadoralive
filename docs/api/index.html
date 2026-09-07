@@ -84,7 +84,12 @@ footer.bottom .disclaimer { margin-top: 0.75rem; }
 
   <section class="assetblock">
     <h2>Row schema</h2>
-    <p>Every element of <code>payload["rows"]</code> carries:</p>
+    <p><code>payload["popular_combos"]</code> (added by the popular-combos extension) is a second
+       array in the same row shape as <code>payload["rows"]</code>, for a separately
+       pre-registered group of multi-indicator combinations &mdash; kept separate so
+       <code>rows</code> keeps meaning exactly what it always meant.</p>
+    <p>Every element of <code>payload["rows"]</code> (and <code>payload["popular_combos"]</code>)
+       carries:</p>
     <ul><li><code>strategy_id</code>: registry id, e.g. &quot;sma_cross&quot; — see the methodology page&#x27;s strategy table for the full list, including the POPULAR_COMBOS group</li>
 <li><code>strategy_name</code>: human-readable name of the strategy</li>
 <li><code>params</code>: the fixed parameter string for this variant, e.g. &quot;10-50&quot;; &quot;-&quot; for reference rows</li>

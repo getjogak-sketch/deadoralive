@@ -211,6 +211,80 @@ def supertrend(df: pd.DataFrame, n: int = 10, multiplier: float = 3.0):
     return pd.Series(direction, index=df.index)
 
 
+# ===========================================================================
+# spec_v3 §D "Popular combos" extension — additive only, nothing above this line is modified.
+# ===========================================================================
+
+def heikin_ashi(df: pd.DataFrame):
+    """
+    Heikin-Ashi open/close, the standard recursive definition:
+      ha_close[t] = (open[t] + high[t] + low[t] + close[t]) / 4
+      ha_open[0]  = (open[0] + close[0]) / 2                        (seed — no prior HA bar)
+      ha_open[t]  = (ha_open[t-1] + ha_close[t-1]) / 2               for t > 0
+
+    Same causal-recursive shape as ema()/rsi_wilder()/atr_wilder() above: ha_open[t] depends only
+    on ha_open[t-1] and ha_close[t-1] (themselves built only from data at positions < t), plus
+    bar t's own raw OHLC for ha_close[t] itself. Implemented as an explicit forward loop (not a
+    vectorized pandas op) for the same reason rsi_wilder/atr_wilder are — it is a genuine
+    recursion, not a rolling window. HA high/low are not returned: no strategy here uses them.
+
+    Returns (ha_open, ha_close), each a pd.Series aligned to df's index.
+    """
+    o = df["open"].to_numpy(dtype=float)
+    h = df["high"].to_numpy(dtype=float)
+    l = df["low"].to_numpy(dtype=float)
+    c = df["close"].to_numpy(dtype=float)
+    m = len(df)
+
+    ha_close = (o + h + l + c) / 4.0
+    ha_open = np.full(m, np.nan)
+    if m:
+        ha_open[0] = (o[0] + c[0]) / 2.0
+        for t in range(1, m):
+            ha_open[t] = (ha_open[t - 1] + ha_close[t - 1]) / 2.0
+
+    return pd.Series(ha_open, index=df.index), pd.Series(ha_close, index=df.index)
+
+
+def ichimoku_cloud_lines(df: pd.DataFrame, n_tenkan: int = 9, n_kijun: int = 26,
+                          n_senkou_b: int = 52, cloud_shift: int = 26):
+    """
+    Ichimoku Kinko Hyo's two "cloud" (kumo) lines, senkou span A and B — ALREADY forward-shifted
+    by `cloud_shift` bars so that the value returned at bar t is exactly what a strategy may
+    causally compare bar t's own close against (spec_v3 §D: "cloud value at bar t was computed
+    from bars <= t-26 -- no lookahead"). This is the one place in this indicator where the shift
+    IS the no-lookahead guarantee, not an afterthought — a real Ichimoku chart plots the cloud 26
+    bars ahead of where it was computed for exactly this reason (it's a forecast overlay), so
+    "the cloud value at today's bar" on a live chart is, mechanically, a `cloud_shift`-bars-old
+    computation; this function returns it already aligned that way rather than making every
+    caller shift it themselves.
+
+      tenkan_raw[t]   = (highest high, n_tenkan bars incl. t) + (lowest low, n_tenkan bars incl. t)) / 2
+      kijun_raw[t]    = (highest high, n_kijun bars incl. t)  + (lowest low, n_kijun bars incl. t))  / 2
+      senkou_a_raw[t] = (tenkan_raw[t] + kijun_raw[t]) / 2
+      senkou_b_raw[t] = (highest high, n_senkou_b bars incl. t) + (lowest low, n_senkou_b bars incl. t)) / 2
+      senkou_a[t] = senkou_a_raw[t - cloud_shift]     (via .shift(cloud_shift))
+      senkou_b[t] = senkou_b_raw[t - cloud_shift]
+
+    tenkan/kijun's own rolling windows include the current bar (unlike donchian() above, which
+    deliberately excludes it) — this matches Ichimoku's own standard definition, and causality is
+    unaffected either way (a window ending at t, inclusive, still only uses data <= t).
+
+    Returns (senkou_a, senkou_b), each a pd.Series aligned to df's index, both already shifted.
+    """
+    high, low = df["high"], df["low"]
+
+    def _mid_channel(n):
+        return (high.rolling(n, min_periods=n).max() + low.rolling(n, min_periods=n).min()) / 2.0
+
+    tenkan_raw = _mid_channel(n_tenkan)
+    kijun_raw = _mid_channel(n_kijun)
+    senkou_a_raw = (tenkan_raw + kijun_raw) / 2.0
+    senkou_b_raw = _mid_channel(n_senkou_b)
+
+    return senkou_a_raw.shift(cloud_shift), senkou_b_raw.shift(cloud_shift)
+
+
 def donchian(df: pd.DataFrame, n_high: int, n_low: int):
     """
     Donchian channel, using the PRIOR n bars only (i.e. shift(1) before the rolling window, so

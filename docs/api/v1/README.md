@@ -19,7 +19,13 @@ served by GitHub Pages, refreshed once a week by the same pipeline that renders 
 
 ## Row schema
 
-Every element of `payload["rows"]` carries:
+`payload["popular_combos"]` (added by spec_v3 §D) is a second array of rows in the exact same
+shape as `payload["rows"]` below, for the separately-pre-registered "popular combos" strategy
+group (multi-indicator combinations as commonly taught on YouTube/TradingView) — kept as its own
+array rather than merged into `rows`, so a consumer that assumed `rows` meant "the original
+registry" is not silently handed extra strategies.
+
+Every element of `payload["rows"]` (and `payload["popular_combos"]`) carries:
 
 - `strategy_id`: registry id, e.g. "sma_cross" — see the methodology page's strategy table for the full list, including the POPULAR_COMBOS group
 - `strategy_name`: human-readable name of the strategy

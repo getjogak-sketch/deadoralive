@@ -167,6 +167,119 @@ def test_no_lookahead_registry():
                     raise AssertionError(f"unknown registry strategy type: {stype}")
 
 
+# ---------------------------------------------------------------------------
+# spec_v3 §D "Popular combos" — additive extension, nothing above this line is modified.
+#
+# 1. The same generic no-lookahead truncation test as test_no_lookahead_registry, over
+#    registry.iter_popular_combo_variants() instead of registry.iter_variants() — spec_v3 §D:
+#    "Every new strategy gets the no-lookahead truncation test like all others".
+# 2. Two EXPLICIT checks spec_v3 §D calls out by name as "the two places a lookahead bug is most
+#    likely": the Ichimoku cloud's forward shift, and the Heikin-Ashi recursion — hand-derived/
+#    independently-recomputed, not just exercised indirectly through (1).
+# ---------------------------------------------------------------------------
+
+def test_no_lookahead_popular_combos():
+    for asset, tf in [("btc", "1d"), ("btc", "4h"), ("spy", "1d")]:
+        if resolve_path(asset, tf) is None:
+            print(f"[SKIP] {asset} {tf}: no data file"); continue
+        df = load_raw(asset, tf)
+        n = len(df)
+        Ts = sorted(set([n // 4, n // 2, (3 * n) // 4]))
+        for sid, sname, stype, variant in _registry.iter_popular_combo_variants():
+            full_out = variant["signal_fn"](df)
+            for T in Ts:
+                if T < MIN_WARMUP_T:
+                    continue
+                df_trunc = df.iloc[:T].reset_index(drop=True)
+                trunc_out = variant["signal_fn"](df_trunc)
+                label = f"no-lookahead (popular combo) {sid} params={variant['params_str']} {asset}/{tf} T={T}"
+                assert stype == "state", f"unexpected popular-combo strategy type: {stype}"
+                full_arr = full_out.iloc[:T].to_numpy()
+                trunc_arr = trunc_out.to_numpy()
+                check(label, np.array_equal(full_arr, trunc_arr),
+                      "signal before T changed when future data was added")
+
+
+def test_ichimoku_shift_explicit():
+    """spec_v3 §D: the Ichimoku cloud's forward shift is "the" place a lookahead bug is most
+    likely (it's the one indicator here whose whole point is to be evaluated against data from
+    26 bars ago). Independently recomputes the raw (unshifted) senkou lines with plain pandas
+    rolling ops — NOT by calling into indicators.ichimoku_cloud_lines' own internals — and checks
+    the shifted output against that independent computation, plus a truncation no-lookahead
+    check and a guard against a no-op ("shift did nothing") bug."""
+    import indicators as ind
+
+    n = 120
+    high = pd.Series(np.arange(n, dtype=float))
+    low = high.copy()
+    df = pd.DataFrame({"high": high, "low": low})
+
+    senkou_a, senkou_b = ind.ichimoku_cloud_lines(df, n_tenkan=9, n_kijun=26, n_senkou_b=52,
+                                                    cloud_shift=26)
+
+    # Independent recomputation (plain rolling ops, no shared code with the function under test).
+    tenkan_raw = (high.rolling(9, min_periods=9).max() + low.rolling(9, min_periods=9).min()) / 2.0
+    kijun_raw = (high.rolling(26, min_periods=26).max() + low.rolling(26, min_periods=26).min()) / 2.0
+    senkou_a_raw = (tenkan_raw + kijun_raw) / 2.0
+    senkou_b_raw = (high.rolling(52, min_periods=52).max() + low.rolling(52, min_periods=52).min()) / 2.0
+
+    t = 100
+    check("Ichimoku: senkou A at bar t equals the raw value computed at bar t-26 (shift correctness)",
+          abs(senkou_a.iloc[t] - senkou_a_raw.iloc[t - 26]) < 1e-9,
+          f"got {senkou_a.iloc[t]} vs {senkou_a_raw.iloc[t - 26]}")
+    check("Ichimoku: senkou B at bar t equals the raw value computed at bar t-26 (shift correctness)",
+          abs(senkou_b.iloc[t] - senkou_b_raw.iloc[t - 26]) < 1e-9,
+          f"got {senkou_b.iloc[t]} vs {senkou_b_raw.iloc[t - 26]}")
+    check("Ichimoku: senkou A at bar t does NOT equal the unshifted raw value at t itself "
+          "(guards against a no-op/missing shift)",
+          abs(senkou_a.iloc[t] - senkou_a_raw.iloc[t]) > 1e-9)
+
+    T = 100
+    df_trunc = df.iloc[:T].reset_index(drop=True)
+    senkou_a_trunc, senkou_b_trunc = ind.ichimoku_cloud_lines(df_trunc, n_tenkan=9, n_kijun=26,
+                                                                n_senkou_b=52, cloud_shift=26)
+    check("Ichimoku no-lookahead: senkou A unchanged before T when future bars are added",
+          np.allclose(senkou_a.iloc[:T].to_numpy(), senkou_a_trunc.to_numpy(), equal_nan=True))
+    check("Ichimoku no-lookahead: senkou B unchanged before T when future bars are added",
+          np.allclose(senkou_b.iloc[:T].to_numpy(), senkou_b_trunc.to_numpy(), equal_nan=True))
+
+
+def test_heikin_ashi_explicit():
+    """spec_v3 §D: the Heikin-Ashi recursion is the other place a lookahead bug is most likely
+    (ha_open[t] depends on ha_open[t-1], not on a fixed rolling window — a copy/paste from
+    ema()/rsi_wilder() elsewhere in this file could easily get the recursion direction backwards).
+    Hand-derived expected values (recomputed independently in this docstring/test, not by calling
+    the function under test) plus an explicit append-a-future-bar no-lookahead check."""
+    import indicators as ind
+
+    df = pd.DataFrame({
+        "open": [10.0, 11.0, 9.0, 12.0],
+        "high": [12.0, 12.0, 11.0, 13.0],
+        "low": [9.0, 10.0, 8.0, 11.0],
+        "close": [11.0, 9.5, 10.5, 12.5],
+    })
+    # ha_close[t] = mean(open,high,low,close)[t]; ha_open[0] = (open[0]+close[0])/2;
+    # ha_open[t] = (ha_open[t-1]+ha_close[t-1])/2 for t>0 — hand-computed:
+    expected_close = [10.5, 10.625, 9.625, 12.125]
+    expected_open = [10.5, 10.5, 10.5625, 10.09375]
+
+    ha_open, ha_close = ind.heikin_ashi(df)
+    check("Heikin-Ashi close hand-derived", np.allclose(ha_close.to_numpy(), expected_close),
+          f"got {ha_close.to_numpy()}")
+    check("Heikin-Ashi open hand-derived", np.allclose(ha_open.to_numpy(), expected_open),
+          f"got {ha_open.to_numpy()}")
+
+    df_future = pd.concat(
+        [df, pd.DataFrame({"open": [20.0], "high": [21.0], "low": [19.0], "close": [20.5]})],
+        ignore_index=True,
+    )
+    ha_open_future, ha_close_future = ind.heikin_ashi(df_future)
+    check("Heikin-Ashi no-lookahead: ha_open unchanged when a future bar is appended",
+          np.allclose(ha_open_future.iloc[:4].to_numpy(), ha_open.to_numpy()))
+    check("Heikin-Ashi no-lookahead: ha_close unchanged when a future bar is appended",
+          np.allclose(ha_close_future.iloc[:4].to_numpy(), ha_close.to_numpy()))
+
+
 def test_no_lookahead_reference_rows():
     """dca_weekly's buy-week flags depend only on each bar's own calendar date (ISO year/week),
     never on other bars' prices — trivially causal, but we still assert it holds for a truncated
@@ -708,6 +821,9 @@ if __name__ == "__main__":
     test_no_lookahead_vol_breakout()
     test_sanity_cost()
     test_no_lookahead_registry()
+    test_no_lookahead_popular_combos()
+    test_ichimoku_shift_explicit()
+    test_heikin_ashi_explicit()
     test_no_lookahead_reference_rows()
     test_indicator_spot_checks()
     test_upbit_parser()

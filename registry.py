@@ -162,6 +162,100 @@ REFERENCE = [
 ]
 
 
+# ===========================================================================
+# spec_v3 §D "Popular combos" — additive only, nothing above this line (REGISTRY, REFERENCE,
+# iter_variants, count_variants) is modified. Same execution rules as REGISTRY above (state at
+# close t -> fill at open t+1, long-only, all-in) — every variant here is dispatched through the
+# same "state" engine primitive (engine.simulate_ma_cross) as REGISTRY's own state-type
+# strategies, so no new engine code was needed for this whole group. Rendered on every page as
+# its own separate table (spec_v3 §D), never merged into REGISTRY/the main per-(asset, timeframe)
+# sections — kept in a second list plus a second iterator (iter_popular_combo_variants) rather
+# than appended into REGISTRY, precisely so nothing about REGISTRY/iter_variants/count_variants
+# (already relied on by run_weekly.py's row counts and tests.py's no-lookahead loop) changes.
+#
+# Numeric parameters exposed for the spec_v3 §C robustness grid: only each combo's OWN
+# combo-defining number(s) (the ones spec_v3 §D's own examples name: 9/21, 200, 120, 5) — the
+# underlying named indicator's standard recipe numbers (RSI's 14/30/70, MACD's 12/26/9,
+# Bollinger's 20/2, Supertrend's 10/3, Ichimoku's 9/26/52) are treated as fixed, exactly like
+# REGISTRY's own already-fixed `rsi_mr`/`macd`/`bb_mr`/`supertrend` entries never grid RSI's
+# window or MACD's three periods either. `ichimoku_cloud` therefore has zero numeric params (its
+# three periods are all "standard recipe" constants) and so gets no robustness grid at all — a
+# documented judgment call, since spec_v3 §D names examples rather than an exhaustive list.
+# ===========================================================================
+
+_EMA_9_21_VARIANTS = [
+    {"params": {"n_fast": 9, "n_slow": 21}, "params_str": "9-21",
+     "signal_fn": (lambda df: strat.ema_cross_target_state(df["close"], 9, 21))},
+]
+
+_EMA200_MACD_VARIANTS = [
+    {"params": {"n_ema": 200}, "params_str": "ema200-macd12.26.9",
+     "signal_fn": (lambda df: strat.ema200_macd_target_state(df, 200))},
+]
+
+_RSI_UPTREND_VARIANTS = [
+    {"params": {"n_sma": 200}, "params_str": "rsi14-sma200",
+     "signal_fn": (lambda df: strat.rsi_uptrend_target_state(df, 200))},
+]
+
+_BB_SQUEEZE_VARIANTS = [
+    {"params": {"n_lookback": 120, "n_confirm": 5}, "params_str": "bb20.2-look120-conf5",
+     "signal_fn": (lambda df: strat.bb_squeeze_target_state(df, 120, 5))},
+]
+
+_ICHIMOKU_CLOUD_VARIANTS = [
+    {"params": {}, "params_str": "9-26-52",
+     "signal_fn": (lambda df: strat.ichimoku_cloud_target_state(df))},
+]
+
+_HEIKIN_ASHI_TREND_VARIANTS = [
+    {"params": {"n_confirm": 2}, "params_str": "conf2",
+     "signal_fn": (lambda df: strat.heikin_ashi_trend_target_state(df, 2))},
+]
+
+_SUPERTREND_EMA200_VARIANTS = [
+    {"params": {"n_ema": 200}, "params_str": "st10.3-ema200",
+     "signal_fn": (lambda df: strat.supertrend_ema200_target_state(df, 200))},
+]
+
+POPULAR_COMBOS = [
+    {"id": "ema_9_21", "name": "EMA 9/21 crossover", "type": "state",
+     "rule": "EMA9 > EMA21 -> long, else flat", "variants": _EMA_9_21_VARIANTS},
+    {"id": "ema200_macd", "name": "EMA200 trend + MACD cross", "type": "state",
+     "rule": "close > EMA200 AND MACD(12,26,9) line > signal -> long; "
+             "MACD line < signal OR close < EMA200 -> flat",
+     "variants": _EMA200_MACD_VARIANTS},
+    {"id": "rsi_uptrend", "name": "RSI dip in uptrend", "type": "state",
+     "rule": "RSI(14) < 30 AND close > SMA200 -> long; RSI(14) > 70 OR close < SMA200 -> flat",
+     "variants": _RSI_UPTREND_VARIANTS},
+    {"id": "bb_squeeze", "name": "Bollinger squeeze breakout", "type": "state",
+     "rule": "bandwidth at/under its own prior 120-bar low ('squeeze') within the last 5 bars "
+             "AND close > upper band(20,2) -> long; close < middle band -> flat",
+     "variants": _BB_SQUEEZE_VARIANTS},
+    {"id": "ichimoku_cloud", "name": "Ichimoku cloud breakout", "type": "state",
+     "rule": "close > cloud top -> long; close < cloud bottom -> flat "
+             "(cloud shifted +26 bars, no lookahead)",
+     "variants": _ICHIMOKU_CLOUD_VARIANTS},
+    {"id": "heikin_ashi_trend", "name": "Heikin-Ashi colour", "type": "state",
+     "rule": "2 consecutive HA close > HA open -> long; first HA close < HA open -> flat",
+     "variants": _HEIKIN_ASHI_TREND_VARIANTS},
+    {"id": "supertrend_ema200", "name": "Supertrend + EMA200 filter", "type": "state",
+     "rule": "Supertrend(10,3) up AND close > EMA200 -> long; Supertrend flips down -> flat",
+     "variants": _SUPERTREND_EMA200_VARIANTS},
+]
+
+
+def iter_popular_combo_variants():
+    """Same shape as iter_variants() below, but over POPULAR_COMBOS instead of REGISTRY."""
+    for entry in POPULAR_COMBOS:
+        for variant in entry["variants"]:
+            yield entry["id"], entry["name"], entry["type"], variant
+
+
+def count_popular_combo_variants() -> int:
+    return sum(len(entry["variants"]) for entry in POPULAR_COMBOS)
+
+
 def iter_variants():
     """Yield (strategy_id, strategy_name, strategy_type, variant_dict) for every tradeable
     (verdict-eligible) registry entry — i.e. everything except REFERENCE."""

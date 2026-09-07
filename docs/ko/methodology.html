@@ -158,6 +158,23 @@ footer.bottom .disclaimer { margin-top: 0.75rem; }
   </section>
 
   <section class="assetblock">
+    <h2>유튜브·트레이딩뷰에서 많이 가르치는 조합 전략</h2>
+    <p>단일 지표가 아니라, 여러 지표를 함께 쓰는 방식으로 유튜브나 트레이딩뷰에서 흔히 가르치는
+       조합들을 따로 모아 검사합니다. 사고파는 규칙, 수수료, 판정 기준, 주변 설정값 안정성 검사는
+       위의 전략들과 완전히 같고, 결과표에서만 보기 쉽게 별도의 표로 나눠 보여줍니다.</p>
+    <div class="tablewrap"><table class="regtable">
+      <thead><tr><th>id</th><th>전략</th><th>규칙</th><th>설정값</th></tr></thead>
+      <tbody><tr><td>ema_9_21</td><td>지수이동평균 9/21 교차 (EMA 9/21 crossover)</td><td>지수이동평균 9가 21 위에 있으면 보유, 아래면 현금</td><td>9-21</td></tr>
+<tr><td>ema200_macd</td><td>200일 이동평균 추세 + MACD 교차 (EMA200 trend + MACD cross)</td><td>종가가 200일 이동평균 위이고 MACD선이 시그널선 위이면 보유, MACD선이 시그널선 아래로 내려오거나 종가가 200일 이동평균 아래로 내려오면 현금</td><td>ema200-macd12.26.9</td></tr>
+<tr><td>rsi_uptrend</td><td>상승 추세 중 RSI 조정 매수 (RSI dip in uptrend)</td><td>RSI(14)가 30 아래이고 종가가 200일 이동평균 위이면 매수, RSI가 70을 넘거나 종가가 200일 이동평균 아래로 내려오면 매도</td><td>rsi14-sma200</td></tr>
+<tr><td>bb_squeeze</td><td>볼린저밴드 수축 후 돌파 (Bollinger squeeze breakout)</td><td>볼린저밴드 폭이 최근 120봉 중 가장 좁았던 뒤 5봉 안에서 종가가 위선을 넘으면 매수, 가운데선 아래로 내려오면 매도</td><td>bb20.2-look120-conf5</td></tr>
+<tr><td>ichimoku_cloud</td><td>일목균형표 구름대 돌파 (Ichimoku cloud breakout)</td><td>종가가 구름대 위쪽 경계를 넘으면 매수, 아래쪽 경계 밑으로 내려오면 매도 (구름은 26봉 앞으로 미뤄 표시하므로 계산 시점의 미래 정보를 쓰지 않음)</td><td>9-26-52</td></tr>
+<tr><td>heikin_ashi_trend</td><td>헤이킨아시 캔들 색 전환 (Heikin-Ashi colour)</td><td>헤이킨아시 캔들이 2봉 연속 양봉이면 매수, 처음 음봉이 나오면 매도</td><td>conf2</td></tr>
+<tr><td>supertrend_ema200</td><td>슈퍼트렌드 + 200일 이동평균 필터 (Supertrend + EMA200 filter)</td><td>슈퍼트렌드(10, 3) 방향이 위이고 종가가 200일 이동평균 위이면 매수, 슈퍼트렌드 방향이 아래로 바뀌는 순간 매도</td><td>st10.3-ema200</td></tr></tbody>
+    </table></div>
+  </section>
+
+  <section class="assetblock">
     <h2>일부러 하지 않는 것</h2>
     <p>설정값을 결과가 좋아질 때까지 바꾸는 일, 결과를 본 뒤 조건을 덧붙이는 일은 하지 않습니다.
        그렇게 하면 과거에만 맞는 전략이 만들어지기 때문입니다. 이 사이트에 있는 모든 전략과 설정값은

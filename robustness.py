@@ -54,6 +54,15 @@ _RAW_SIGNAL = {
     "rsi_mr": lambda df, p: strat.rsi_mr_target_state(df["close"], p["exit"]),
     "tsmom": lambda df, p: strat.tsmom_target_state(df["close"], p["n"]),
     "dip_pct": lambda df, p: strat.dip_pct_entry_trigger(df["close"], p["threshold"]),
+    # spec_v3 §D "Popular combos" — additive. `ichimoku_cloud` has no entry here since it has no
+    # numeric params (see registry.py's own comment on that judgment call); evaluate_variant_grid
+    # already returns [] for any strategy with zero numeric params before this table is consulted.
+    "ema_9_21": lambda df, p: strat.ema_cross_target_state(df["close"], p["n_fast"], p["n_slow"]),
+    "ema200_macd": lambda df, p: strat.ema200_macd_target_state(df, p["n_ema"]),
+    "rsi_uptrend": lambda df, p: strat.rsi_uptrend_target_state(df, p["n_sma"]),
+    "bb_squeeze": lambda df, p: strat.bb_squeeze_target_state(df, p["n_lookback"], p["n_confirm"]),
+    "heikin_ashi_trend": lambda df, p: strat.heikin_ashi_trend_target_state(df, p["n_confirm"]),
+    "supertrend_ema200": lambda df, p: strat.supertrend_ema200_target_state(df, p["n_ema"]),
 }
 
 # Strategy ids with no numeric parameter at all (registry.py's variant["params"] == {}) never

@@ -1,7 +1,7 @@
 {
   "project_name": "Dead or Alive",
   "tagline": "Popular trading strategies, re-tested every week \u2014 after fees, out-of-sample.",
-  "generated_at": "2026-09-07T00:43:39.370423+00:00",
+  "generated_at": "2026-09-07T00:56:55.333965+00:00",
   "as_of": "2026-09-05",
   "oos_days": 730,
   "tally": {
@@ -3200,7 +3200,995 @@
       "edition": "en"
     }
   ],
+  "popular_combos": [
+    {
+      "strategy_id": "ema_9_21",
+      "strategy_name": "EMA 9/21 crossover",
+      "type": "state",
+      "params": "9-21",
+      "asset": "BTCUSD",
+      "timeframe": "1d",
+      "as_of": "2026-09-05",
+      "verdict": "FADING",
+      "is": {
+        "total_return": 19.18082845749978,
+        "cagr": 0.5307354101233313,
+        "bh_return": 12.260049609513961,
+        "n_trades": 50,
+        "win_rate": 34.0,
+        "profit_factor": 3.388923486776483,
+        "mdd": 76.20480556408882,
+        "bh_mdd": 83.4293493046095,
+        "sharpe": 1.0917100993641629,
+        "exposure": 52.09627329192546,
+        "max_consec_loss": 11,
+        "avg_trade_return": 0.12005854313628646
+      },
+      "oos": {
+        "total_return": 0.5302847032595597,
+        "cagr": 0.23668682858635814,
+        "bh_return": 0.37425257290058767,
+        "n_trades": 19,
+        "win_rate": 31.57894736842105,
+        "profit_factor": 2.304785219837196,
+        "mdd": 27.470632521308293,
+        "bh_mdd": 53.0769594637932,
+        "sharpe": 0.874427669559606,
+        "exposure": 50.88919288645691,
+        "max_consec_loss": 5,
+        "avg_trade_return": 0.029892127280213007,
+        "fee_drag": 0.05926983334671587
+      },
+      "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n_fast=7, n_slow=16",
+            "oos_pf": 1.8104564501814233,
+            "oos_n_trades": 22
+          },
+          {
+            "params": "n_fast=7, n_slow=21",
+            "oos_pf": 2.19836690275833,
+            "oos_n_trades": 21
+          },
+          {
+            "params": "n_fast=7, n_slow=26",
+            "oos_pf": 2.6161189086701397,
+            "oos_n_trades": 18
+          },
+          {
+            "params": "n_fast=9, n_slow=16",
+            "oos_pf": 1.7917098745226987,
+            "oos_n_trades": 20
+          },
+          {
+            "params": "n_fast=9, n_slow=21",
+            "oos_pf": 2.304785219837196,
+            "oos_n_trades": 19
+          },
+          {
+            "params": "n_fast=9, n_slow=26",
+            "oos_pf": 2.4327207843035694,
+            "oos_n_trades": 16
+          },
+          {
+            "params": "n_fast=11, n_slow=16",
+            "oos_pf": 1.9438568820804107,
+            "oos_n_trades": 18
+          },
+          {
+            "params": "n_fast=11, n_slow=21",
+            "oos_pf": 2.517374724932339,
+            "oos_n_trades": 15
+          },
+          {
+            "params": "n_fast=11, n_slow=26",
+            "oos_pf": 2.4519859533856576,
+            "oos_n_trades": 14
+          }
+        ],
+        "share_pf_ge_1": 1.0,
+        "n_pass": 9,
+        "n_total": 9,
+        "note": "diagnostic; verdict uses registered params only"
+      },
+      "group": "popular_combos",
+      "edition": "en"
+    },
+    {
+      "strategy_id": "ema200_macd",
+      "strategy_name": "EMA200 trend + MACD cross",
+      "type": "state",
+      "params": "ema200-macd12.26.9",
+      "asset": "BTCUSD",
+      "timeframe": "1d",
+      "as_of": "2026-09-05",
+      "verdict": "DEAD",
+      "is": {
+        "total_return": 8.80613207222804,
+        "cagr": 0.3819357102021761,
+        "bh_return": 12.260049609513961,
+        "n_trades": 74,
+        "win_rate": 32.432432432432435,
+        "profit_factor": 2.5675023761481985,
+        "mdd": 46.65719030002579,
+        "bh_mdd": 83.4293493046095,
+        "sharpe": 1.0348550061877548,
+        "exposure": 28.88198757763975,
+        "max_consec_loss": 8,
+        "avg_trade_return": 0.04428203794831874
+      },
+      "oos": {
+        "total_return": -0.06778385232798623,
+        "cagr": -0.0344402331785697,
+        "bh_return": 0.37425257290058767,
+        "n_trades": 27,
+        "win_rate": 29.629629629629626,
+        "profit_factor": 0.9823093625644371,
+        "mdd": 32.02319145014467,
+        "bh_mdd": 53.0769594637932,
+        "sharpe": -0.05055195192096015,
+        "exposure": 27.63337893296854,
+        "max_consec_loss": 5,
+        "avg_trade_return": -0.00040604282744211224,
+        "fee_drag": 0.05172365978704763
+      },
+      "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n_ema=150",
+            "oos_pf": 1.287908355962017,
+            "oos_n_trades": 23
+          },
+          {
+            "params": "n_ema=200",
+            "oos_pf": 0.9823093625644371,
+            "oos_n_trades": 27
+          },
+          {
+            "params": "n_ema=250",
+            "oos_pf": 0.9760283287059675,
+            "oos_n_trades": 24
+          }
+        ],
+        "share_pf_ge_1": 0.3333333333333333,
+        "n_pass": 1,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
+      "group": "popular_combos",
+      "edition": "en"
+    },
+    {
+      "strategy_id": "rsi_uptrend",
+      "strategy_name": "RSI dip in uptrend",
+      "type": "state",
+      "params": "rsi14-sma200",
+      "asset": "BTCUSD",
+      "timeframe": "1d",
+      "as_of": "2026-09-05",
+      "verdict": "TOO FEW TRADES",
+      "is": {
+        "total_return": 0.01308816016743175,
+        "cagr": 0.0018441620240805534,
+        "bh_return": 12.260049609513961,
+        "n_trades": 5,
+        "win_rate": 20.0,
+        "profit_factor": 1.2851893552497033,
+        "mdd": 20.97040504897959,
+        "bh_mdd": 83.4293493046095,
+        "sharpe": 0.06725714278773198,
+        "exposure": 0.9316770186335404,
+        "max_consec_loss": 3,
+        "avg_trade_return": 0.015346631542041056
+      },
+      "oos": {
+        "total_return": -0.09039204616863716,
+        "cagr": -0.04620450219671024,
+        "bh_return": 0.37425257290058767,
+        "n_trades": 1,
+        "win_rate": 0.0,
+        "profit_factor": 0.0,
+        "mdd": 14.453478726676783,
+        "bh_mdd": 53.0769594637932,
+        "sharpe": -0.350844738715908,
+        "exposure": 1.6415868673050615,
+        "max_consec_loss": 1,
+        "avg_trade_return": -0.09039204616863716,
+        "fee_drag": 0.001821036944607335
+      },
+      "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n_sma=150",
+            "oos_pf": null,
+            "oos_n_trades": 0
+          },
+          {
+            "params": "n_sma=200",
+            "oos_pf": 0.0,
+            "oos_n_trades": 1
+          },
+          {
+            "params": "n_sma=250",
+            "oos_pf": 0.0,
+            "oos_n_trades": 1
+          }
+        ],
+        "share_pf_ge_1": 0.0,
+        "n_pass": 0,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
+      "group": "popular_combos",
+      "edition": "en"
+    },
+    {
+      "strategy_id": "bb_squeeze",
+      "strategy_name": "Bollinger squeeze breakout",
+      "type": "state",
+      "params": "bb20.2-look120-conf5",
+      "asset": "BTCUSD",
+      "timeframe": "1d",
+      "as_of": "2026-09-05",
+      "verdict": "TOO FEW TRADES",
+      "is": {
+        "total_return": 0.03067948401414977,
+        "cagr": 0.004290884351716429,
+        "bh_return": 12.260049609513961,
+        "n_trades": 10,
+        "win_rate": 20.0,
+        "profit_factor": 1.254737648419713,
+        "mdd": 28.105373622477604,
+        "bh_mdd": 83.4293493046095,
+        "sharpe": 0.09380699693222654,
+        "exposure": 4.3478260869565215,
+        "max_consec_loss": 3,
+        "avg_trade_return": 0.010817613164408412
+      },
+      "oos": {
+        "total_return": 0.33695946341621585,
+        "cagr": 0.15603998490661075,
+        "bh_return": 0.37425257290058767,
+        "n_trades": 4,
+        "win_rate": 50.0,
+        "profit_factor": 4.744943185157813,
+        "mdd": 13.000716258611822,
+        "bh_mdd": 53.0769594637932,
+        "sharpe": 0.9678905604984019,
+        "exposure": 9.849521203830369,
+        "max_consec_loss": 2,
+        "avg_trade_return": 0.08386459565154639,
+        "fee_drag": 0.0107385763197696
+      },
+      "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n_lookback=90, n_confirm=4",
+            "oos_pf": 9.480269969135982,
+            "oos_n_trades": 4
+          },
+          {
+            "params": "n_lookback=90, n_confirm=5",
+            "oos_pf": 3.7195027399452285,
+            "oos_n_trades": 5
+          },
+          {
+            "params": "n_lookback=90, n_confirm=6",
+            "oos_pf": 3.7195027399452285,
+            "oos_n_trades": 5
+          },
+          {
+            "params": "n_lookback=120, n_confirm=4",
+            "oos_pf": 21.106056509204926,
+            "oos_n_trades": 3
+          },
+          {
+            "params": "n_lookback=120, n_confirm=5",
+            "oos_pf": 4.744943185157813,
+            "oos_n_trades": 4
+          },
+          {
+            "params": "n_lookback=120, n_confirm=6",
+            "oos_pf": 4.744943185157813,
+            "oos_n_trades": 4
+          },
+          {
+            "params": "n_lookback=150, n_confirm=4",
+            "oos_pf": 7.432963045167882,
+            "oos_n_trades": 2
+          },
+          {
+            "params": "n_lookback=150, n_confirm=5",
+            "oos_pf": 1.6710363364808314,
+            "oos_n_trades": 3
+          },
+          {
+            "params": "n_lookback=150, n_confirm=6",
+            "oos_pf": 1.6710363364808314,
+            "oos_n_trades": 3
+          }
+        ],
+        "share_pf_ge_1": 0.0,
+        "n_pass": 0,
+        "n_total": 9,
+        "note": "diagnostic; verdict uses registered params only"
+      },
+      "group": "popular_combos",
+      "edition": "en"
+    },
+    {
+      "strategy_id": "ichimoku_cloud",
+      "strategy_name": "Ichimoku cloud breakout",
+      "type": "state",
+      "params": "9-26-52",
+      "asset": "BTCUSD",
+      "timeframe": "1d",
+      "as_of": "2026-09-05",
+      "verdict": "TOO FEW TRADES",
+      "is": {
+        "total_return": 14.201994173645268,
+        "cagr": 0.47050498263843754,
+        "bh_return": 12.260049609513961,
+        "n_trades": 28,
+        "win_rate": 35.714285714285715,
+        "profit_factor": 4.51466749227666,
+        "mdd": 63.96096282645871,
+        "bh_mdd": 83.4293493046095,
+        "sharpe": 1.01092820208974,
+        "exposure": 52.484472049689444,
+        "max_consec_loss": 4,
+        "avg_trade_return": 0.22036164401641298
+      },
+      "oos": {
+        "total_return": 0.9074030160816067,
+        "cagr": 0.3804777505050245,
+        "bh_return": 0.37425257290058767,
+        "n_trades": 8,
+        "win_rate": 37.5,
+        "profit_factor": 5.133516637277165,
+        "mdd": 22.46260043635354,
+        "bh_mdd": 53.0769594637932,
+        "sharpe": 1.291970038353527,
+        "exposure": 46.51162790697674,
+        "max_consec_loss": 3,
+        "avg_trade_return": 0.10300374391596766,
+        "fee_drag": 0.03076391352591279
+      },
+      "suspicious": true,
+      "robustness": {
+        "grid": [],
+        "share_pf_ge_1": null,
+        "n_pass": null,
+        "n_total": 0,
+        "note": "diagnostic; verdict uses registered params only; this variant has no tunable numeric parameter to vary"
+      },
+      "group": "popular_combos",
+      "edition": "en"
+    },
+    {
+      "strategy_id": "heikin_ashi_trend",
+      "strategy_name": "Heikin-Ashi colour",
+      "type": "state",
+      "params": "conf2",
+      "asset": "BTCUSD",
+      "timeframe": "1d",
+      "as_of": "2026-09-05",
+      "verdict": "DEAD",
+      "is": {
+        "total_return": 6.633084161869556,
+        "cagr": 0.33374258537750756,
+        "bh_return": 12.260049609513961,
+        "n_trades": 238,
+        "win_rate": 34.03361344537815,
+        "profit_factor": 1.6142180301288345,
+        "mdd": 69.90307871089418,
+        "bh_mdd": 83.4293493046095,
+        "sharpe": 0.8675049823625249,
+        "exposure": 41.45962732919254,
+        "max_consec_loss": 10,
+        "avg_trade_return": 0.012862228257259916
+      },
+      "oos": {
+        "total_return": -0.09702507459655108,
+        "cagr": -0.049683733995974255,
+        "bh_return": 0.37425257290058767,
+        "n_trades": 76,
+        "win_rate": 28.947368421052634,
+        "profit_factor": 0.975909174548674,
+        "mdd": 46.68189084713915,
+        "bh_mdd": 53.0769594637932,
+        "sharpe": -0.04688332389509468,
+        "exposure": 41.58686730506156,
+        "max_consec_loss": 9,
+        "avg_trade_return": -0.000339489814511518,
+        "fee_drag": 0.14823263050770175
+      },
+      "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n_confirm=2",
+            "oos_pf": 0.975909174548674,
+            "oos_n_trades": 76
+          }
+        ],
+        "share_pf_ge_1": 0.0,
+        "n_pass": 0,
+        "n_total": 1,
+        "note": "diagnostic; verdict uses registered params only"
+      },
+      "group": "popular_combos",
+      "edition": "en"
+    },
+    {
+      "strategy_id": "supertrend_ema200",
+      "strategy_name": "Supertrend + EMA200 filter",
+      "type": "state",
+      "params": "st10.3-ema200",
+      "asset": "BTCUSD",
+      "timeframe": "1d",
+      "as_of": "2026-09-05",
+      "verdict": "FADING",
+      "is": {
+        "total_return": 12.636838318449716,
+        "cagr": 0.448039712596459,
+        "bh_return": 12.260049609513961,
+        "n_trades": 23,
+        "win_rate": 52.17391304347826,
+        "profit_factor": 4.785192685565027,
+        "mdd": 45.7353015609077,
+        "bh_mdd": 83.4293493046095,
+        "sharpe": 1.0875310800730245,
+        "exposure": 40.91614906832298,
+        "max_consec_loss": 3,
+        "avg_trade_return": 0.17829562384031308
+      },
+      "oos": {
+        "total_return": 0.02552129221715016,
+        "cagr": 0.012662795904923696,
+        "bh_return": 0.37425257290058767,
+        "n_trades": 10,
+        "win_rate": 40.0,
+        "profit_factor": 1.3170802974157252,
+        "mdd": 43.42809551053486,
+        "bh_mdd": 53.0769594637932,
+        "sharpe": 0.17697240356997962,
+        "exposure": 34.74692202462381,
+        "max_consec_loss": 3,
+        "avg_trade_return": 0.01735763617154995,
+        "fee_drag": 0.020716911303681584
+      },
+      "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n_ema=150",
+            "oos_pf": 1.4970609471042706,
+            "oos_n_trades": 10
+          },
+          {
+            "params": "n_ema=200",
+            "oos_pf": 1.3170802974157252,
+            "oos_n_trades": 10
+          },
+          {
+            "params": "n_ema=250",
+            "oos_pf": 1.3954106532132327,
+            "oos_n_trades": 9
+          }
+        ],
+        "share_pf_ge_1": 0.6666666666666666,
+        "n_pass": 2,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
+      "group": "popular_combos",
+      "edition": "en"
+    },
+    {
+      "strategy_id": "ema_9_21",
+      "strategy_name": "EMA 9/21 crossover",
+      "type": "state",
+      "params": "9-21",
+      "asset": "BTCUSD",
+      "timeframe": "4h",
+      "as_of": "2026-09-05",
+      "verdict": "FADING",
+      "is": {
+        "total_return": 22.48284684208026,
+        "cagr": 0.5639582806991636,
+        "bh_return": 12.260049609513961,
+        "n_trades": 316,
+        "win_rate": 28.79746835443038,
+        "profit_factor": 1.7800269334478667,
+        "mdd": 64.12420399118339,
+        "bh_mdd": 83.93728308558705,
+        "sharpe": 1.1654108671007701,
+        "exposure": 52.45212215320911,
+        "max_consec_loss": 13,
+        "avg_trade_return": 0.014901392521260827
+      },
+      "oos": {
+        "total_return": -0.056874699831828246,
+        "cagr": -0.028814718273873052,
+        "bh_return": 0.37425257290058767,
+        "n_trades": 101,
+        "win_rate": 31.683168316831683,
+        "profit_factor": 1.0305610355584294,
+        "mdd": 47.73005030412064,
+        "bh_mdd": 53.56229229923255,
+        "sharpe": 0.05624076155474264,
+        "exposure": 52.849977200182394,
+        "max_consec_loss": 13,
+        "avg_trade_return": 0.000423099858329253,
+        "fee_drag": 0.21111679756106783
+      },
+      "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n_fast=7, n_slow=16",
+            "oos_pf": 1.2331920367839009,
+            "oos_n_trades": 116
+          },
+          {
+            "params": "n_fast=7, n_slow=21",
+            "oos_pf": 1.0315899059380387,
+            "oos_n_trades": 115
+          },
+          {
+            "params": "n_fast=7, n_slow=26",
+            "oos_pf": 0.9984608779350372,
+            "oos_n_trades": 100
+          },
+          {
+            "params": "n_fast=9, n_slow=16",
+            "oos_pf": 1.0669153832408633,
+            "oos_n_trades": 113
+          },
+          {
+            "params": "n_fast=9, n_slow=21",
+            "oos_pf": 1.0305610355584294,
+            "oos_n_trades": 101
+          },
+          {
+            "params": "n_fast=9, n_slow=26",
+            "oos_pf": 0.9610962424076446,
+            "oos_n_trades": 97
+          },
+          {
+            "params": "n_fast=11, n_slow=16",
+            "oos_pf": 1.0261706939260051,
+            "oos_n_trades": 106
+          },
+          {
+            "params": "n_fast=11, n_slow=21",
+            "oos_pf": 0.9638982310470943,
+            "oos_n_trades": 96
+          },
+          {
+            "params": "n_fast=11, n_slow=26",
+            "oos_pf": 0.8843145618556867,
+            "oos_n_trades": 88
+          }
+        ],
+        "share_pf_ge_1": 0.5555555555555556,
+        "n_pass": 5,
+        "n_total": 9,
+        "note": "diagnostic; verdict uses registered params only"
+      },
+      "group": "popular_combos",
+      "edition": "en"
+    },
+    {
+      "strategy_id": "ema200_macd",
+      "strategy_name": "EMA200 trend + MACD cross",
+      "type": "state",
+      "params": "ema200-macd12.26.9",
+      "asset": "BTCUSD",
+      "timeframe": "4h",
+      "as_of": "2026-09-05",
+      "verdict": "ALIVE",
+      "is": {
+        "total_return": 9.429962564628934,
+        "cagr": 0.39406516753019205,
+        "bh_return": 12.260049609513961,
+        "n_trades": 405,
+        "win_rate": 35.30864197530864,
+        "profit_factor": 1.5867871495152899,
+        "mdd": 30.220109339999013,
+        "bh_mdd": 83.93728308558705,
+        "sharpe": 1.1361471128322678,
+        "exposure": 25.87991718426501,
+        "max_consec_loss": 18,
+        "avg_trade_return": 0.006888998600320938
+      },
+      "oos": {
+        "total_return": 0.2844676808254636,
+        "cagr": 0.13314953408265784,
+        "bh_return": 0.37425257290058767,
+        "n_trades": 115,
+        "win_rate": 28.695652173913043,
+        "profit_factor": 1.285709707863161,
+        "mdd": 30.12088132361791,
+        "bh_mdd": 53.56229229923255,
+        "sharpe": 0.709266974472947,
+        "exposure": 25.786593707250343,
+        "max_consec_loss": 12,
+        "avg_trade_return": 0.0027422863533037435,
+        "fee_drag": 0.33216347895733
+      },
+      "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n_ema=150",
+            "oos_pf": 1.2641151336140954,
+            "oos_n_trades": 128
+          },
+          {
+            "params": "n_ema=200",
+            "oos_pf": 1.285709707863161,
+            "oos_n_trades": 115
+          },
+          {
+            "params": "n_ema=250",
+            "oos_pf": 1.303737888782746,
+            "oos_n_trades": 112
+          }
+        ],
+        "share_pf_ge_1": 1.0,
+        "n_pass": 3,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
+      "group": "popular_combos",
+      "edition": "en"
+    },
+    {
+      "strategy_id": "rsi_uptrend",
+      "strategy_name": "RSI dip in uptrend",
+      "type": "state",
+      "params": "rsi14-sma200",
+      "asset": "BTCUSD",
+      "timeframe": "4h",
+      "as_of": "2026-09-05",
+      "verdict": "TOO FEW TRADES",
+      "is": {
+        "total_return": -0.0720912354370612,
+        "cagr": -0.010545700648132095,
+        "bh_return": 12.260049609513961,
+        "n_trades": 25,
+        "win_rate": 24.0,
+        "profit_factor": 0.9440748883684046,
+        "mdd": 34.5550089066453,
+        "bh_mdd": 83.93728308558705,
+        "sharpe": 0.008828537617135663,
+        "exposure": 4.464285714285714,
+        "max_consec_loss": 8,
+        "avg_trade_return": -0.0013111024462415654
+      },
+      "oos": {
+        "total_return": -0.08554936712131589,
+        "cagr": -0.04367238083219249,
+        "bh_return": 0.37425257290058767,
+        "n_trades": 5,
+        "win_rate": 0.0,
+        "profit_factor": 0.0,
+        "mdd": 11.851148757648367,
+        "bh_mdd": 53.56229229923255,
+        "sharpe": -0.7166197155640288,
+        "exposure": 1.3451892384860922,
+        "max_consec_loss": 5,
+        "avg_trade_return": -0.01765394633347086,
+        "fee_drag": 0.009190384729458767
+      },
+      "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n_sma=150",
+            "oos_pf": 0.0,
+            "oos_n_trades": 3
+          },
+          {
+            "params": "n_sma=200",
+            "oos_pf": 0.0,
+            "oos_n_trades": 5
+          },
+          {
+            "params": "n_sma=250",
+            "oos_pf": 0.0,
+            "oos_n_trades": 7
+          }
+        ],
+        "share_pf_ge_1": 0.0,
+        "n_pass": 0,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
+      "group": "popular_combos",
+      "edition": "en"
+    },
+    {
+      "strategy_id": "bb_squeeze",
+      "strategy_name": "Bollinger squeeze breakout",
+      "type": "state",
+      "params": "bb20.2-look120-conf5",
+      "asset": "BTCUSD",
+      "timeframe": "4h",
+      "as_of": "2026-09-05",
+      "verdict": "FADING",
+      "is": {
+        "total_return": 2.651577015868202,
+        "cagr": 0.20143226092151334,
+        "bh_return": 12.260049609513961,
+        "n_trades": 58,
+        "win_rate": 43.103448275862064,
+        "profit_factor": 2.6921293075396333,
+        "mdd": 23.162286055111558,
+        "bh_mdd": 83.93728308558705,
+        "sharpe": 1.1453094678042286,
+        "exposure": 6.722308488612836,
+        "max_consec_loss": 4,
+        "avg_trade_return": 0.02534302385367479
+      },
+      "oos": {
+        "total_return": 0.11954627989523958,
+        "cagr": 0.0580044176954162,
+        "bh_return": 0.37425257290058767,
+        "n_trades": 22,
+        "win_rate": 31.818181818181817,
+        "profit_factor": 1.528836777619769,
+        "mdd": 17.75780662277615,
+        "bh_mdd": 53.56229229923255,
+        "sharpe": 0.5808908130587128,
+        "exposure": 7.3187414500684,
+        "max_consec_loss": 5,
+        "avg_trade_return": 0.006524229200283071,
+        "fee_drag": 0.05035984523491699
+      },
+      "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n_lookback=90, n_confirm=4",
+            "oos_pf": 1.1105629994638673,
+            "oos_n_trades": 25
+          },
+          {
+            "params": "n_lookback=90, n_confirm=5",
+            "oos_pf": 1.1627187473497167,
+            "oos_n_trades": 27
+          },
+          {
+            "params": "n_lookback=90, n_confirm=6",
+            "oos_pf": 1.1627187473497167,
+            "oos_n_trades": 27
+          },
+          {
+            "params": "n_lookback=120, n_confirm=4",
+            "oos_pf": 1.5266195505253257,
+            "oos_n_trades": 20
+          },
+          {
+            "params": "n_lookback=120, n_confirm=5",
+            "oos_pf": 1.528836777619769,
+            "oos_n_trades": 22
+          },
+          {
+            "params": "n_lookback=120, n_confirm=6",
+            "oos_pf": 1.528836777619769,
+            "oos_n_trades": 22
+          },
+          {
+            "params": "n_lookback=150, n_confirm=4",
+            "oos_pf": 1.77492238401211,
+            "oos_n_trades": 16
+          },
+          {
+            "params": "n_lookback=150, n_confirm=5",
+            "oos_pf": 1.9166119561890473,
+            "oos_n_trades": 17
+          },
+          {
+            "params": "n_lookback=150, n_confirm=6",
+            "oos_pf": 1.9166119561890473,
+            "oos_n_trades": 17
+          }
+        ],
+        "share_pf_ge_1": 1.0,
+        "n_pass": 9,
+        "n_total": 9,
+        "note": "diagnostic; verdict uses registered params only"
+      },
+      "group": "popular_combos",
+      "edition": "en"
+    },
+    {
+      "strategy_id": "ichimoku_cloud",
+      "strategy_name": "Ichimoku cloud breakout",
+      "type": "state",
+      "params": "9-26-52",
+      "asset": "BTCUSD",
+      "timeframe": "4h",
+      "as_of": "2026-09-05",
+      "verdict": "FADING",
+      "is": {
+        "total_return": 18.496897610091885,
+        "cagr": 0.5232756445083819,
+        "bh_return": 12.260049609513961,
+        "n_trades": 175,
+        "win_rate": 26.285714285714285,
+        "profit_factor": 2.055882156539775,
+        "mdd": 56.88567299683683,
+        "bh_mdd": 83.93728308558705,
+        "sharpe": 1.1121711781071846,
+        "exposure": 53.247929606625256,
+        "max_consec_loss": 11,
+        "avg_trade_return": 0.025502927806355352
+      },
+      "oos": {
+        "total_return": -0.07370588275156553,
+        "cagr": -0.03750784911409877,
+        "bh_return": 0.37425257290058767,
+        "n_trades": 61,
+        "win_rate": 27.86885245901639,
+        "profit_factor": 1.016406764099616,
+        "mdd": 47.13313039462281,
+        "bh_mdd": 53.56229229923255,
+        "sharpe": 0.0180519521940215,
+        "exposure": 53.98996808025536,
+        "max_consec_loss": 10,
+        "avg_trade_return": 0.00031073509898627916,
+        "fee_drag": 0.12019050372502305
+      },
+      "suspicious": false,
+      "robustness": {
+        "grid": [],
+        "share_pf_ge_1": null,
+        "n_pass": null,
+        "n_total": 0,
+        "note": "diagnostic; verdict uses registered params only; this variant has no tunable numeric parameter to vary"
+      },
+      "group": "popular_combos",
+      "edition": "en"
+    },
+    {
+      "strategy_id": "heikin_ashi_trend",
+      "strategy_name": "Heikin-Ashi colour",
+      "type": "state",
+      "params": "conf2",
+      "asset": "BTCUSD",
+      "timeframe": "4h",
+      "as_of": "2026-09-05",
+      "verdict": "DEAD",
+      "is": {
+        "total_return": -0.38727433683485,
+        "cagr": -0.06705253754428742,
+        "bh_return": 12.260049609513961,
+        "n_trades": 1510,
+        "win_rate": 29.668874172185433,
+        "profit_factor": 1.016162687130992,
+        "mdd": 81.02711792477564,
+        "bh_mdd": 83.93728308558705,
+        "sharpe": 0.05307506187950448,
+        "exposure": 39.285714285714285,
+        "max_consec_loss": 16,
+        "avg_trade_return": 0.00014256717206108927
+      },
+      "oos": {
+        "total_return": -0.46530606352572224,
+        "cagr": -0.26845911378921594,
+        "bh_return": 0.37425257290058767,
+        "n_trades": 440,
+        "win_rate": 30.681818181818183,
+        "profit_factor": 0.8107337777063249,
+        "mdd": 62.487203728026316,
+        "bh_mdd": 53.56229229923255,
+        "sharpe": -1.0119066532723213,
+        "exposure": 39.19288645690834,
+        "max_consec_loss": 13,
+        "avg_trade_return": -0.0012510603888751368,
+        "fee_drag": 0.7543998961289162
+      },
+      "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n_confirm=2",
+            "oos_pf": 0.8107337777063249,
+            "oos_n_trades": 440
+          }
+        ],
+        "share_pf_ge_1": 0.0,
+        "n_pass": 0,
+        "n_total": 1,
+        "note": "diagnostic; verdict uses registered params only"
+      },
+      "group": "popular_combos",
+      "edition": "en"
+    },
+    {
+      "strategy_id": "supertrend_ema200",
+      "strategy_name": "Supertrend + EMA200 filter",
+      "type": "state",
+      "params": "st10.3-ema200",
+      "asset": "BTCUSD",
+      "timeframe": "4h",
+      "as_of": "2026-09-05",
+      "verdict": "ALIVE",
+      "is": {
+        "total_return": 34.49834224673607,
+        "cagr": 0.6582611627877664,
+        "bh_return": 12.260049609513961,
+        "n_trades": 130,
+        "win_rate": 40.76923076923077,
+        "profit_factor": 2.5446818713394923,
+        "mdd": 32.46879221510729,
+        "bh_mdd": 83.93728308558705,
+        "sharpe": 1.4456889603089778,
+        "exposure": 38.60636645962733,
+        "max_consec_loss": 9,
+        "avg_trade_return": 0.03526441500396008
+      },
+      "oos": {
+        "total_return": 0.2580593503849895,
+        "cagr": 0.12145633853844551,
+        "bh_return": 0.37425257290058767,
+        "n_trades": 44,
+        "win_rate": 52.27272727272727,
+        "profit_factor": 1.3976754478740918,
+        "mdd": 33.93066459237934,
+        "bh_mdd": 53.56229229923255,
+        "sharpe": 0.573245385417627,
+        "exposure": 41.244870041039675,
+        "max_consec_loss": 6,
+        "avg_trade_return": 0.007227695311658581,
+        "fee_drag": 0.11572655733966464
+      },
+      "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n_ema=150",
+            "oos_pf": 1.4929075825255607,
+            "oos_n_trades": 45
+          },
+          {
+            "params": "n_ema=200",
+            "oos_pf": 1.3976754478740918,
+            "oos_n_trades": 44
+          },
+          {
+            "params": "n_ema=250",
+            "oos_pf": 1.5898573490604049,
+            "oos_n_trades": 41
+          }
+        ],
+        "share_pf_ge_1": 1.0,
+        "n_pass": 3,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
+      "group": "popular_combos",
+      "edition": "en"
+    }
+  ],
   "suspicious": [
+    {
+      "strategy_id": "ichimoku_cloud",
+      "params": "9-26-52",
+      "asset": "BTCUSD",
+      "tf": "1d",
+      "oos_pf": 5.133516637277165,
+      "oos_sharpe": 1.291970038353527
+    },
     {
       "strategy_id": "dip_pct",
       "params": "-5pct-5bar",

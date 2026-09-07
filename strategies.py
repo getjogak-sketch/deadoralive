@@ -197,3 +197,114 @@ def dip_pct_entry_trigger(close: pd.Series, threshold: float = -0.05) -> pd.Seri
     strategy here)."""
     bar_return = close / close.shift(1) - 1.0
     return ((bar_return <= threshold) & bar_return.notna()).astype(bool)
+
+
+# ===========================================================================
+# spec_v3 §D "Popular combos" extension — additive only, nothing above this line is modified.
+#
+# Every function below returns a single bool "state" Series with EXACTLY the same semantics as
+# ma_cross_target_state at the top of this file (True=long/False=flat, decided using data up to
+# and including bar t) — spec_v3 §D itself specifies "same execution rules as spec_v2 (state at
+# close t -> fill at open t+1)", so all seven plug directly into engine.simulate_ma_cross
+# unmodified, exactly like every "state"-type registry strategy above. No new engine code is
+# needed for this entire extension.
+# ===========================================================================
+
+def ema200_macd_target_state(df: pd.DataFrame, n_ema: int = 200) -> pd.Series:
+    """POPULAR_COMBOS `ema200_macd`: long when close > EMA(n_ema) AND MACD(12,26,9) line >
+    signal; flat when MACD line < signal OR close < EMA(n_ema). The flat condition is exactly the
+    De Morgan negation of the long condition (ignoring the knife-edge tie case, which both
+    conditions already treat as flat via strict '>'), so — unlike the RSI/Bollinger "hold zone"
+    strategies elsewhere in this file — state[t] IS the long condition itself, evaluated fresh
+    every bar; no persistence state machine is needed."""
+    close = df["close"]
+    ema_n = ind.ema(close, n_ema)
+    macd_line, signal_line, _hist = ind.macd(close, 12, 26, 9)
+    long_cond = (close > ema_n) & (macd_line > signal_line) & ema_n.notna() & macd_line.notna()
+    return long_cond.astype(bool)
+
+
+def rsi_uptrend_target_state(df: pd.DataFrame, n_sma: int = 200) -> pd.Series:
+    """POPULAR_COMBOS `rsi_uptrend`: RSI dip in an uptrend. Long when RSI(14) < 30 AND
+    close > SMA(n_sma); flat when RSI(14) > 70 OR close < SMA(n_sma). Unlike ema200_macd above,
+    the flat trigger is NOT the negation of the long trigger (there is a hold zone — e.g. RSI
+    sitting between 30 and 70 while still above the SMA is neither an entry nor an exit signal) —
+    genuine hysteresis, via the same _stateful_target helper the registry's own `rsi_mr` uses."""
+    close = df["close"]
+    rsi14 = ind.rsi_wilder(close, 14)
+    sma_n = ind.sma(close, n_sma)
+    entry = (rsi14 < 30) & (close > sma_n) & sma_n.notna()
+    exit_ = (rsi14 > 70) | ((close < sma_n) & sma_n.notna())
+    return _stateful_target(entry, exit_)
+
+
+def bb_squeeze_target_state(df: pd.DataFrame, n_lookback: int = 120, n_confirm: int = 5) -> pd.Series:
+    """POPULAR_COMBOS `bb_squeeze`: bandwidth = (upper-lower)/middle of Bollinger(20,2).
+    "squeeze" at bar t means bandwidth[t] is at or below the lowest bandwidth seen over the
+    n_lookback bars STRICTLY BEFORE t (shift(1) before the rolling window, so today's own
+    bandwidth never contributes to what counts as "tight"). Long when a squeeze was true on any
+    of the n_confirm bars STRICTLY BEFORE t (shift(1) again) AND close[t] > upper band[t]; flat
+    when close[t] < middle band[t]. Hold zone between breakout and the middle band ->
+    _stateful_target."""
+    close = df["close"]
+    mid, upper, lower = ind.bollinger_bands(close, 20, 2.0)
+    bandwidth = (upper - lower) / mid
+    prior_min = bandwidth.shift(1).rolling(n_lookback, min_periods=n_lookback).min()
+    squeeze = ((bandwidth <= prior_min) & prior_min.notna()).astype(float)
+    squeeze_recent = (squeeze.shift(1).rolling(n_confirm, min_periods=1).max().fillna(0.0) > 0.0)
+    entry = squeeze_recent & (close > upper) & upper.notna()
+    exit_ = (close < mid) & mid.notna()
+    return _stateful_target(entry, exit_)
+
+
+def ichimoku_cloud_target_state(df: pd.DataFrame) -> pd.Series:
+    """POPULAR_COMBOS `ichimoku_cloud`: long when close > max(senkou A, senkou B); flat when
+    close < min(senkou A, senkou B); hold state while price sits inside the cloud. Both senkou
+    spans (indicators.ichimoku_cloud_lines) are already forward-shifted so the cloud value used
+    here at bar t was computed entirely from data at positions <= t-26 — see that function's own
+    docstring for why the shift itself is the no-lookahead guarantee. Hold zone inside the cloud
+    -> _stateful_target."""
+    senkou_a, senkou_b = ind.ichimoku_cloud_lines(df)
+    close = df["close"]
+    # NaN-safe elementwise max/min (senkou_a matures earlier than senkou_b since n_tenkan/n_kijun
+    # < n_senkou_b, so there is a stretch where one span is valid and the other still NaN;
+    # DataFrame.max/min(axis=1, skipna=True) treats that correctly regardless of which side is
+    # NaN, unlike Series.combine(..., max)/(..., min), whose result for a (valid, NaN) pair
+    # depends on argument ORDER because Python's builtin max/min don't handle NaN symmetrically).
+    both = pd.concat([senkou_a, senkou_b], axis=1)
+    cloud_top = both.max(axis=1, skipna=True)
+    cloud_bottom = both.min(axis=1, skipna=True)
+    entry = (close > cloud_top) & cloud_top.notna()
+    exit_ = (close < cloud_bottom) & cloud_bottom.notna()
+    return _stateful_target(entry, exit_)
+
+
+def heikin_ashi_trend_target_state(df: pd.DataFrame, n_confirm: int = 2) -> pd.Series:
+    """POPULAR_COMBOS `heikin_ashi_trend`: long after n_confirm CONSECUTIVE Heikin-Ashi bars with
+    HA close > HA open; flat on the first HA bar with HA close < HA open. A run of only
+    n_confirm-1 bullish HA bars is not yet a signal (hold zone) -> _stateful_target.
+    indicators.heikin_ashi is the one recursive (not merely rolling-window) computation behind
+    this strategy — its own no-lookahead property is what tests.py checks directly, since a bug
+    there could otherwise hide behind this function's own causal-looking boolean algebra."""
+    ha_open, ha_close = ind.heikin_ashi(df)
+    bullish = ha_close > ha_open
+    bearish = ha_close < ha_open
+    entry = bullish.copy()
+    for i in range(1, n_confirm):
+        entry = entry & bullish.shift(i).fillna(False)
+    return _stateful_target(entry, bearish)
+
+
+def supertrend_ema200_target_state(df: pd.DataFrame, n_ema: int = 200) -> pd.Series:
+    """POPULAR_COMBOS `supertrend_ema200`: long when Supertrend(10,3) direction is up AND
+    close > EMA(n_ema); flat SPECIFICALLY on the bar Supertrend flips from up to down — not on
+    every bar the direction merely reads "down" already, and not when price alone dips below the
+    EMA while Supertrend is still up (spec_v3 §D's own wording is asymmetric between the entry
+    and exit conditions; followed literally here). Hysteresis -> _stateful_target."""
+    direction = ind.supertrend(df, 10, 3.0)
+    close = df["close"]
+    ema_n = ind.ema(close, n_ema)
+    up = (direction == "up")
+    entry = up & (close > ema_n) & ema_n.notna()
+    flipped_down = (direction == "down") & (direction.shift(1) == "up")
+    return _stateful_target(entry, flipped_down)

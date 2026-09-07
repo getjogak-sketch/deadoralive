@@ -57,7 +57,7 @@ footer.bottom .disclaimer { margin-top: 0.75rem; }
 <header class="top">
   <h1>Dead or Alive</h1>
   <p class="tagline">Popular trading strategies, re-tested every week — after fees, out-of-sample.</p>
-  <p class="meta">as_of: <strong>2026-09-05</strong> &middot; generated 2026-09-07T00:43:39.370423+00:00
+  <p class="meta">as_of: <strong>2026-09-05</strong> &middot; generated 2026-09-07T00:56:55.333965+00:00
   &middot; <a href="stocks/index.html">Stocks edition</a> &middot; <a href="ko/index.html">한국어 (Korean edition)</a></p>
   <div class="tally"><span style="background:var(--alive-bg);color:var(--alive-fg)">ALIVE 8</span><span style="background:var(--fading-bg);color:var(--fading-fg)">FADING 17</span><span style="background:var(--dead-bg);color:var(--dead-fg)">DEAD 12</span><span style="background:var(--toofew-bg);color:var(--toofew-fg)">TOO FEW TRADES 7</span></div>
   <p class="meta">Skipped this run (no local data file): ETHUSD.</p>
@@ -156,6 +156,56 @@ footer.bottom .disclaimer { margin-top: 0.75rem; }
      &sup2; Robustness = how many of a small grid of nearby parameter values (hover for the list)
      also clear OOS PF &ge; 1.0 with &ge; 10 trades &mdash; diagnostic only, see methodology; it
      never changes the verdict.</p>
+</section>
+  
+<section class="assetblock" id="popular-combos">
+  <h2>Popular combos &mdash; as commonly taught on YouTube / TradingView</h2>
+  <p class="meta">Same execution rules as every strategy above (long-only, always fully invested
+     or fully in cash, state decided at the close of bar t and executed at bar t+1's open, net of
+     cost) and pre-registered the same way, before any result was computed.</p>
+  
+  <h3>BTCUSD &middot; 1d</h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr>
+        <th>Strategy</th><th>Params</th><th>Verdict</th>
+        <th>OOS Return</th><th>OOS PF</th><th>OOS MDD</th><th>OOS Trades</th><th>OOS Win%</th>
+        <th>IS PF</th><th>IS MDD</th>
+        <th>B&amp;H OOS Return</th><th>B&amp;H OOS MDD</th>
+        <th>Fee drag&sup1;</th><th>Robustness&sup2;</th>
+      </tr></thead>
+      <tbody>
+<tr><td>EMA 9/21 crossover</td><td>9-21</td><td><span class="badge" style="background:var(--fading-bg);color:var(--fading-fg)">FADING</span></td><td>53.0%</td><td>2.30</td><td>27.5%</td><td>19</td><td>31.6%</td><td>3.39</td><td>76.2%</td><td>37.4%</td><td>53.1%</td><td>5.9%</td><td><span class="badge robustness-badge" style="background:var(--alive-bg);color:var(--alive-fg)" title="n_fast=7, n_slow=16 → PF=1.81 (n=22); n_fast=7, n_slow=21 → PF=2.20 (n=21); n_fast=7, n_slow=26 → PF=2.62 (n=18); n_fast=9, n_slow=16 → PF=1.79 (n=20); n_fast=9, n_slow=21 → PF=2.30 (n=19); n_fast=9, n_slow=26 → PF=2.43 (n=16); n_fast=11, n_slow=16 → PF=1.94 (n=18); n_fast=11, n_slow=21 → PF=2.52 (n=15); n_fast=11, n_slow=26 → PF=2.45 (n=14)">9/9</span></td></tr>
+<tr><td>EMA200 trend + MACD cross</td><td>ema200-macd12.26.9</td><td><span class="badge" style="background:var(--dead-bg);color:var(--dead-fg)">DEAD</span></td><td>-6.8%</td><td>0.98</td><td>32.0%</td><td>27</td><td>29.6%</td><td>2.57</td><td>46.7%</td><td>37.4%</td><td>53.1%</td><td>5.2%</td><td><span class="badge robustness-badge" style="background:var(--fading-bg);color:var(--fading-fg)" title="n_ema=150 → PF=1.29 (n=23); n_ema=200 → PF=0.98 (n=27); n_ema=250 → PF=0.98 (n=24)">1/3</span></td></tr>
+<tr><td>RSI dip in uptrend</td><td>rsi14-sma200</td><td><span class="badge" style="background:var(--toofew-bg);color:var(--toofew-fg)">TOO FEW TRADES</span></td><td>-9.0%</td><td>0.00</td><td>14.5%</td><td>1</td><td>0.0%</td><td>1.29</td><td>21.0%</td><td>37.4%</td><td>53.1%</td><td>0.2%</td><td><span class="badge robustness-badge" style="background:var(--toofew-bg);color:var(--toofew-fg)" title="n_sma=150 → PF=n/a (n=0); n_sma=200 → PF=0.00 (n=1); n_sma=250 → PF=0.00 (n=1)">0/3</span></td></tr>
+<tr><td>Bollinger squeeze breakout</td><td>bb20.2-look120-conf5</td><td><span class="badge" style="background:var(--toofew-bg);color:var(--toofew-fg)">TOO FEW TRADES</span></td><td>33.7%</td><td>4.74</td><td>13.0%</td><td>4</td><td>50.0%</td><td>1.25</td><td>28.1%</td><td>37.4%</td><td>53.1%</td><td>1.1%</td><td><span class="badge robustness-badge" style="background:var(--toofew-bg);color:var(--toofew-fg)" title="n_lookback=90, n_confirm=4 → PF=9.48 (n=4); n_lookback=90, n_confirm=5 → PF=3.72 (n=5); n_lookback=90, n_confirm=6 → PF=3.72 (n=5); n_lookback=120, n_confirm=4 → PF=21.11 (n=3); n_lookback=120, n_confirm=5 → PF=4.74 (n=4); n_lookback=120, n_confirm=6 → PF=4.74 (n=4); n_lookback=150, n_confirm=4 → PF=7.43 (n=2); n_lookback=150, n_confirm=5 → PF=1.67 (n=3); n_lookback=150, n_confirm=6 → PF=1.67 (n=3)">0/9</span></td></tr>
+<tr><td>Ichimoku cloud breakout <span class="suspicious" title="OOS PF or Sharpe unusually high — see methodology">&#9888;</span></td><td>9-26-52</td><td><span class="badge" style="background:var(--toofew-bg);color:var(--toofew-fg)">TOO FEW TRADES</span></td><td>90.7%</td><td>5.13</td><td>22.5%</td><td>8</td><td>37.5%</td><td>4.51</td><td>64.0%</td><td>37.4%</td><td>53.1%</td><td>3.1%</td><td><span class="meta">-</span></td></tr>
+<tr><td>Heikin-Ashi colour</td><td>conf2</td><td><span class="badge" style="background:var(--dead-bg);color:var(--dead-fg)">DEAD</span></td><td>-9.7%</td><td>0.98</td><td>46.7%</td><td>76</td><td>28.9%</td><td>1.61</td><td>69.9%</td><td>37.4%</td><td>53.1%</td><td>14.8%</td><td><span class="badge robustness-badge" style="background:var(--toofew-bg);color:var(--toofew-fg)" title="n_confirm=2 → PF=0.98 (n=76)">0/1</span></td></tr>
+<tr><td>Supertrend + EMA200 filter</td><td>st10.3-ema200</td><td><span class="badge" style="background:var(--fading-bg);color:var(--fading-fg)">FADING</span></td><td>2.6%</td><td>1.32</td><td>43.4%</td><td>10</td><td>40.0%</td><td>4.79</td><td>45.7%</td><td>37.4%</td><td>53.1%</td><td>2.1%</td><td><span class="badge robustness-badge" style="background:var(--alive-bg);color:var(--alive-fg)" title="n_ema=150 → PF=1.50 (n=10); n_ema=200 → PF=1.32 (n=10); n_ema=250 → PF=1.40 (n=9)">2/3</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>BTCUSD &middot; 4h</h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr>
+        <th>Strategy</th><th>Params</th><th>Verdict</th>
+        <th>OOS Return</th><th>OOS PF</th><th>OOS MDD</th><th>OOS Trades</th><th>OOS Win%</th>
+        <th>IS PF</th><th>IS MDD</th>
+        <th>B&amp;H OOS Return</th><th>B&amp;H OOS MDD</th>
+        <th>Fee drag&sup1;</th><th>Robustness&sup2;</th>
+      </tr></thead>
+      <tbody>
+<tr><td>EMA 9/21 crossover</td><td>9-21</td><td><span class="badge" style="background:var(--fading-bg);color:var(--fading-fg)">FADING</span></td><td>-5.7%</td><td>1.03</td><td>47.7%</td><td>101</td><td>31.7%</td><td>1.78</td><td>64.1%</td><td>37.4%</td><td>53.6%</td><td>21.1%</td><td><span class="badge robustness-badge" style="background:var(--fading-bg);color:var(--fading-fg)" title="n_fast=7, n_slow=16 → PF=1.23 (n=116); n_fast=7, n_slow=21 → PF=1.03 (n=115); n_fast=7, n_slow=26 → PF=1.00 (n=100); n_fast=9, n_slow=16 → PF=1.07 (n=113); n_fast=9, n_slow=21 → PF=1.03 (n=101); n_fast=9, n_slow=26 → PF=0.96 (n=97); n_fast=11, n_slow=16 → PF=1.03 (n=106); n_fast=11, n_slow=21 → PF=0.96 (n=96); n_fast=11, n_slow=26 → PF=0.88 (n=88)">5/9</span></td></tr>
+<tr><td>EMA200 trend + MACD cross</td><td>ema200-macd12.26.9</td><td><span class="badge" style="background:var(--alive-bg);color:var(--alive-fg)">ALIVE</span></td><td>28.4%</td><td>1.29</td><td>30.1%</td><td>115</td><td>28.7%</td><td>1.59</td><td>30.2%</td><td>37.4%</td><td>53.6%</td><td>33.2%</td><td><span class="badge robustness-badge" style="background:var(--alive-bg);color:var(--alive-fg)" title="n_ema=150 → PF=1.26 (n=128); n_ema=200 → PF=1.29 (n=115); n_ema=250 → PF=1.30 (n=112)">3/3</span></td></tr>
+<tr><td>RSI dip in uptrend</td><td>rsi14-sma200</td><td><span class="badge" style="background:var(--toofew-bg);color:var(--toofew-fg)">TOO FEW TRADES</span></td><td>-8.6%</td><td>0.00</td><td>11.9%</td><td>5</td><td>0.0%</td><td>0.94</td><td>34.6%</td><td>37.4%</td><td>53.6%</td><td>0.9%</td><td><span class="badge robustness-badge" style="background:var(--toofew-bg);color:var(--toofew-fg)" title="n_sma=150 → PF=0.00 (n=3); n_sma=200 → PF=0.00 (n=5); n_sma=250 → PF=0.00 (n=7)">0/3</span></td></tr>
+<tr><td>Bollinger squeeze breakout</td><td>bb20.2-look120-conf5</td><td><span class="badge" style="background:var(--fading-bg);color:var(--fading-fg)">FADING</span></td><td>12.0%</td><td>1.53</td><td>17.8%</td><td>22</td><td>31.8%</td><td>2.69</td><td>23.2%</td><td>37.4%</td><td>53.6%</td><td>5.0%</td><td><span class="badge robustness-badge" style="background:var(--alive-bg);color:var(--alive-fg)" title="n_lookback=90, n_confirm=4 → PF=1.11 (n=25); n_lookback=90, n_confirm=5 → PF=1.16 (n=27); n_lookback=90, n_confirm=6 → PF=1.16 (n=27); n_lookback=120, n_confirm=4 → PF=1.53 (n=20); n_lookback=120, n_confirm=5 → PF=1.53 (n=22); n_lookback=120, n_confirm=6 → PF=1.53 (n=22); n_lookback=150, n_confirm=4 → PF=1.77 (n=16); n_lookback=150, n_confirm=5 → PF=1.92 (n=17); n_lookback=150, n_confirm=6 → PF=1.92 (n=17)">9/9</span></td></tr>
+<tr><td>Ichimoku cloud breakout</td><td>9-26-52</td><td><span class="badge" style="background:var(--fading-bg);color:var(--fading-fg)">FADING</span></td><td>-7.4%</td><td>1.02</td><td>47.1%</td><td>61</td><td>27.9%</td><td>2.06</td><td>56.9%</td><td>37.4%</td><td>53.6%</td><td>12.0%</td><td><span class="meta">-</span></td></tr>
+<tr><td>Heikin-Ashi colour</td><td>conf2</td><td><span class="badge" style="background:var(--dead-bg);color:var(--dead-fg)">DEAD</span></td><td>-46.5%</td><td>0.81</td><td>62.5%</td><td>440</td><td>30.7%</td><td>1.02</td><td>81.0%</td><td>37.4%</td><td>53.6%</td><td>75.4%</td><td><span class="badge robustness-badge" style="background:var(--toofew-bg);color:var(--toofew-fg)" title="n_confirm=2 → PF=0.81 (n=440)">0/1</span></td></tr>
+<tr><td>Supertrend + EMA200 filter</td><td>st10.3-ema200</td><td><span class="badge" style="background:var(--alive-bg);color:var(--alive-fg)">ALIVE</span></td><td>25.8%</td><td>1.40</td><td>33.9%</td><td>44</td><td>52.3%</td><td>2.54</td><td>32.5%</td><td>37.4%</td><td>53.6%</td><td>11.6%</td><td><span class="badge robustness-badge" style="background:var(--alive-bg);color:var(--alive-fg)" title="n_ema=150 → PF=1.49 (n=45); n_ema=200 → PF=1.40 (n=44); n_ema=250 → PF=1.59 (n=41)">3/3</span></td></tr>
+      </tbody>
+    </table>
+  </div>
 </section>
 </main>
 <footer class="bottom">

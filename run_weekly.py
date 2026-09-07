@@ -103,6 +103,66 @@ def _gross_oos_return(stype, signal_out, hold_n, df, oos_mask):
     return float(eq["equity"].iloc[-1] - 1.0) if len(eq) else np.nan
 
 
+def _clean_metrics(m: dict) -> dict:
+    """NaN -> None, +inf -> the string "inf" (JSON has no native inf/NaN) — used for every
+    strategy row's is/oos metric dict, both the main registry (spec_v2) and the popular-combos
+    group (spec_v3 §D)."""
+    return {k: (None if isinstance(v, float) and np.isnan(v) else
+                ("inf" if isinstance(v, float) and np.isinf(v) else v))
+            for k, v in m.items()}
+
+
+def _build_variant_row(sid, sname, stype, variant, df, is_mask, oos_mask, cost, bars_per_year,
+                        as_of, symbol, tf, group: str | None = None):
+    """One (strategy variant, asset, timeframe) row: IS/OOS metrics, verdict, fee drag, the
+    spec_v3 §C robustness grid, and the spec_v2 §6 "suspiciously good" flag. Shared by the main
+    registry loop (_build_rows_for_asset_tf_impl) and the popular-combos loop
+    (_build_popular_combo_rows_impl, spec_v3 §D) — the row shape and every metric definition are
+    identical between the two groups; only which registry table a variant came from differs.
+    Returns (row: dict, suspicious_entry: dict | None). `group` is an additive, optional tag
+    (spec_v3 §D rows get "popular_combos"; the original registry's rows pass None so their JSON
+    shape is byte-for-byte what it was before spec_v3 §D — no new key on those rows)."""
+    signal_out = variant["signal_fn"](df)
+    hold_n = variant.get("hold_n")
+
+    m_is = _metrics_for_period(stype, signal_out, hold_n, df, is_mask, cost, bars_per_year)
+    m_oos = _metrics_for_period(stype, signal_out, hold_n, df, oos_mask, cost, bars_per_year)
+    gross_oos_return = _gross_oos_return(stype, signal_out, hold_n, df, oos_mask)
+    fee_drag = gross_oos_return - m_oos["total_return"]
+
+    verd = vd.assign_verdict(m_oos["profit_factor"], m_oos["n_trades"], m_oos["mdd"], m_oos["bh_mdd"])
+
+    is_suspicious = (
+        (isinstance(m_oos["profit_factor"], float) and np.isfinite(m_oos["profit_factor"])
+         and m_oos["profit_factor"] > config.SUSPICIOUS_OOS_PF)
+        or (m_oos["sharpe"] > config.SUSPICIOUS_OOS_SHARPE)
+    )
+    suspicious_entry = None
+    if is_suspicious:
+        suspicious_entry = {
+            "strategy_id": sid, "params": variant["params_str"], "asset": symbol, "tf": tf,
+            "oos_pf": m_oos["profit_factor"], "oos_sharpe": m_oos["sharpe"],
+        }
+
+    # spec_v3 §C: diagnostic-only robustness map, computed from the same OOS window/engine —
+    # never read by verdict.assign_verdict above, which already ran on the registered params.
+    robustness = rb.compute_robustness(sid, variant["params"], stype, hold_n, df, oos_mask, cost)
+
+    row = {
+        "strategy_id": sid, "strategy_name": sname, "type": stype,
+        "params": variant["params_str"], "asset": symbol, "timeframe": tf,
+        "as_of": str(as_of.date()),
+        "verdict": verd,
+        "is": _clean_metrics(m_is),
+        "oos": {**_clean_metrics(m_oos), "fee_drag": None if np.isnan(fee_drag) else fee_drag},
+        "suspicious": bool(is_suspicious),
+        "robustness": robustness,
+    }
+    if group is not None:
+        row["group"] = group
+    return row, suspicious_entry
+
+
 def build_rows_for_asset_tf(symbol: str, tf: str, df: pd.DataFrame):
     """Public entry point, kept byte-for-byte equivalent to spec_v2's original behavior: looks up
     cost/bars_per_year from the module-level config dicts (keyed by symbol / by timeframe) and
@@ -134,46 +194,12 @@ def _build_rows_for_asset_tf_impl(symbol: str, tf: str, df: pd.DataFrame, cost: 
     bh_oos_return_gross, _bh_oos_mdd_g, _ = buy_and_hold(df, oos_mask, 0.0)
 
     for sid, sname, stype, variant in reg.iter_variants():
-        signal_out = variant["signal_fn"](df)
-        hold_n = variant.get("hold_n")
-
-        m_is = _metrics_for_period(stype, signal_out, hold_n, df, is_mask, cost, bars_per_year)
-        m_oos = _metrics_for_period(stype, signal_out, hold_n, df, oos_mask, cost, bars_per_year)
-        gross_oos_return = _gross_oos_return(stype, signal_out, hold_n, df, oos_mask)
-        fee_drag = gross_oos_return - m_oos["total_return"]
-
-        verd = vd.assign_verdict(m_oos["profit_factor"], m_oos["n_trades"], m_oos["mdd"], m_oos["bh_mdd"])
-
-        is_suspicious = (
-            (isinstance(m_oos["profit_factor"], float) and np.isfinite(m_oos["profit_factor"])
-             and m_oos["profit_factor"] > config.SUSPICIOUS_OOS_PF)
-            or (m_oos["sharpe"] > config.SUSPICIOUS_OOS_SHARPE)
-        )
-        if is_suspicious:
-            suspicious.append({
-                "strategy_id": sid, "params": variant["params_str"], "asset": symbol, "tf": tf,
-                "oos_pf": m_oos["profit_factor"], "oos_sharpe": m_oos["sharpe"],
-            })
-
-        def _clean(m):
-            return {k: (None if isinstance(v, float) and (np.isnan(v)) else
-                        ("inf" if isinstance(v, float) and np.isinf(v) else v))
-                    for k, v in m.items()}
-
-        # spec_v3 §C: diagnostic-only robustness map, computed from the same OOS window/engine —
-        # never read by verdict.assign_verdict above, which already ran on the registered params.
-        robustness = rb.compute_robustness(sid, variant["params"], stype, hold_n, df, oos_mask, cost)
-
-        rows.append({
-            "strategy_id": sid, "strategy_name": sname, "type": stype,
-            "params": variant["params_str"], "asset": symbol, "timeframe": tf,
-            "as_of": str(as_of.date()),
-            "verdict": verd,
-            "is": _clean(m_is),
-            "oos": {**_clean(m_oos), "fee_drag": None if np.isnan(fee_drag) else fee_drag},
-            "suspicious": bool(is_suspicious),
-            "robustness": robustness,
-        })
+        row, suspicious_entry = _build_variant_row(
+            sid, sname, stype, variant, df, is_mask, oos_mask, cost, bars_per_year,
+            as_of, symbol, tf)
+        rows.append(row)
+        if suspicious_entry is not None:
+            suspicious.append(suspicious_entry)
 
     # --- reference rows: buy_and_hold, dca_weekly (no verdict; return/MDD only) ---
     rows.append({
@@ -199,6 +225,42 @@ def _build_rows_for_asset_tf_impl(symbol: str, tf: str, df: pd.DataFrame, cost: 
                             else dca_oos_return_gross - dca_oos_return},
         "suspicious": False,
     })
+
+    return as_of, rows, suspicious
+
+
+def build_popular_combo_rows_for_asset_tf(symbol: str, tf: str, df: pd.DataFrame):
+    """spec_v3 §D: the "Popular combos" registry group's rows for one (asset, timeframe), for the
+    crypto editions (looks up cost/bars_per_year the same way build_rows_for_asset_tf does).
+    Delegates to _build_popular_combo_rows_impl; see that function for the row-building details."""
+    cost = config.COST[symbol]
+    bars_per_year = config.BARS_PER_YEAR[tf]
+    return _build_popular_combo_rows_impl(symbol, tf, df, cost, bars_per_year)
+
+
+def _build_popular_combo_rows_impl(symbol: str, tf: str, df: pd.DataFrame, cost: float,
+                                    bars_per_year: float):
+    """spec_v3 §D: the "Popular combos" registry group's rows for one (asset, timeframe) —
+    exactly the same row shape, metrics, verdict rule, and robustness diagnostic as
+    _build_rows_for_asset_tf_impl above, over registry.iter_popular_combo_variants() instead of
+    registry.iter_variants(). Parameterized on cost/bars_per_year (rather than looking them up
+    from config.COST[symbol]/config.BARS_PER_YEAR[tf] itself) for the same reason
+    _build_rows_for_asset_tf_impl is: the stocks edition's 252-trading-day convention. Deliberately
+    a SEPARATE function (not merged into the main registry's row-building) because spec_v3 §D
+    requires this group be rendered as its own separate table on every page, and because it has no
+    reference rows (buy & hold / DCA only make sense once per asset/tf, already produced by the
+    main registry's rows). Returns (as_of, rows, suspicious) — same shape as build_rows_for_asset_tf."""
+    as_of, is_mask, oos_mask = rolling_is_oos_window(df, config.OOS_DAYS)
+
+    rows = []
+    suspicious = []
+    for sid, sname, stype, variant in reg.iter_popular_combo_variants():
+        row, suspicious_entry = _build_variant_row(
+            sid, sname, stype, variant, df, is_mask, oos_mask, cost, bars_per_year,
+            as_of, symbol, tf, group="popular_combos")
+        rows.append(row)
+        if suspicious_entry is not None:
+            suspicious.append(suspicious_entry)
 
     return as_of, rows, suspicious
 
@@ -229,6 +291,7 @@ def main():
 
     all_rows = []
     all_suspicious = []
+    all_combo_rows = []
     run_as_of = None
 
     for symbol in config.ASSETS:
@@ -247,9 +310,13 @@ def main():
             as_of, rows, suspicious = build_rows_for_asset_tf(symbol, tf, df)
             all_rows.extend(rows)
             all_suspicious.extend(suspicious)
+            _, combo_rows, combo_suspicious = build_popular_combo_rows_for_asset_tf(symbol, tf, df)
+            all_combo_rows.extend(combo_rows)
+            all_suspicious.extend(combo_suspicious)
             run_as_of = as_of if run_as_of is None else max(run_as_of, as_of)
             print(f"[run_weekly] {symbol} {tf}: as_of={as_of.date()}, {len(rows)} rows "
-                  f"({reg.count_variants()} strategy variants + 2 reference)")
+                  f"({reg.count_variants()} strategy variants + 2 reference), "
+                  f"{len(combo_rows)} popular-combo rows")
 
     if not all_rows:
         print("[run_weekly] No data available for any asset/timeframe — nothing to write.")
@@ -258,6 +325,8 @@ def main():
     # Korean-edition addition (requirement 3): tag every row with which edition produced it.
     # Purely additive (a new dict key) — no existing field is touched.
     for r in all_rows:
+        r["edition"] = "en"
+    for r in all_combo_rows:
         r["edition"] = "en"
 
     tally = vd.tally([r["verdict"] for r in all_rows if r["verdict"] is not None])
@@ -270,6 +339,7 @@ def main():
         "oos_days": config.OOS_DAYS,
         "tally": tally,
         "rows": all_rows,
+        "popular_combos": all_combo_rows,
         "suspicious": all_suspicious,
         "legal_disclaimer": config.LEGAL_DISCLAIMER,
         "repo_url": config.REPO_URL,
@@ -357,6 +427,7 @@ def _run_ko_edition():
 
     all_rows = []
     all_suspicious = []
+    all_combo_rows = []
     last_price = {}
     run_as_of = None
 
@@ -379,10 +450,16 @@ def _run_ko_edition():
                 r["edition"] = edition_key
             all_rows.extend(rows)
             all_suspicious.extend(suspicious)
+            _, combo_rows, combo_suspicious = build_popular_combo_rows_for_asset_tf(symbol, tf, df)
+            for r in combo_rows:
+                r["edition"] = edition_key
+            all_combo_rows.extend(combo_rows)
+            all_suspicious.extend(combo_suspicious)
             last_price[f"{symbol}_{tf}"] = float(df["close"].iloc[-1])
             run_as_of = as_of if run_as_of is None else max(run_as_of, as_of)
             print(f"[run_weekly] [ko] {symbol} {tf}: as_of={as_of.date()}, {len(rows)} rows "
-                  f"({reg.count_variants()} strategy variants + 2 reference)")
+                  f"({reg.count_variants()} strategy variants + 2 reference), "
+                  f"{len(combo_rows)} popular-combo rows")
 
     os.makedirs(config.RESULTS_DIR, exist_ok=True)
     os.makedirs(config.HISTORY_DIR, exist_ok=True)
@@ -396,7 +473,7 @@ def _run_ko_edition():
             "project_name": config.PROJECT_NAME, "edition": edition_key, "lang": "ko",
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "as_of": as_of_str, "oos_days": config.OOS_DAYS,
-            "tally": vd.tally([]), "rows": [], "suspicious": [], "last_price": {},
+            "tally": vd.tally([]), "rows": [], "popular_combos": [], "suspicious": [], "last_price": {},
             "legal_disclaimer_ko": config.LEGAL_DISCLAIMER_KO,
             "repo_url": config.REPO_URL, "signup_url": config.SIGNUP_URL,
         }
@@ -420,7 +497,8 @@ def _run_ko_edition():
         "tagline": config.TAGLINE_KO,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "as_of": str(run_as_of.date()), "oos_days": config.OOS_DAYS,
-        "tally": tally, "rows": all_rows, "suspicious": all_suspicious,
+        "tally": tally, "rows": all_rows, "popular_combos": all_combo_rows,
+        "suspicious": all_suspicious,
         "last_price": last_price,
         "legal_disclaimer": config.LEGAL_DISCLAIMER,
         "legal_disclaimer_ko": config.LEGAL_DISCLAIMER_KO,
@@ -476,6 +554,7 @@ def _run_stocks_edition():
 
     all_rows = []
     all_suspicious = []
+    all_combo_rows = []
     run_as_of = None
 
     for symbol in assets:
@@ -498,9 +577,16 @@ def _run_stocks_edition():
                 r["edition"] = "stocks"
             all_rows.extend(rows)
             all_suspicious.extend(suspicious)
+            _, combo_rows, combo_suspicious = _build_popular_combo_rows_impl(
+                symbol, tf, df, cost, config.STOCKS_BARS_PER_YEAR)
+            for r in combo_rows:
+                r["edition"] = "stocks"
+            all_combo_rows.extend(combo_rows)
+            all_suspicious.extend(combo_suspicious)
             run_as_of = as_of if run_as_of is None else max(run_as_of, as_of)
             print(f"[run_weekly] [stocks] {symbol} {tf}: as_of={as_of.date()}, {len(rows)} rows "
-                  f"({reg.count_variants()} strategy variants + 2 reference)")
+                  f"({reg.count_variants()} strategy variants + 2 reference), "
+                  f"{len(combo_rows)} popular-combo rows")
 
     os.makedirs(config.RESULTS_DIR, exist_ok=True)
     os.makedirs(config.HISTORY_DIR, exist_ok=True)
@@ -517,7 +603,8 @@ def _run_stocks_edition():
         "tagline": config.TAGLINE,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "as_of": str(run_as_of.date()), "oos_days": config.OOS_DAYS,
-        "tally": tally, "rows": all_rows, "suspicious": all_suspicious,
+        "tally": tally, "rows": all_rows, "popular_combos": all_combo_rows,
+        "suspicious": all_suspicious,
         "legal_disclaimer": config.LEGAL_DISCLAIMER,
         "repo_url": config.REPO_URL, "signup_url": config.SIGNUP_URL,
     }

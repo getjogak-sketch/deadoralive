@@ -157,6 +157,25 @@ footer.bottom .disclaimer { margin-top: 0.75rem; }
   </section>
 
   <section class="assetblock">
+    <h2>Popular combos &mdash; as commonly taught on YouTube / TradingView</h2>
+    <p>A second, separately pre-registered group (spec_v3 §D) of multi-indicator combinations as
+       they are commonly taught in retail trading content, rather than single-indicator textbook
+       strategies. Same execution rules, same cost model, same verdict thresholds, same
+       robustness map as every strategy above &mdash; rendered in its own table on the results
+       page rather than mixed into the main sections, purely for readability.</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>id</th><th>Name</th><th>Type</th><th>Rule</th><th>Params</th></tr></thead>
+      <tbody><tr><td>ema_9_21</td><td>EMA 9/21 crossover</td><td>state</td><td>EMA9 &gt; EMA21 -&gt; long, else flat</td><td>9-21</td></tr>
+<tr><td>ema200_macd</td><td>EMA200 trend + MACD cross</td><td>state</td><td>close &gt; EMA200 AND MACD(12,26,9) line &gt; signal -&gt; long; MACD line &lt; signal OR close &lt; EMA200 -&gt; flat</td><td>ema200-macd12.26.9</td></tr>
+<tr><td>rsi_uptrend</td><td>RSI dip in uptrend</td><td>state</td><td>RSI(14) &lt; 30 AND close &gt; SMA200 -&gt; long; RSI(14) &gt; 70 OR close &lt; SMA200 -&gt; flat</td><td>rsi14-sma200</td></tr>
+<tr><td>bb_squeeze</td><td>Bollinger squeeze breakout</td><td>state</td><td>bandwidth at/under its own prior 120-bar low (&#x27;squeeze&#x27;) within the last 5 bars AND close &gt; upper band(20,2) -&gt; long; close &lt; middle band -&gt; flat</td><td>bb20.2-look120-conf5</td></tr>
+<tr><td>ichimoku_cloud</td><td>Ichimoku cloud breakout</td><td>state</td><td>close &gt; cloud top -&gt; long; close &lt; cloud bottom -&gt; flat (cloud shifted +26 bars, no lookahead)</td><td>9-26-52</td></tr>
+<tr><td>heikin_ashi_trend</td><td>Heikin-Ashi colour</td><td>state</td><td>2 consecutive HA close &gt; HA open -&gt; long; first HA close &lt; HA open -&gt; flat</td><td>conf2</td></tr>
+<tr><td>supertrend_ema200</td><td>Supertrend + EMA200 filter</td><td>state</td><td>Supertrend(10,3) up AND close &gt; EMA200 -&gt; long; Supertrend flips down -&gt; flat</td><td>st10.3-ema200</td></tr></tbody>
+    </table></div>
+  </section>
+
+  <section class="assetblock">
     <h2>What we don't do</h2>
     <p>No parameter tuning, no new filters, no adding a strategy variant after seeing how it
        performs. Every strategy and every parameter value that will ever appear on this site is

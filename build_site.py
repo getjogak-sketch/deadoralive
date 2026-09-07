@@ -210,6 +210,57 @@ def _asset_tf_section(asset, tf, rows, as_of):
 </section>"""
 
 
+# =================================================================================================
+# spec_v3 §D "Popular combos" — additive extension, nothing above this line is modified. Reuses
+# _row_html/_row_html_ko unchanged (the row shape is identical to the main registry's), just
+# grouped into its own separate table per spec_v3 §D ("rendered on all pages as its own table").
+# =================================================================================================
+
+def _popular_combos_html(payload: dict, assets: list | None = None, timeframes: list | None = None) -> str:
+    assets = assets if assets is not None else config.ASSETS
+    timeframes = timeframes if timeframes is not None else config.TIMEFRAMES
+    combo_rows = payload.get("popular_combos") or []
+    if not combo_rows:
+        return ""
+
+    groups = {}
+    order = []
+    for r in combo_rows:
+        key = (r["asset"], r["timeframe"])
+        if key not in groups:
+            groups[key] = []
+            order.append(key)
+    order = [k for k in [(a, tf) for a in assets for tf in timeframes] if k in groups] or order
+    for r in combo_rows:
+        groups[(r["asset"], r["timeframe"])].append(r)
+
+    subsections = "".join(f"""
+  <h3>{html.escape(a)} &middot; {html.escape(tf)}</h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr>
+        <th>Strategy</th><th>Params</th><th>Verdict</th>
+        <th>OOS Return</th><th>OOS PF</th><th>OOS MDD</th><th>OOS Trades</th><th>OOS Win%</th>
+        <th>IS PF</th><th>IS MDD</th>
+        <th>B&amp;H OOS Return</th><th>B&amp;H OOS MDD</th>
+        <th>Fee drag&sup1;</th><th>Robustness&sup2;</th>
+      </tr></thead>
+      <tbody>
+{chr(10).join(_row_html(r) for r in groups[(a, tf)])}
+      </tbody>
+    </table>
+  </div>""" for a, tf in order)
+
+    return f"""
+<section class="assetblock" id="popular-combos">
+  <h2>Popular combos &mdash; as commonly taught on YouTube / TradingView</h2>
+  <p class="meta">Same execution rules as every strategy above (long-only, always fully invested
+     or fully in cash, state decided at the close of bar t and executed at bar t+1's open, net of
+     cost) and pre-registered the same way, before any result was computed.</p>
+  {subsections}
+</section>"""
+
+
 def build_index(payload: dict, out_path: str | None = None, assets: list | None = None,
                  timeframes: list | None = None, lang_links: str | None = None):
     """spec_v3 §A extension (additive): `assets`/`timeframes`/`lang_links` let a second edition
@@ -249,6 +300,7 @@ def build_index(payload: dict, out_path: str | None = None, assets: list | None 
     )
 
     sections_html = "".join(_asset_tf_section(a, tf, groups[(a, tf)], payload["as_of"]) for a, tf in order)
+    popular_combos_html = _popular_combos_html(payload, assets, timeframes)
 
     skipped = sorted(set(assets) - {a for a, _tf in order})
     skipped_note = ""
@@ -283,6 +335,7 @@ def build_index(payload: dict, out_path: str | None = None, assets: list | None 
 <main>
   <nav class="jump">{nav_html}</nav>
   {sections_html}
+  {popular_combos_html}
 </main>
 <footer class="bottom">
   <div><a href="methodology.html">Methodology</a>{repo_html}{signup_html}</div>
@@ -310,6 +363,20 @@ def _registry_table_html():
         rows.append(
             f"<tr class=\"ref-row\"><td>{html.escape(entry['id'])}</td><td>{html.escape(entry['name'])}</td>"
             f"<td>{html.escape(entry['type'])}</td><td>{html.escape(entry['rule'])}</td><td>-</td></tr>"
+        )
+    return "\n".join(rows)
+
+
+def _popular_combos_table_html() -> str:
+    """spec_v3 §D methodology table — same shape as _registry_table_html above, over
+    registry.POPULAR_COMBOS instead of registry.REGISTRY."""
+    rows = []
+    for entry in reg.POPULAR_COMBOS:
+        params = ", ".join(v["params_str"] for v in entry["variants"])
+        rows.append(
+            f"<tr><td>{html.escape(entry['id'])}</td><td>{html.escape(entry['name'])}</td>"
+            f"<td>{html.escape(entry['type'])}</td><td>{html.escape(entry['rule'])}</td>"
+            f"<td>{html.escape(params)}</td></tr>"
         )
     return "\n".join(rows)
 
@@ -429,6 +496,19 @@ def build_methodology(out_path: str | None = None, assets: list | None = None,
   </section>
 
   <section class="assetblock">
+    <h2>Popular combos &mdash; as commonly taught on YouTube / TradingView</h2>
+    <p>A second, separately pre-registered group (spec_v3 §D) of multi-indicator combinations as
+       they are commonly taught in retail trading content, rather than single-indicator textbook
+       strategies. Same execution rules, same cost model, same verdict thresholds, same
+       robustness map as every strategy above &mdash; rendered in its own table on the results
+       page rather than mixed into the main sections, purely for readability.</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>id</th><th>Name</th><th>Type</th><th>Rule</th><th>Params</th></tr></thead>
+      <tbody>{_popular_combos_table_html()}</tbody>
+    </table></div>
+  </section>
+
+  <section class="assetblock">
     <h2>What we don't do</h2>
     <p>No parameter tuning, no new filters, no adding a strategy variant after seeing how it
        performs. Every strategy and every parameter value that will ever appear on this site is
@@ -489,6 +569,14 @@ STRATEGY_NAME_KO = {
     "dip_pct": "한 봉에 5% 이상 급락하면 매수 (Buy the dip, -x% bar)",
     "dca_weekly": "매주 일정 금액 적립 매수 — 참고용 (Weekly DCA)",
     "buy_and_hold": "단순 보유 — 참고용 (Buy & hold)",
+    # spec_v3 §D "Popular combos" — additive.
+    "ema_9_21": "지수이동평균 9/21 교차 (EMA 9/21 crossover)",
+    "ema200_macd": "200일 이동평균 추세 + MACD 교차 (EMA200 trend + MACD cross)",
+    "rsi_uptrend": "상승 추세 중 RSI 조정 매수 (RSI dip in uptrend)",
+    "bb_squeeze": "볼린저밴드 수축 후 돌파 (Bollinger squeeze breakout)",
+    "ichimoku_cloud": "일목균형표 구름대 돌파 (Ichimoku cloud breakout)",
+    "heikin_ashi_trend": "헤이킨아시 캔들 색 전환 (Heikin-Ashi colour)",
+    "supertrend_ema200": "슈퍼트렌드 + 200일 이동평균 필터 (Supertrend + EMA200 filter)",
 }
 
 ASSET_LABEL_KO = {
@@ -610,6 +698,52 @@ def _asset_tf_section_ko(asset, tf, rows, as_of, last_price):
 </section>"""
 
 
+def _popular_combos_html_ko(payload: dict) -> str:
+    """Korean edition of _popular_combos_html — same structure, Korean labels/title (spec_v3 §D:
+    "유튜브·트레이딩뷰에서 많이 가르치는 조합 전략")."""
+    combo_rows = payload.get("popular_combos") or []
+    if not combo_rows:
+        return ""
+
+    groups = {}
+    order = []
+    for r in combo_rows:
+        key = (r["asset"], r["timeframe"])
+        if key not in groups:
+            groups[key] = []
+            order.append(key)
+    canonical_order = [(a, tf) for a in config.UPBIT_ASSETS for tf in config.TIMEFRAMES]
+    order = [k for k in canonical_order if k in groups] or order
+    for r in combo_rows:
+        groups[(r["asset"], r["timeframe"])].append(r)
+
+    subsections = "".join(f"""
+  <h3>{html.escape(ASSET_LABEL_KO.get(a, a))} &middot; {html.escape(TF_LABEL_KO.get(tf, tf))}</h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr>
+        <th>전략</th><th>설정값</th><th>판정</th>
+        <th>최근 2년 수익률</th><th>PF</th><th>최대 낙폭</th><th>거래 횟수</th><th>승률</th>
+        <th>이전 기간 PF</th><th>이전 기간 최대 낙폭</th>
+        <th>단순 보유 수익률</th><th>단순 보유 최대 낙폭</th>
+        <th>수수료로 사라진 수익</th><th>주변 설정값 안정성</th>
+      </tr></thead>
+      <tbody>
+{chr(10).join(_row_html_ko(r) for r in groups[(a, tf)])}
+      </tbody>
+    </table>
+  </div>""" for a, tf in order)
+
+    return f"""
+<section class="assetblock" id="popular-combos">
+  <h2>유튜브·트레이딩뷰에서 많이 가르치는 조합 전략</h2>
+  <p class="meta">위의 전략들과 사고파는 규칙은 완전히 같습니다(매수만, 전액 보유 또는 전액 현금,
+     봉이 닫힌 뒤 판단해서 다음 봉 시가에 체결, 수수료 뗀 뒤 값). 이 조합들도 결과를 보기 전에
+     미리 등록해 둔 것입니다.</p>
+  {subsections}
+</section>"""
+
+
 def build_index_ko(payload: dict, out_path: str | None = None):
     """Korean edition of build_index — same layout/columns as the English page, all UI text in
     Korean, verbatim disclaimer top and bottom (requirement 4)."""
@@ -644,6 +778,7 @@ def build_index_ko(payload: dict, out_path: str | None = None):
     sections_html = "".join(
         _asset_tf_section_ko(a, tf, groups[(a, tf)], payload["as_of"], last_price) for a, tf in order
     )
+    popular_combos_html = _popular_combos_html_ko(payload)
 
     skipped = sorted(set(config.UPBIT_ASSETS) - {a for a, _tf in order})
     skipped_note = ""
@@ -679,6 +814,7 @@ def build_index_ko(payload: dict, out_path: str | None = None):
 <main>
   <nav class="jump">{nav_html}</nav>
   {sections_html}
+  {popular_combos_html}
 </main>
 <footer class="bottom">
   <div><a href="methodology.html">어떻게 계산했나</a>{repo_html}{signup_html} &middot; <a href="../index.html">English</a> &middot; <a href="../stocks/index.html">Stocks</a></div>
@@ -711,6 +847,19 @@ RULE_KO = {
     "dip_pct": "한 봉에 5% 이상 떨어지면 다음 봉 시가에 매수, 5봉 뒤 시가에 매도",
     "dca_weekly": "매주 첫 봉 시가에 같은 금액을 사고 팔지 않음 (참고용)",
     "buy_and_hold": "구간 첫날 사서 마지막 날까지 들고 있음 (참고용)",
+    # spec_v3 §D "Popular combos" — additive.
+    "ema_9_21": "지수이동평균 9가 21 위에 있으면 보유, 아래면 현금",
+    "ema200_macd": "종가가 200일 이동평균 위이고 MACD선이 시그널선 위이면 보유, MACD선이 시그널선 "
+                   "아래로 내려오거나 종가가 200일 이동평균 아래로 내려오면 현금",
+    "rsi_uptrend": "RSI(14)가 30 아래이고 종가가 200일 이동평균 위이면 매수, RSI가 70을 넘거나 "
+                   "종가가 200일 이동평균 아래로 내려오면 매도",
+    "bb_squeeze": "볼린저밴드 폭이 최근 120봉 중 가장 좁았던 뒤 5봉 안에서 종가가 위선을 넘으면 매수, "
+                  "가운데선 아래로 내려오면 매도",
+    "ichimoku_cloud": "종가가 구름대 위쪽 경계를 넘으면 매수, 아래쪽 경계 밑으로 내려오면 매도 "
+                      "(구름은 26봉 앞으로 미뤄 표시하므로 계산 시점의 미래 정보를 쓰지 않음)",
+    "heikin_ashi_trend": "헤이킨아시 캔들이 2봉 연속 양봉이면 매수, 처음 음봉이 나오면 매도",
+    "supertrend_ema200": "슈퍼트렌드(10, 3) 방향이 위이고 종가가 200일 이동평균 위이면 매수, "
+                         "슈퍼트렌드 방향이 아래로 바뀌는 순간 매도",
 }
 
 
@@ -731,6 +880,20 @@ def _registry_table_html_ko():
         rows.append(
             f"<tr class=\"ref-row\"><td>{html.escape(entry['id'])}</td><td>{html.escape(name_ko)}</td>"
             f"<td>{html.escape(rule_ko)}</td><td>-</td></tr>"
+        )
+    return "\n".join(rows)
+
+
+def _popular_combos_table_html_ko() -> str:
+    rows = []
+    for entry in reg.POPULAR_COMBOS:
+        params = ", ".join(v["params_str"] for v in entry["variants"])
+        name_ko = STRATEGY_NAME_KO.get(entry["id"], entry["name"])
+        rule_ko = RULE_KO.get(entry["id"], entry["rule"])
+        rows.append(
+            f"<tr><td>{html.escape(entry['id'])}</td><td>{html.escape(name_ko)}</td>"
+            f"<td>{html.escape(rule_ko)}</td>"
+            f"<td>{html.escape(params)}</td></tr>"
         )
     return "\n".join(rows)
 
@@ -829,6 +992,17 @@ def build_methodology_ko(out_path: str | None = None):
     <div class="tablewrap"><table class="regtable">
       <thead><tr><th>id</th><th>전략</th><th>규칙</th><th>설정값</th></tr></thead>
       <tbody>{_registry_table_html_ko()}</tbody>
+    </table></div>
+  </section>
+
+  <section class="assetblock">
+    <h2>유튜브·트레이딩뷰에서 많이 가르치는 조합 전략</h2>
+    <p>단일 지표가 아니라, 여러 지표를 함께 쓰는 방식으로 유튜브나 트레이딩뷰에서 흔히 가르치는
+       조합들을 따로 모아 검사합니다. 사고파는 규칙, 수수료, 판정 기준, 주변 설정값 안정성 검사는
+       위의 전략들과 완전히 같고, 결과표에서만 보기 쉽게 별도의 표로 나눠 보여줍니다.</p>
+    <div class="tablewrap"><table class="regtable">
+      <thead><tr><th>id</th><th>전략</th><th>규칙</th><th>설정값</th></tr></thead>
+      <tbody>{_popular_combos_table_html_ko()}</tbody>
     </table></div>
   </section>
 
@@ -962,7 +1136,13 @@ served by GitHub Pages, refreshed once a week by the same pipeline that renders 
 
 ## Row schema
 
-Every element of `payload["rows"]` carries:
+`payload["popular_combos"]` (added by spec_v3 §D) is a second array of rows in the exact same
+shape as `payload["rows"]` below, for the separately-pre-registered "popular combos" strategy
+group (multi-indicator combinations as commonly taught on YouTube/TradingView) — kept as its own
+array rather than merged into `rows`, so a consumer that assumed `rows` meant "the original
+registry" is not silently handed extra strategies.
+
+Every element of `payload["rows"]` (and `payload["popular_combos"]`) carries:
 
 {schema_md}
 
@@ -1040,7 +1220,12 @@ def _api_readme_html_body() -> str:
 
   <section class="assetblock">
     <h2>Row schema</h2>
-    <p>Every element of <code>payload["rows"]</code> carries:</p>
+    <p><code>payload["popular_combos"]</code> (added by the popular-combos extension) is a second
+       array in the same row shape as <code>payload["rows"]</code>, for a separately
+       pre-registered group of multi-indicator combinations &mdash; kept separate so
+       <code>rows</code> keeps meaning exactly what it always meant.</p>
+    <p>Every element of <code>payload["rows"]</code> (and <code>payload["popular_combos"]</code>)
+       carries:</p>
     <ul>{schema_li}</ul>
     <p>Cost model and verdict-badge thresholds are defined once, by reference, on each edition's
        methodology page linked above &mdash; not repeated as numbers here, so this page never goes

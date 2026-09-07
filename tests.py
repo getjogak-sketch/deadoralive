@@ -475,6 +475,113 @@ def test_yahoo_parser():
     check("Yahoo parser: None payload -> empty frame", fd._parse_yahoo_chart_json(None).empty)
 
 
+# ---------------------------------------------------------------------------
+# Robustness map (spec_v3 §C) — additive extension, nothing above this line is modified.
+#
+# This is a DIAGNOSTIC-ONLY feature: these tests check (1) the grid candidate rule matches
+# spec_v3 §C's own wording, (2) the "MA pairs keep fast < slow" filter actually filters,
+# (3) the grid never exceeds 3x3=9 points for a 2-parameter variant, (4) computing it never
+# mutates the registered params dict it was given (that dict IS registry.py's own live object —
+# corrupting it would corrupt the real backtest), and (5) it runs fast enough in practice on the
+# local BTC 1d+4h data (spec_v3 §C's ~10-minute CI budget).
+# ---------------------------------------------------------------------------
+
+def test_robustness_neighbour_values():
+    import robustness as rb
+
+    check("robustness neighbours: k-type float (k=0.5) -> {0.4, 0.5, 0.6}",
+          rb.neighbour_values("k", 0.5) == [0.4, 0.5, 0.6],
+          f"got {rb.neighbour_values('k', 0.5)}")
+    check("robustness neighbours: k-type float floors at 0.1 (k=0.1 -> no candidate below 0.1)",
+          min(rb.neighbour_values("k", 0.1)) >= 0.1,
+          f"got {rb.neighbour_values('k', 0.1)}")
+    check("robustness neighbours: window int (n=200) -> {150, 200, 250}",
+          rb.neighbour_values("n", 200) == [150, 200, 250],
+          f"got {rb.neighbour_values('n', 200)}")
+    check("robustness neighbours: window int floors at 2 (n=2 never produces 0 or negative)",
+          min(rb.neighbour_values("n", 2)) >= 2, f"got {rb.neighbour_values('n', 2)}")
+    frac = rb.neighbour_values("threshold", -0.05)
+    check("robustness neighbours: fractional non-k param (threshold=-0.05) stays negative and "
+          "is NOT rounded to an integer (would degenerate to 0)",
+          all(v < 0 for v in frac), f"got {frac}")
+    check("robustness neighbours: threshold=-0.05 middle candidate is the registered value",
+          -0.05 in frac, f"got {frac}")
+
+
+def test_robustness_ma_pair_and_grid_size():
+    import robustness as rb
+
+    df = load_raw("btc", "1d")
+    n = len(df)
+    oos_mask = pd.Series(False, index=df.index)
+    oos_mask.iloc[n - 300:] = True  # a plausible-sized OOS-like window for this smoke test
+    cost = 0.001
+
+    grid = rb.evaluate_variant_grid("sma_cross", {"n_fast": 10, "n_slow": 50}, "state", None,
+                                      df, oos_mask, cost)
+    check("robustness sma_cross: grid never exceeds 9 points (2 numeric params)", len(grid) <= 9,
+          f"got {len(grid)}")
+    check("robustness sma_cross: grid is non-empty (base point always survives the fast<slow filter)",
+          len(grid) >= 1)
+    # Re-derive fast/slow from each grid point's own label to check the "keep fast < slow" filter.
+    for g in grid:
+        parts = dict(kv.split("=") for kv in g["params"].split(", "))
+        check(f"robustness sma_cross: fast < slow held for grid point {g['params']}",
+              int(parts["n_fast"]) < int(parts["n_slow"]))
+
+    grid_1param = rb.evaluate_variant_grid("above_sma", {"n": 200}, "state", None,
+                                             df, oos_mask, cost)
+    check("robustness above_sma: 1 numeric param -> at most 3 grid points", len(grid_1param) <= 3,
+          f"got {len(grid_1param)}")
+
+    grid_none = rb.evaluate_variant_grid("bb_mr", {}, "state", None, df, oos_mask, cost)
+    check("robustness bb_mr: no numeric params -> empty grid (nothing to vary)",
+          grid_none == [], f"got {grid_none}")
+
+
+def test_robustness_does_not_mutate_registered_params():
+    import copy
+    import robustness as rb
+
+    df = load_raw("btc", "1d")
+    n = len(df)
+    oos_mask = pd.Series(False, index=df.index)
+    oos_mask.iloc[n - 300:] = True
+
+    base_params = {"n_fast": 10, "n_slow": 50}
+    snapshot = copy.deepcopy(base_params)
+    rb.compute_robustness("sma_cross", base_params, "state", None, df, oos_mask, 0.001)
+    check("robustness: computing the grid never mutates the registered params dict it was given",
+          base_params == snapshot, f"params dict changed to {base_params}")
+
+
+def test_robustness_runtime_on_local_btc_data():
+    """Not a correctness test — a runtime smoke-check against spec_v3 §C's own "~10 minutes in
+    CI" budget, measured here on the local BTC 1d+4h data as this task's report requires. Well
+    under budget is expected (OOS-window-only simulation loops, vectorized signal computation);
+    if this ever regresses toward the budget, that's the signal to switch to 1-D grids per
+    spec_v3 §C's own fallback instruction."""
+    import time
+    import registry as _reg
+    import robustness as rb
+
+    for asset, tf in [("btc", "1d"), ("btc", "4h")]:
+        if resolve_path(asset, tf) is None:
+            print(f"[SKIP] {asset} {tf}: no data file"); continue
+        df = load_raw(asset, tf)
+        n = len(df)
+        oos_mask = pd.Series(False, index=df.index)
+        oos_mask.iloc[max(0, n - 800):] = True
+        cost = COST[asset]
+        t0 = time.time()
+        for sid, sname, stype, variant in _reg.iter_variants():
+            rb.evaluate_variant_grid(sid, variant["params"], stype, variant.get("hold_n"),
+                                       df, oos_mask, cost)
+        dt = time.time() - t0
+        check(f"robustness runtime {asset}/{tf}: full registry grid well under the 10-minute "
+              f"CI budget ({dt:.2f}s)", dt < 60.0, f"took {dt:.2f}s")
+
+
 def test_write_api_v1():
     """spec_v3 §B: _write_api_v1 must (1) write latest.json + a history/<as_of>.json snapshot,
     (2) build/merge history/index.json across repeated calls (dedup on as_of, newest first)
@@ -610,6 +717,10 @@ if __name__ == "__main__":
     test_drop_unclosed_stocks_bar()
     test_stocks_edition_pipeline()
     test_write_api_v1()
+    test_robustness_neighbour_values()
+    test_robustness_ma_pair_and_grid_size()
+    test_robustness_does_not_mutate_registered_params()
+    test_robustness_runtime_on_local_btc_data()
 
     print()
     if FAILURES:

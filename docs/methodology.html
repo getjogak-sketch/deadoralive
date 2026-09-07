@@ -102,6 +102,24 @@ footer.bottom .disclaimer { margin-top: 0.75rem; }
   </section>
 
   <section class="assetblock">
+    <h2>Robustness map (diagnostic)</h2>
+    <p>Every registered variant with at least one numeric parameter (a window length, a
+       multiplier, a threshold) is also re-run, out-of-sample only, at a small grid of nearby
+       values &mdash; roughly &plusmn;25% around each registered number (or &plusmn;0.1 for the
+       volatility-breakout multiplier <code>k</code>), one parameter combination at a time. The
+       "Robustness" column reports what fraction of that grid still clears OOS PF &ge; 1.0 with
+       at least 10 trades, e.g. "7/9"; hover it for the full grid. A strategy that only works at
+       exactly its registered numbers and falls apart one step away is more likely to be a
+       historical coincidence than a real, durable edge &mdash; this column exists to make that
+       visible.</p>
+    <p><strong>This never changes the verdict.</strong> The grid is read-only: it reuses the same
+       simulation engine on the same data, but its output feeds nothing except this one column.
+       Verdicts are always computed from &mdash; and only from &mdash; the exact parameter values
+       fixed in <code>registry.py</code> before any result was ever seen; the grid can never
+       select a "better" parameter or retroactively change what was registered.</p>
+  </section>
+
+  <section class="assetblock">
     <h2>Engine honesty checks</h2>
     <p><strong>No-lookahead test</strong>: for every strategy variant in the registry below, the
        signal computed on the full price series is compared against the signal computed on data

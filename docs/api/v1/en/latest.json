@@ -1,7 +1,7 @@
 {
   "project_name": "Dead or Alive",
   "tagline": "Popular trading strategies, re-tested every week \u2014 after fees, out-of-sample.",
-  "generated_at": "2026-09-07T00:37:18.029648+00:00",
+  "generated_at": "2026-09-07T00:43:39.370423+00:00",
   "as_of": "2026-09-05",
   "oos_days": 730,
   "tally": {
@@ -50,6 +50,59 @@
         "fee_drag": 0.033568745552542856
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n_fast=8, n_slow=38",
+            "oos_pf": 2.477826748819365,
+            "oos_n_trades": 13
+          },
+          {
+            "params": "n_fast=8, n_slow=50",
+            "oos_pf": 2.12619331919574,
+            "oos_n_trades": 11
+          },
+          {
+            "params": "n_fast=8, n_slow=62",
+            "oos_pf": 3.014360601018218,
+            "oos_n_trades": 8
+          },
+          {
+            "params": "n_fast=10, n_slow=38",
+            "oos_pf": 2.396763888437387,
+            "oos_n_trades": 13
+          },
+          {
+            "params": "n_fast=10, n_slow=50",
+            "oos_pf": 2.352020302239963,
+            "oos_n_trades": 11
+          },
+          {
+            "params": "n_fast=10, n_slow=62",
+            "oos_pf": 3.1357928285672494,
+            "oos_n_trades": 8
+          },
+          {
+            "params": "n_fast=12, n_slow=38",
+            "oos_pf": 3.3623051810542695,
+            "oos_n_trades": 11
+          },
+          {
+            "params": "n_fast=12, n_slow=50",
+            "oos_pf": 2.246574797979234,
+            "oos_n_trades": 10
+          },
+          {
+            "params": "n_fast=12, n_slow=62",
+            "oos_pf": 3.9492156444860473,
+            "oos_n_trades": 8
+          }
+        ],
+        "share_pf_ge_1": 0.6666666666666666,
+        "n_pass": 6,
+        "n_total": 9,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -91,6 +144,59 @@
         "fee_drag": 0.012592198873975002
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n_fast=15, n_slow=75",
+            "oos_pf": 2.592520043612986,
+            "oos_n_trades": 6
+          },
+          {
+            "params": "n_fast=15, n_slow=100",
+            "oos_pf": 2.3775929675030842,
+            "oos_n_trades": 6
+          },
+          {
+            "params": "n_fast=15, n_slow=125",
+            "oos_pf": 1.7146998354704488,
+            "oos_n_trades": 5
+          },
+          {
+            "params": "n_fast=20, n_slow=75",
+            "oos_pf": 2.1160808585301614,
+            "oos_n_trades": 6
+          },
+          {
+            "params": "n_fast=20, n_slow=100",
+            "oos_pf": 2.2101018765461475,
+            "oos_n_trades": 5
+          },
+          {
+            "params": "n_fast=20, n_slow=125",
+            "oos_pf": 2.9992745217115293,
+            "oos_n_trades": 4
+          },
+          {
+            "params": "n_fast=25, n_slow=75",
+            "oos_pf": 2.328379031597862,
+            "oos_n_trades": 6
+          },
+          {
+            "params": "n_fast=25, n_slow=100",
+            "oos_pf": 2.6125534617966837,
+            "oos_n_trades": 6
+          },
+          {
+            "params": "n_fast=25, n_slow=125",
+            "oos_pf": 2.1029488407328802,
+            "oos_n_trades": 4
+          }
+        ],
+        "share_pf_ge_1": 0.0,
+        "n_pass": 0,
+        "n_total": 9,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -132,6 +238,59 @@
         "fee_drag": 0.003808341375053481
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n_fast=38, n_slow=150",
+            "oos_pf": 0.9481984576962916,
+            "oos_n_trades": 4
+          },
+          {
+            "params": "n_fast=38, n_slow=200",
+            "oos_pf": 5.614987477092432,
+            "oos_n_trades": 3
+          },
+          {
+            "params": "n_fast=38, n_slow=250",
+            "oos_pf": 9.810955712632762,
+            "oos_n_trades": 2
+          },
+          {
+            "params": "n_fast=50, n_slow=150",
+            "oos_pf": 0.9112017036111918,
+            "oos_n_trades": 3
+          },
+          {
+            "params": "n_fast=50, n_slow=200",
+            "oos_pf": 0.8158277304738106,
+            "oos_n_trades": 2
+          },
+          {
+            "params": "n_fast=50, n_slow=250",
+            "oos_pf": "inf",
+            "oos_n_trades": 2
+          },
+          {
+            "params": "n_fast=62, n_slow=150",
+            "oos_pf": 2.5120135760239632,
+            "oos_n_trades": 3
+          },
+          {
+            "params": "n_fast=62, n_slow=200",
+            "oos_pf": 2.0904427164131953,
+            "oos_n_trades": 2
+          },
+          {
+            "params": "n_fast=62, n_slow=250",
+            "oos_pf": "inf",
+            "oos_n_trades": 2
+          }
+        ],
+        "share_pf_ge_1": 0.0,
+        "n_pass": 0,
+        "n_total": 9,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -173,6 +332,59 @@
         "fee_drag": 0.04196856183232578
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n_fast=9, n_slow=20",
+            "oos_pf": 2.6211067822643286,
+            "oos_n_trades": 17
+          },
+          {
+            "params": "n_fast=9, n_slow=26",
+            "oos_pf": 2.4327207843035694,
+            "oos_n_trades": 16
+          },
+          {
+            "params": "n_fast=9, n_slow=32",
+            "oos_pf": 2.4251770817615883,
+            "oos_n_trades": 13
+          },
+          {
+            "params": "n_fast=12, n_slow=20",
+            "oos_pf": 2.5750731938840055,
+            "oos_n_trades": 15
+          },
+          {
+            "params": "n_fast=12, n_slow=26",
+            "oos_pf": 2.2138990907054414,
+            "oos_n_trades": 14
+          },
+          {
+            "params": "n_fast=12, n_slow=32",
+            "oos_pf": 2.2238449322336216,
+            "oos_n_trades": 13
+          },
+          {
+            "params": "n_fast=15, n_slow=20",
+            "oos_pf": 2.270305672521436,
+            "oos_n_trades": 14
+          },
+          {
+            "params": "n_fast=15, n_slow=26",
+            "oos_pf": 2.016144218548808,
+            "oos_n_trades": 14
+          },
+          {
+            "params": "n_fast=15, n_slow=32",
+            "oos_pf": 2.9627182261929406,
+            "oos_n_trades": 10
+          }
+        ],
+        "share_pf_ge_1": 1.0,
+        "n_pass": 9,
+        "n_total": 9,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -214,6 +426,29 @@
         "fee_drag": 0.0310777629627752
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n=150",
+            "oos_pf": 2.388190225418028,
+            "oos_n_trades": 12
+          },
+          {
+            "params": "n=200",
+            "oos_pf": 2.3344006536067563,
+            "oos_n_trades": 12
+          },
+          {
+            "params": "n=250",
+            "oos_pf": 2.8051631045098864,
+            "oos_n_trades": 10
+          }
+        ],
+        "share_pf_ge_1": 1.0,
+        "n_pass": 3,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -255,6 +490,29 @@
         "fee_drag": 0.09185624907845114
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n=38",
+            "oos_pf": 2.2031057240895047,
+            "oos_n_trades": 28
+          },
+          {
+            "params": "n=50",
+            "oos_pf": 2.777650768190031,
+            "oos_n_trades": 26
+          },
+          {
+            "params": "n=62",
+            "oos_pf": 2.582769688010881,
+            "oos_n_trades": 21
+          }
+        ],
+        "share_pf_ge_1": 1.0,
+        "n_pass": 3,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -296,6 +554,59 @@
         "fee_drag": 0.03297451004390162
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n_high=15, n_low=8",
+            "oos_pf": 3.197358668364869,
+            "oos_n_trades": 12
+          },
+          {
+            "params": "n_high=15, n_low=10",
+            "oos_pf": 2.267851512449,
+            "oos_n_trades": 12
+          },
+          {
+            "params": "n_high=15, n_low=12",
+            "oos_pf": 2.042924795468749,
+            "oos_n_trades": 12
+          },
+          {
+            "params": "n_high=20, n_low=8",
+            "oos_pf": 3.226115823677941,
+            "oos_n_trades": 11
+          },
+          {
+            "params": "n_high=20, n_low=10",
+            "oos_pf": 2.5259244522059103,
+            "oos_n_trades": 11
+          },
+          {
+            "params": "n_high=20, n_low=12",
+            "oos_pf": 2.238102475861398,
+            "oos_n_trades": 11
+          },
+          {
+            "params": "n_high=25, n_low=8",
+            "oos_pf": 2.7290108993779305,
+            "oos_n_trades": 10
+          },
+          {
+            "params": "n_high=25, n_low=10",
+            "oos_pf": 2.1908629729231985,
+            "oos_n_trades": 10
+          },
+          {
+            "params": "n_high=25, n_low=12",
+            "oos_pf": 2.1218698220919876,
+            "oos_n_trades": 10
+          }
+        ],
+        "share_pf_ge_1": 1.0,
+        "n_pass": 9,
+        "n_total": 9,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -337,6 +648,59 @@
         "fee_drag": 0.017789415140737397
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n_high=41, n_low=15",
+            "oos_pf": 2.717072142291978,
+            "oos_n_trades": 8
+          },
+          {
+            "params": "n_high=41, n_low=20",
+            "oos_pf": 2.05478798412754,
+            "oos_n_trades": 8
+          },
+          {
+            "params": "n_high=41, n_low=25",
+            "oos_pf": 2.932611457234417,
+            "oos_n_trades": 6
+          },
+          {
+            "params": "n_high=55, n_low=15",
+            "oos_pf": 3.1060682768535814,
+            "oos_n_trades": 7
+          },
+          {
+            "params": "n_high=55, n_low=20",
+            "oos_pf": 2.2222190071993233,
+            "oos_n_trades": 7
+          },
+          {
+            "params": "n_high=55, n_low=25",
+            "oos_pf": 4.255713355939279,
+            "oos_n_trades": 5
+          },
+          {
+            "params": "n_high=69, n_low=15",
+            "oos_pf": 3.9485500227070296,
+            "oos_n_trades": 6
+          },
+          {
+            "params": "n_high=69, n_low=20",
+            "oos_pf": 2.8951929781038306,
+            "oos_n_trades": 6
+          },
+          {
+            "params": "n_high=69, n_low=25",
+            "oos_pf": 11.014840505095416,
+            "oos_n_trades": 4
+          }
+        ],
+        "share_pf_ge_1": 0.0,
+        "n_pass": 0,
+        "n_total": 9,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -378,6 +742,29 @@
         "fee_drag": 0.7647604799706555
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "k=0.4",
+            "oos_pf": 0.9158467788236382,
+            "oos_n_trades": 365
+          },
+          {
+            "params": "k=0.5",
+            "oos_pf": 0.9894045335561817,
+            "oos_n_trades": 301
+          },
+          {
+            "params": "k=0.6",
+            "oos_pf": 1.0031764155839928,
+            "oos_n_trades": 254
+          }
+        ],
+        "share_pf_ge_1": 0.3333333333333333,
+        "n_pass": 1,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -419,6 +806,29 @@
         "fee_drag": 0.5665091588734279
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "k=0.6",
+            "oos_pf": 1.0031764155839928,
+            "oos_n_trades": 254
+          },
+          {
+            "params": "k=0.7",
+            "oos_pf": 1.0893234398347302,
+            "oos_n_trades": 210
+          },
+          {
+            "params": "k=0.8",
+            "oos_pf": 0.9788540083534465,
+            "oos_n_trades": 183
+          }
+        ],
+        "share_pf_ge_1": 0.6666666666666666,
+        "n_pass": 2,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -460,6 +870,59 @@
         "fee_drag": 0.4136825947054106
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "k=0.4, sma_n=15",
+            "oos_pf": 0.9951329587651961,
+            "oos_n_trades": 199
+          },
+          {
+            "params": "k=0.4, sma_n=20",
+            "oos_pf": 0.991748809289523,
+            "oos_n_trades": 194
+          },
+          {
+            "params": "k=0.4, sma_n=25",
+            "oos_pf": 1.017371619280251,
+            "oos_n_trades": 187
+          },
+          {
+            "params": "k=0.5, sma_n=15",
+            "oos_pf": 1.1084650571268788,
+            "oos_n_trades": 162
+          },
+          {
+            "params": "k=0.5, sma_n=20",
+            "oos_pf": 1.1386947960403704,
+            "oos_n_trades": 157
+          },
+          {
+            "params": "k=0.5, sma_n=25",
+            "oos_pf": 1.1656038811569323,
+            "oos_n_trades": 153
+          },
+          {
+            "params": "k=0.6, sma_n=15",
+            "oos_pf": 1.1556307264627528,
+            "oos_n_trades": 137
+          },
+          {
+            "params": "k=0.6, sma_n=20",
+            "oos_pf": 1.1693268549068845,
+            "oos_n_trades": 134
+          },
+          {
+            "params": "k=0.6, sma_n=25",
+            "oos_pf": 1.114326009310086,
+            "oos_n_trades": 133
+          }
+        ],
+        "share_pf_ge_1": 0.7777777777777778,
+        "n_pass": 7,
+        "n_total": 9,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -501,6 +964,29 @@
         "fee_drag": 0.007301018106304236
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "exit=38",
+            "oos_pf": 0.35920434108440047,
+            "oos_n_trades": 4
+          },
+          {
+            "params": "exit=50",
+            "oos_pf": 0.4117785019085478,
+            "oos_n_trades": 4
+          },
+          {
+            "params": "exit=62",
+            "oos_pf": 3.548883415920355,
+            "oos_n_trades": 5
+          }
+        ],
+        "share_pf_ge_1": 0.0,
+        "n_pass": 0,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -542,6 +1028,29 @@
         "fee_drag": 0.006243961716452695
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "exit=52",
+            "oos_pf": 0.0,
+            "oos_n_trades": 4
+          },
+          {
+            "params": "exit=70",
+            "oos_pf": 1.4094080473996484,
+            "oos_n_trades": 3
+          },
+          {
+            "params": "exit=88",
+            "oos_pf": "inf",
+            "oos_n_trades": 1
+          }
+        ],
+        "share_pf_ge_1": 0.0,
+        "n_pass": 0,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -583,6 +1092,13 @@
         "fee_drag": 0.031951842252729845
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [],
+        "share_pf_ge_1": null,
+        "n_pass": null,
+        "n_total": 0,
+        "note": "diagnostic; verdict uses registered params only; this variant has no tunable numeric parameter to vary"
+      },
       "edition": "en"
     },
     {
@@ -624,6 +1140,13 @@
         "fee_drag": 0.026503501590527945
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [],
+        "share_pf_ge_1": null,
+        "n_pass": null,
+        "n_total": 0,
+        "note": "diagnostic; verdict uses registered params only; this variant has no tunable numeric parameter to vary"
+      },
       "edition": "en"
     },
     {
@@ -665,6 +1188,13 @@
         "fee_drag": 0.029296871008183678
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [],
+        "share_pf_ge_1": null,
+        "n_pass": null,
+        "n_total": 0,
+        "note": "diagnostic; verdict uses registered params only; this variant has no tunable numeric parameter to vary"
+      },
       "edition": "en"
     },
     {
@@ -706,6 +1236,13 @@
         "fee_drag": 0.07152309884068409
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [],
+        "share_pf_ge_1": null,
+        "n_pass": null,
+        "n_total": 0,
+        "note": "diagnostic; verdict uses registered params only; this variant has no tunable numeric parameter to vary"
+      },
       "edition": "en"
     },
     {
@@ -747,6 +1284,13 @@
         "fee_drag": 0.02526102913191086
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [],
+        "share_pf_ge_1": null,
+        "n_pass": null,
+        "n_total": 0,
+        "note": "diagnostic; verdict uses registered params only; this variant has no tunable numeric parameter to vary"
+      },
       "edition": "en"
     },
     {
@@ -788,6 +1332,29 @@
         "fee_drag": 0.11081505991509077
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n=22",
+            "oos_pf": 1.8615029509131247,
+            "oos_n_trades": 39
+          },
+          {
+            "params": "n=30",
+            "oos_pf": 1.5601000722217968,
+            "oos_n_trades": 41
+          },
+          {
+            "params": "n=38",
+            "oos_pf": 2.320830011228089,
+            "oos_n_trades": 30
+          }
+        ],
+        "share_pf_ge_1": 1.0,
+        "n_pass": 3,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -829,6 +1396,29 @@
         "fee_drag": 0.02127121938729659
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n=68",
+            "oos_pf": 3.4321013899862285,
+            "oos_n_trades": 16
+          },
+          {
+            "params": "n=90",
+            "oos_pf": 2.6205440376938935,
+            "oos_n_trades": 8
+          },
+          {
+            "params": "n=112",
+            "oos_pf": 1.0140283604688562,
+            "oos_n_trades": 16
+          }
+        ],
+        "share_pf_ge_1": 0.6666666666666666,
+        "n_pass": 2,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -870,6 +1460,13 @@
         "fee_drag": 0.1563740299688383
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [],
+        "share_pf_ge_1": null,
+        "n_pass": null,
+        "n_total": 0,
+        "note": "diagnostic; verdict uses registered params only; this variant has no tunable numeric parameter to vary"
+      },
       "edition": "en"
     },
     {
@@ -911,6 +1508,59 @@
         "fee_drag": 0.024845591086937402
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "threshold=-0.0625, n_hold=4",
+            "oos_pf": 0.7397373860655947,
+            "oos_n_trades": 6
+          },
+          {
+            "params": "threshold=-0.0625, n_hold=5",
+            "oos_pf": 0.4733212021277867,
+            "oos_n_trades": 6
+          },
+          {
+            "params": "threshold=-0.0625, n_hold=6",
+            "oos_pf": 0.15884958853930084,
+            "oos_n_trades": 5
+          },
+          {
+            "params": "threshold=-0.05, n_hold=4",
+            "oos_pf": 1.2253545624536095,
+            "oos_n_trades": 13
+          },
+          {
+            "params": "threshold=-0.05, n_hold=5",
+            "oos_pf": 0.8640635126126905,
+            "oos_n_trades": 13
+          },
+          {
+            "params": "threshold=-0.05, n_hold=6",
+            "oos_pf": 0.8595272135770103,
+            "oos_n_trades": 12
+          },
+          {
+            "params": "threshold=-0.0375, n_hold=4",
+            "oos_pf": 0.7166408056401674,
+            "oos_n_trades": 23
+          },
+          {
+            "params": "threshold=-0.0375, n_hold=5",
+            "oos_pf": 0.8083394504705655,
+            "oos_n_trades": 23
+          },
+          {
+            "params": "threshold=-0.0375, n_hold=6",
+            "oos_pf": 1.2842255494529367,
+            "oos_n_trades": 23
+          }
+        ],
+        "share_pf_ge_1": 0.2222222222222222,
+        "n_pass": 2,
+        "n_total": 9,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -994,6 +1644,59 @@
         "fee_drag": 0.1572536744825721
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n_fast=8, n_slow=38",
+            "oos_pf": 0.9771848495577794,
+            "oos_n_trades": 86
+          },
+          {
+            "params": "n_fast=8, n_slow=50",
+            "oos_pf": 1.171343409115141,
+            "oos_n_trades": 68
+          },
+          {
+            "params": "n_fast=8, n_slow=62",
+            "oos_pf": 1.2408762884000009,
+            "oos_n_trades": 63
+          },
+          {
+            "params": "n_fast=10, n_slow=38",
+            "oos_pf": 0.91913665632504,
+            "oos_n_trades": 81
+          },
+          {
+            "params": "n_fast=10, n_slow=50",
+            "oos_pf": 1.311038063049402,
+            "oos_n_trades": 60
+          },
+          {
+            "params": "n_fast=10, n_slow=62",
+            "oos_pf": 1.2575482883312608,
+            "oos_n_trades": 56
+          },
+          {
+            "params": "n_fast=12, n_slow=38",
+            "oos_pf": 0.8590960524235977,
+            "oos_n_trades": 80
+          },
+          {
+            "params": "n_fast=12, n_slow=50",
+            "oos_pf": 1.330744049253968,
+            "oos_n_trades": 57
+          },
+          {
+            "params": "n_fast=12, n_slow=62",
+            "oos_pf": 1.4149715914381387,
+            "oos_n_trades": 50
+          }
+        ],
+        "share_pf_ge_1": 0.6666666666666666,
+        "n_pass": 6,
+        "n_total": 9,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -1035,6 +1738,59 @@
         "fee_drag": 0.09203358741701906
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n_fast=15, n_slow=75",
+            "oos_pf": 1.4783696182043244,
+            "oos_n_trades": 41
+          },
+          {
+            "params": "n_fast=15, n_slow=100",
+            "oos_pf": 1.936224087295058,
+            "oos_n_trades": 30
+          },
+          {
+            "params": "n_fast=15, n_slow=125",
+            "oos_pf": 2.5106313039121004,
+            "oos_n_trades": 25
+          },
+          {
+            "params": "n_fast=20, n_slow=75",
+            "oos_pf": 1.7742156389145276,
+            "oos_n_trades": 42
+          },
+          {
+            "params": "n_fast=20, n_slow=100",
+            "oos_pf": 2.2437685999931523,
+            "oos_n_trades": 27
+          },
+          {
+            "params": "n_fast=20, n_slow=125",
+            "oos_pf": 2.6458679650752686,
+            "oos_n_trades": 23
+          },
+          {
+            "params": "n_fast=25, n_slow=75",
+            "oos_pf": 2.103065928960898,
+            "oos_n_trades": 38
+          },
+          {
+            "params": "n_fast=25, n_slow=100",
+            "oos_pf": 2.5251267232326082,
+            "oos_n_trades": 24
+          },
+          {
+            "params": "n_fast=25, n_slow=125",
+            "oos_pf": 2.1780125010372995,
+            "oos_n_trades": 20
+          }
+        ],
+        "share_pf_ge_1": 1.0,
+        "n_pass": 9,
+        "n_total": 9,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -1076,6 +1832,59 @@
         "fee_drag": 0.04432189051407942
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n_fast=38, n_slow=150",
+            "oos_pf": 2.7267827752285183,
+            "oos_n_trades": 18
+          },
+          {
+            "params": "n_fast=38, n_slow=200",
+            "oos_pf": 2.4166096144030864,
+            "oos_n_trades": 15
+          },
+          {
+            "params": "n_fast=38, n_slow=250",
+            "oos_pf": 2.9459041557311134,
+            "oos_n_trades": 13
+          },
+          {
+            "params": "n_fast=50, n_slow=150",
+            "oos_pf": 1.6835170091743519,
+            "oos_n_trades": 19
+          },
+          {
+            "params": "n_fast=50, n_slow=200",
+            "oos_pf": 2.1025205840541945,
+            "oos_n_trades": 15
+          },
+          {
+            "params": "n_fast=50, n_slow=250",
+            "oos_pf": 2.2932488790096306,
+            "oos_n_trades": 11
+          },
+          {
+            "params": "n_fast=62, n_slow=150",
+            "oos_pf": 1.5767339028228382,
+            "oos_n_trades": 18
+          },
+          {
+            "params": "n_fast=62, n_slow=200",
+            "oos_pf": 2.162503723820342,
+            "oos_n_trades": 16
+          },
+          {
+            "params": "n_fast=62, n_slow=250",
+            "oos_pf": 2.7037561610523966,
+            "oos_n_trades": 11
+          }
+        ],
+        "share_pf_ge_1": 1.0,
+        "n_pass": 9,
+        "n_total": 9,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -1117,6 +1926,59 @@
         "fee_drag": 0.1442791318947556
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n_fast=9, n_slow=20",
+            "oos_pf": 0.9974926685727732,
+            "oos_n_trades": 102
+          },
+          {
+            "params": "n_fast=9, n_slow=26",
+            "oos_pf": 0.9610962424076446,
+            "oos_n_trades": 97
+          },
+          {
+            "params": "n_fast=9, n_slow=32",
+            "oos_pf": 0.9830186546503766,
+            "oos_n_trades": 85
+          },
+          {
+            "params": "n_fast=12, n_slow=20",
+            "oos_pf": 0.9431718769901078,
+            "oos_n_trades": 98
+          },
+          {
+            "params": "n_fast=12, n_slow=26",
+            "oos_pf": 0.8827899039987924,
+            "oos_n_trades": 87
+          },
+          {
+            "params": "n_fast=12, n_slow=32",
+            "oos_pf": 1.0695513490378215,
+            "oos_n_trades": 71
+          },
+          {
+            "params": "n_fast=15, n_slow=20",
+            "oos_pf": 0.9617445244012284,
+            "oos_n_trades": 87
+          },
+          {
+            "params": "n_fast=15, n_slow=26",
+            "oos_pf": 1.0345146407819348,
+            "oos_n_trades": 73
+          },
+          {
+            "params": "n_fast=15, n_slow=32",
+            "oos_pf": 1.113505724154632,
+            "oos_n_trades": 65
+          }
+        ],
+        "share_pf_ge_1": 0.3333333333333333,
+        "n_pass": 3,
+        "n_total": 9,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -1158,6 +2020,29 @@
         "fee_drag": 0.1920432493103712
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n=150",
+            "oos_pf": 1.5821904777460916,
+            "oos_n_trades": 80
+          },
+          {
+            "params": "n=200",
+            "oos_pf": 1.7603777111174443,
+            "oos_n_trades": 64
+          },
+          {
+            "params": "n=250",
+            "oos_pf": 1.7790554853841163,
+            "oos_n_trades": 57
+          }
+        ],
+        "share_pf_ge_1": 1.0,
+        "n_pass": 3,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -1199,6 +2084,29 @@
         "fee_drag": 0.30037058436386344
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n=38",
+            "oos_pf": 0.9544047479271114,
+            "oos_n_trades": 187
+          },
+          {
+            "params": "n=50",
+            "oos_pf": 0.9470534544663562,
+            "oos_n_trades": 154
+          },
+          {
+            "params": "n=62",
+            "oos_pf": 1.005793148896675,
+            "oos_n_trades": 139
+          }
+        ],
+        "share_pf_ge_1": 0.3333333333333333,
+        "n_pass": 1,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -1240,6 +2148,59 @@
         "fee_drag": 0.13545257090195473
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n_high=15, n_low=8",
+            "oos_pf": 1.0870596874451448,
+            "oos_n_trades": 79
+          },
+          {
+            "params": "n_high=15, n_low=10",
+            "oos_pf": 1.1183709307403662,
+            "oos_n_trades": 76
+          },
+          {
+            "params": "n_high=15, n_low=12",
+            "oos_pf": 1.1454004094388348,
+            "oos_n_trades": 71
+          },
+          {
+            "params": "n_high=20, n_low=8",
+            "oos_pf": 1.0418926674829185,
+            "oos_n_trades": 67
+          },
+          {
+            "params": "n_high=20, n_low=10",
+            "oos_pf": 1.0723980321005624,
+            "oos_n_trades": 64
+          },
+          {
+            "params": "n_high=20, n_low=12",
+            "oos_pf": 1.0891049375999664,
+            "oos_n_trades": 60
+          },
+          {
+            "params": "n_high=25, n_low=8",
+            "oos_pf": 0.8969743052789365,
+            "oos_n_trades": 63
+          },
+          {
+            "params": "n_high=25, n_low=10",
+            "oos_pf": 0.9117300251376274,
+            "oos_n_trades": 61
+          },
+          {
+            "params": "n_high=25, n_low=12",
+            "oos_pf": 0.9200625742499993,
+            "oos_n_trades": 58
+          }
+        ],
+        "share_pf_ge_1": 0.6666666666666666,
+        "n_pass": 6,
+        "n_total": 9,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -1281,6 +2242,59 @@
         "fee_drag": 0.08149745447043766
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n_high=41, n_low=15",
+            "oos_pf": 1.6322467395095912,
+            "oos_n_trades": 38
+          },
+          {
+            "params": "n_high=41, n_low=20",
+            "oos_pf": 1.8413474745834641,
+            "oos_n_trades": 31
+          },
+          {
+            "params": "n_high=41, n_low=25",
+            "oos_pf": 2.560252008166913,
+            "oos_n_trades": 27
+          },
+          {
+            "params": "n_high=55, n_low=15",
+            "oos_pf": 1.5314817032467891,
+            "oos_n_trades": 36
+          },
+          {
+            "params": "n_high=55, n_low=20",
+            "oos_pf": 1.7949424534431666,
+            "oos_n_trades": 29
+          },
+          {
+            "params": "n_high=55, n_low=25",
+            "oos_pf": 1.9670208589009763,
+            "oos_n_trades": 26
+          },
+          {
+            "params": "n_high=69, n_low=15",
+            "oos_pf": 1.0637707643498941,
+            "oos_n_trades": 35
+          },
+          {
+            "params": "n_high=69, n_low=20",
+            "oos_pf": 1.164512880858131,
+            "oos_n_trades": 29
+          },
+          {
+            "params": "n_high=69, n_low=25",
+            "oos_pf": 1.2696213854076417,
+            "oos_n_trades": 26
+          }
+        ],
+        "share_pf_ge_1": 1.0,
+        "n_pass": 9,
+        "n_total": 9,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -1322,6 +2336,29 @@
         "fee_drag": 1.9176669773385941
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "k=0.4",
+            "oos_pf": 0.5643191326271653,
+            "oos_n_trades": 2149
+          },
+          {
+            "params": "k=0.5",
+            "oos_pf": 0.5741707595627533,
+            "oos_n_trades": 1765
+          },
+          {
+            "params": "k=0.6",
+            "oos_pf": 0.5972697410801111,
+            "oos_n_trades": 1461
+          }
+        ],
+        "share_pf_ge_1": 0.0,
+        "n_pass": 0,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -1363,6 +2400,29 @@
         "fee_drag": 2.1456242886081958
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "k=0.6",
+            "oos_pf": 0.5972697410801111,
+            "oos_n_trades": 1461
+          },
+          {
+            "params": "k=0.7",
+            "oos_pf": 0.6352431581585815,
+            "oos_n_trades": 1210
+          },
+          {
+            "params": "k=0.8",
+            "oos_pf": 0.5980801230479597,
+            "oos_n_trades": 1042
+          }
+        ],
+        "share_pf_ge_1": 0.0,
+        "n_pass": 0,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -1404,6 +2464,59 @@
         "fee_drag": 1.0836618809012855
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "k=0.4, sma_n=15",
+            "oos_pf": 0.5569680299136023,
+            "oos_n_trades": 1155
+          },
+          {
+            "params": "k=0.4, sma_n=20",
+            "oos_pf": 0.5485830771395592,
+            "oos_n_trades": 1160
+          },
+          {
+            "params": "k=0.4, sma_n=25",
+            "oos_pf": 0.5550156205577225,
+            "oos_n_trades": 1134
+          },
+          {
+            "params": "k=0.5, sma_n=15",
+            "oos_pf": 0.5700068195176899,
+            "oos_n_trades": 949
+          },
+          {
+            "params": "k=0.5, sma_n=20",
+            "oos_pf": 0.5591805070128135,
+            "oos_n_trades": 960
+          },
+          {
+            "params": "k=0.5, sma_n=25",
+            "oos_pf": 0.5655969313158304,
+            "oos_n_trades": 939
+          },
+          {
+            "params": "k=0.6, sma_n=15",
+            "oos_pf": 0.5753024789077738,
+            "oos_n_trades": 809
+          },
+          {
+            "params": "k=0.6, sma_n=20",
+            "oos_pf": 0.5723907578943719,
+            "oos_n_trades": 816
+          },
+          {
+            "params": "k=0.6, sma_n=25",
+            "oos_pf": 0.5839767972467803,
+            "oos_n_trades": 794
+          }
+        ],
+        "share_pf_ge_1": 0.0,
+        "n_pass": 0,
+        "n_total": 9,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -1445,6 +2558,29 @@
         "fee_drag": 0.07440715020303212
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "exit=38",
+            "oos_pf": 0.9369823629126353,
+            "oos_n_trades": 44
+          },
+          {
+            "params": "exit=50",
+            "oos_pf": 1.252963315181571,
+            "oos_n_trades": 33
+          },
+          {
+            "params": "exit=62",
+            "oos_pf": 1.3957076896678828,
+            "oos_n_trades": 26
+          }
+        ],
+        "share_pf_ge_1": 0.6666666666666666,
+        "n_pass": 2,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -1486,6 +2622,29 @@
         "fee_drag": 0.03894568171446822
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "exit=52",
+            "oos_pf": 1.2557496881151151,
+            "oos_n_trades": 32
+          },
+          {
+            "params": "exit=70",
+            "oos_pf": 1.2336769531239775,
+            "oos_n_trades": 18
+          },
+          {
+            "params": "exit=88",
+            "oos_pf": 2.0221561343531618,
+            "oos_n_trades": 2
+          }
+        ],
+        "share_pf_ge_1": 0.6666666666666666,
+        "n_pass": 2,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -1527,6 +2686,13 @@
         "fee_drag": 0.17606755193557955
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [],
+        "share_pf_ge_1": null,
+        "n_pass": null,
+        "n_total": 0,
+        "note": "diagnostic; verdict uses registered params only; this variant has no tunable numeric parameter to vary"
+      },
       "edition": "en"
     },
     {
@@ -1568,6 +2734,13 @@
         "fee_drag": 0.14051037608077632
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [],
+        "share_pf_ge_1": null,
+        "n_pass": null,
+        "n_total": 0,
+        "note": "diagnostic; verdict uses registered params only; this variant has no tunable numeric parameter to vary"
+      },
       "edition": "en"
     },
     {
@@ -1609,6 +2782,13 @@
         "fee_drag": 0.17614483939684933
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [],
+        "share_pf_ge_1": null,
+        "n_pass": null,
+        "n_total": 0,
+        "note": "diagnostic; verdict uses registered params only; this variant has no tunable numeric parameter to vary"
+      },
       "edition": "en"
     },
     {
@@ -1650,6 +2830,13 @@
         "fee_drag": 0.4108106144659309
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [],
+        "share_pf_ge_1": null,
+        "n_pass": null,
+        "n_total": 0,
+        "note": "diagnostic; verdict uses registered params only; this variant has no tunable numeric parameter to vary"
+      },
       "edition": "en"
     },
     {
@@ -1691,6 +2878,13 @@
         "fee_drag": 0.13292751667063363
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [],
+        "share_pf_ge_1": null,
+        "n_pass": null,
+        "n_total": 0,
+        "note": "diagnostic; verdict uses registered params only; this variant has no tunable numeric parameter to vary"
+      },
       "edition": "en"
     },
     {
@@ -1732,6 +2926,29 @@
         "fee_drag": 0.3804791070228095
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n=22",
+            "oos_pf": 0.7525450099143182,
+            "oos_n_trades": 229
+          },
+          {
+            "params": "n=30",
+            "oos_pf": 0.8533018712033437,
+            "oos_n_trades": 219
+          },
+          {
+            "params": "n=38",
+            "oos_pf": 0.848190316453599,
+            "oos_n_trades": 175
+          }
+        ],
+        "share_pf_ge_1": 0.0,
+        "n_pass": 0,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -1773,6 +2990,29 @@
         "fee_drag": 0.3092068667673531
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [
+          {
+            "params": "n=68",
+            "oos_pf": 1.067381810821715,
+            "oos_n_trades": 132
+          },
+          {
+            "params": "n=90",
+            "oos_pf": 1.3273298261552546,
+            "oos_n_trades": 112
+          },
+          {
+            "params": "n=112",
+            "oos_pf": 1.0226412106814902,
+            "oos_n_trades": 100
+          }
+        ],
+        "share_pf_ge_1": 1.0,
+        "n_pass": 3,
+        "n_total": 3,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {
@@ -1814,6 +3054,13 @@
         "fee_drag": 0.37216602514992225
       },
       "suspicious": false,
+      "robustness": {
+        "grid": [],
+        "share_pf_ge_1": null,
+        "n_pass": null,
+        "n_total": 0,
+        "note": "diagnostic; verdict uses registered params only; this variant has no tunable numeric parameter to vary"
+      },
       "edition": "en"
     },
     {
@@ -1855,6 +3102,59 @@
         "fee_drag": 0.0066682897125800444
       },
       "suspicious": true,
+      "robustness": {
+        "grid": [
+          {
+            "params": "threshold=-0.0625, n_hold=4",
+            "oos_pf": null,
+            "oos_n_trades": 0
+          },
+          {
+            "params": "threshold=-0.0625, n_hold=5",
+            "oos_pf": null,
+            "oos_n_trades": 0
+          },
+          {
+            "params": "threshold=-0.0625, n_hold=6",
+            "oos_pf": null,
+            "oos_n_trades": 0
+          },
+          {
+            "params": "threshold=-0.05, n_hold=4",
+            "oos_pf": 13.195998769872745,
+            "oos_n_trades": 3
+          },
+          {
+            "params": "threshold=-0.05, n_hold=5",
+            "oos_pf": 13.64100308775583,
+            "oos_n_trades": 3
+          },
+          {
+            "params": "threshold=-0.05, n_hold=6",
+            "oos_pf": "inf",
+            "oos_n_trades": 3
+          },
+          {
+            "params": "threshold=-0.0375, n_hold=4",
+            "oos_pf": 2.912948292690636,
+            "oos_n_trades": 17
+          },
+          {
+            "params": "threshold=-0.0375, n_hold=5",
+            "oos_pf": 3.679768041618701,
+            "oos_n_trades": 17
+          },
+          {
+            "params": "threshold=-0.0375, n_hold=6",
+            "oos_pf": 4.894884758681521,
+            "oos_n_trades": 17
+          }
+        ],
+        "share_pf_ge_1": 0.3333333333333333,
+        "n_pass": 3,
+        "n_total": 9,
+        "note": "diagnostic; verdict uses registered params only"
+      },
       "edition": "en"
     },
     {

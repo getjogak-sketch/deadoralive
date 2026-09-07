@@ -104,6 +104,44 @@ def _badge_html(verdict):
     return f'<span class="badge" style="background:{bg};color:{fg}">{html.escape(verdict)}</span>'
 
 
+# spec_v3 §C: 3-level colour coding for the robustness column, reusing the exact same badge color
+# tokens already used for verdicts (green-ish/amber/grey) rather than inventing a fourth palette.
+_ROBUST_HIGH = VERDICT_COLORS["ALIVE"]
+_ROBUST_MID = VERDICT_COLORS["FADING"]
+_ROBUST_LOW = VERDICT_COLORS["TOO FEW TRADES"]
+
+
+def _fmt_grid_pf(pf):
+    if pf is None:
+        return "n/a"
+    if pf == "inf":
+        return "inf"
+    return f"{pf:.2f}"
+
+
+def _robustness_badge_html(robustness: dict | None) -> str:
+    """spec_v3 §C: a small `n/total` badge with a tooltip listing every grid point's own
+    (params -> PF, n trades), colour-coded at the 2/3 and 1/3 `share_pf_ge_1` breakpoints. `None`
+    or an empty grid (a strategy with no numeric parameter to vary, e.g. `macd`) renders as a
+    plain dash — never a badge, so it isn't mistaken for a share of 0."""
+    if not robustness or robustness.get("share_pf_ge_1") is None:
+        return '<span class="meta">-</span>'
+    share = robustness["share_pf_ge_1"]
+    n_pass, n_total = robustness["n_pass"], robustness["n_total"]
+    if share >= 2 / 3:
+        bg, fg = _ROBUST_HIGH
+    elif share >= 1 / 3:
+        bg, fg = _ROBUST_MID
+    else:
+        bg, fg = _ROBUST_LOW
+    tooltip = "; ".join(
+        f"{g['params']} → PF={_fmt_grid_pf(g['oos_pf'])} (n={g['oos_n_trades']})"
+        for g in robustness["grid"]
+    )
+    return (f'<span class="badge robustness-badge" style="background:{bg};color:{fg}" '
+            f'title="{html.escape(tooltip)}">{n_pass}/{n_total}</span>')
+
+
 def _row_html(row):
     is_ = row["is"]
     oos = row["oos"]
@@ -121,6 +159,7 @@ def _row_html(row):
     bh_oos_return = _fmt_pct(oos.get("bh_return")) if not is_ref else "-"
     bh_oos_mdd = _fmt_pct_already(oos.get("bh_mdd")) if not is_ref else "-"
     fee_drag = _fmt_pct(oos.get("fee_drag"))
+    robustness_html = "-" if is_ref else _robustness_badge_html(row.get("robustness"))
 
     return (
         f"<tr{cls}>"
@@ -137,6 +176,7 @@ def _row_html(row):
         f"<td>{bh_oos_return}</td>"
         f"<td>{bh_oos_mdd}</td>"
         f"<td>{fee_drag}</td>"
+        f"<td>{robustness_html}</td>"
         f"</tr>"
     )
 
@@ -155,7 +195,7 @@ def _asset_tf_section(asset, tf, rows, as_of):
         <th>OOS Return</th><th>OOS PF</th><th>OOS MDD</th><th>OOS Trades</th><th>OOS Win%</th>
         <th>IS PF</th><th>IS MDD</th>
         <th>B&amp;H OOS Return</th><th>B&amp;H OOS MDD</th>
-        <th>Fee drag&sup1;</th>
+        <th>Fee drag&sup1;</th><th>Robustness&sup2;</th>
       </tr></thead>
       <tbody>
 {body_rows}
@@ -163,7 +203,10 @@ def _asset_tf_section(asset, tf, rows, as_of):
     </table>
   </div>
   <p class="gross-note">&sup1; Fee drag = gross (before-fees, for illustration only) OOS return
-     &minus; net OOS return. Every other number on this page is net of trading cost.</p>
+     &minus; net OOS return. Every other number on this page is net of trading cost.
+     &sup2; Robustness = how many of a small grid of nearby parameter values (hover for the list)
+     also clear OOS PF &ge; 1.0 with &ge; 10 trades &mdash; diagnostic only, see methodology; it
+     never changes the verdict.</p>
 </section>"""
 
 
@@ -347,6 +390,24 @@ def build_methodology(out_path: str | None = None, assets: list | None = None,
   </section>
 
   <section class="assetblock">
+    <h2>Robustness map (diagnostic)</h2>
+    <p>Every registered variant with at least one numeric parameter (a window length, a
+       multiplier, a threshold) is also re-run, out-of-sample only, at a small grid of nearby
+       values &mdash; roughly &plusmn;25% around each registered number (or &plusmn;0.1 for the
+       volatility-breakout multiplier <code>k</code>), one parameter combination at a time. The
+       "Robustness" column reports what fraction of that grid still clears OOS PF &ge; 1.0 with
+       at least 10 trades, e.g. "7/9"; hover it for the full grid. A strategy that only works at
+       exactly its registered numbers and falls apart one step away is more likely to be a
+       historical coincidence than a real, durable edge &mdash; this column exists to make that
+       visible.</p>
+    <p><strong>This never changes the verdict.</strong> The grid is read-only: it reuses the same
+       simulation engine on the same data, but its output feeds nothing except this one column.
+       Verdicts are always computed from &mdash; and only from &mdash; the exact parameter values
+       fixed in <code>registry.py</code> before any result was ever seen; the grid can never
+       select a "better" parameter or retroactively change what was registered.</p>
+  </section>
+
+  <section class="assetblock">
     <h2>Engine honesty checks</h2>
     <p><strong>No-lookahead test</strong>: for every strategy variant in the registry below, the
        signal computed on the full price series is compared against the signal computed on data
@@ -492,6 +553,7 @@ def _row_html_ko(row):
     bh_oos_return = _fmt_pct(oos.get("bh_return")) if not is_ref else "-"
     bh_oos_mdd = _fmt_pct_already(oos.get("bh_mdd")) if not is_ref else "-"
     fee_drag = _fmt_pct(oos.get("fee_drag"))
+    robustness_html = "-" if is_ref else _robustness_badge_html(row.get("robustness"))
 
     return (
         f"<tr{cls}>"
@@ -508,6 +570,7 @@ def _row_html_ko(row):
         f"<td>{bh_oos_return}</td>"
         f"<td>{bh_oos_mdd}</td>"
         f"<td>{fee_drag}</td>"
+        f"<td>{robustness_html}</td>"
         f"</tr>"
     )
 
@@ -531,7 +594,7 @@ def _asset_tf_section_ko(asset, tf, rows, as_of, last_price):
         <th>최근 2년 수익률</th><th>PF</th><th>최대 낙폭</th><th>거래 횟수</th><th>승률</th>
         <th>이전 기간 PF</th><th>이전 기간 최대 낙폭</th>
         <th>단순 보유 수익률</th><th>단순 보유 최대 낙폭</th>
-        <th>수수료로 사라진 수익&sup1;</th>
+        <th>수수료로 사라진 수익&sup1;</th><th>주변 설정값 안정성&sup2;</th>
       </tr></thead>
       <tbody>
 {body_rows}
@@ -541,7 +604,9 @@ def _asset_tf_section_ko(asset, tf, rows, as_of, last_price):
   <p class="gross-note">&sup1; 수수료가 없다고 가정했을 때의 수익률에서 실제 수익률을 뺀 값입니다(참고용).
      이 열을 제외한 모든 숫자는 수수료(편도 0.10%)를 뗀 뒤의 값입니다. PF(Profit Factor)는 이긴 거래의
      이익 합계를 진 거래의 손실 합계로 나눈 값으로, 1.0이면 본전입니다. 최대 낙폭(MDD)은 고점 대비
-     가장 많이 빠졌던 비율입니다.</p>
+     가장 많이 빠졌던 비율입니다. &sup2; 등록된 설정값 근처의 값들로도 같은 조건(PF 1.0 이상, 거래
+     10회 이상)을 통과하는 비율입니다(마우스를 올리면 목록이 나옵니다) — 참고용이며 판정에는 전혀
+     반영되지 않습니다.</p>
 </section>"""
 
 
@@ -732,6 +797,19 @@ def build_methodology_ko(out_path: str | None = None):
     </tbody></table>
     <p>참고용 두 줄(단순 보유, 적립 매수)에는 판정을 붙이지 않습니다. 이 기준은 결과를 보기 전에
        정해 두었고, 결과에 맞춰 바꾸지 않습니다.</p>
+  </section>
+
+  <section class="assetblock">
+    <h2>주변 설정값 안정성 (참고용)</h2>
+    <p>숫자로 된 설정값이 하나라도 있는 전략은, 시험 구간(OOS)에서 등록된 값 근처의 몇 가지 값으로도
+       다시 계산해 봅니다. 등록된 값을 기준으로 대략 위아래 25%(변동성 돌파의 k 값은 위아래 0.1) 떨어진
+       값들을 조합해서, PF가 1.0 이상이고 거래가 10번 이상인 조건을 몇 개나 통과하는지 셉니다. 예를 들어
+       "7/9"라면 아홉 가지 조합 중 일곱 가지가 이 조건을 통과했다는 뜻이고, 표에서 마우스를 올리면 전체
+       목록을 볼 수 있습니다. 등록된 값 딱 하나에서만 결과가 좋고 조금만 벗어나면 무너지는 전략은, 실제로
+       통하는 방식이라기보다 과거 데이터에 우연히 들어맞았을 가능성이 큽니다.</p>
+    <p>이 값은 판정에 전혀 반영되지 않습니다. 계산은 같은 엔진과 같은 데이터로 하지만, 결과는 이 열
+       하나에만 쓰입니다. 판정은 언제나 결과를 보기 전에 <code>registry.py</code>에 고정해 둔 값 하나로만
+       계산하며, 이 참고 자료를 보고 더 나아 보이는 값으로 바꾸는 일은 없습니다.</p>
   </section>
 
   <section class="assetblock">

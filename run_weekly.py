@@ -28,6 +28,7 @@ import pandas as pd
 
 import config
 import registry as reg
+import robustness as rb
 import verdict as vd
 from data_loader import load_generic, rolling_is_oos_window
 from engine import (
@@ -159,6 +160,10 @@ def _build_rows_for_asset_tf_impl(symbol: str, tf: str, df: pd.DataFrame, cost: 
                         ("inf" if isinstance(v, float) and np.isinf(v) else v))
                     for k, v in m.items()}
 
+        # spec_v3 §C: diagnostic-only robustness map, computed from the same OOS window/engine —
+        # never read by verdict.assign_verdict above, which already ran on the registered params.
+        robustness = rb.compute_robustness(sid, variant["params"], stype, hold_n, df, oos_mask, cost)
+
         rows.append({
             "strategy_id": sid, "strategy_name": sname, "type": stype,
             "params": variant["params_str"], "asset": symbol, "timeframe": tf,
@@ -167,6 +172,7 @@ def _build_rows_for_asset_tf_impl(symbol: str, tf: str, df: pd.DataFrame, cost: 
             "is": _clean(m_is),
             "oos": {**_clean(m_oos), "fee_drag": None if np.isnan(fee_drag) else fee_drag},
             "suspicious": bool(is_suspicious),
+            "robustness": robustness,
         })
 
     # --- reference rows: buy_and_hold, dca_weekly (no verdict; return/MDD only) ---

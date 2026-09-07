@@ -1,0 +1,62 @@
+# research/demand/keywords.yml — candidate-sea keyword groups (CRITERIA.md).
+#
+# Plain, hand-rolled subset of YAML (no external YAML lib — parsed by
+# run_demand.py's load_keywords_yaml, a ~30-line indentation-based parser written for exactly
+# this shape). Two body shapes are supported:
+#   1. a plain list of keywords (most groups):
+#        group_name:
+#          - keyword one
+#          - keyword two
+#   2. a mapping with an optional geo override (the "korean" group):
+#        group_name:
+#          geo: KR
+#          keywords:
+#            - keyword one
+#
+# "supertrend strategy" (anchor_crypto's first entry) is the fixed anchor keyword (CRITERIA.md)
+# and is added by run_demand.py to every OTHER group's request batch — it must not be duplicated
+# by hand into the other groups below.
+
+anchor_crypto:
+  - supertrend strategy
+  - golden cross strategy
+  - rsi strategy backtest
+  - bollinger bands strategy
+  - volatility breakout strategy
+
+forex_commodities:
+  - forex strategy backtest
+  - gold trading strategy
+  - eurusd strategy
+  - moving average crossover forex
+
+bot_templates:
+  - 3commas strategy
+  - grid bot strategy
+  - dca bot strategy
+  - pionex grid bot
+
+indicator_combos:
+  - ema 200 macd strategy
+  - rsi divergence strategy
+  - ichimoku strategy
+  - heikin ashi strategy
+
+stocks_etf:
+  - spy trading strategy
+  - qqq strategy
+  - sma 200 strategy stocks
+  - swing trading strategy backtest
+
+sports_systems:
+  - sports betting system
+  - betting strategy backtest
+  - kelly criterion betting
+
+korean:
+  geo: KR
+  keywords:
+    - 변동성 돌파 전략
+    - 업비트 자동매매
+    - 이동평균 교차 전략
+    - 비트코인 백테스트

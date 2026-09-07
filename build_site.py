@@ -167,8 +167,22 @@ def _asset_tf_section(asset, tf, rows, as_of):
 </section>"""
 
 
-def build_index(payload: dict, out_path: str | None = None):
+def build_index(payload: dict, out_path: str | None = None, assets: list | None = None,
+                 timeframes: list | None = None, lang_links: str | None = None):
+    """spec_v3 §A extension (additive): `assets`/`timeframes`/`lang_links` let a second edition
+    (the stocks edition — SPY/QQQ, 1d only) reuse this exact template instead of duplicating it,
+    per spec_v3 §A's own instruction ("reuse the English builders with an edition parameter").
+    All three default to exactly what this function already hard-coded before spec_v3, so the
+    English crypto edition's call site (no new args passed) renders byte-for-byte the same rows/
+    table structure as before — only its header gained one more nav link (Stocks), which changes
+    no number on the page."""
     out_path = out_path or os.path.join(config.DOCS_DIR, "index.html")
+    assets = assets if assets is not None else config.ASSETS
+    timeframes = timeframes if timeframes is not None else config.TIMEFRAMES
+    lang_links = lang_links if lang_links is not None else (
+        '<a href="stocks/index.html">Stocks edition</a> &middot; '
+        '<a href="ko/index.html">한국어 (Korean edition)</a>'
+    )
 
     groups = {}
     order = []
@@ -177,7 +191,7 @@ def build_index(payload: dict, out_path: str | None = None):
         if key not in groups:
             groups[key] = []
             order.append(key)
-    order = [k for k in [(a, tf) for a in config.ASSETS for tf in config.TIMEFRAMES] if k in groups] or order
+    order = [k for k in [(a, tf) for a in assets for tf in timeframes] if k in groups] or order
     for r in payload["rows"]:
         groups[(r["asset"], r["timeframe"])].append(r)
 
@@ -193,7 +207,7 @@ def build_index(payload: dict, out_path: str | None = None):
 
     sections_html = "".join(_asset_tf_section(a, tf, groups[(a, tf)], payload["as_of"]) for a, tf in order)
 
-    skipped = sorted(set(config.ASSETS) - {a for a, _tf in order})
+    skipped = sorted(set(assets) - {a for a, _tf in order})
     skipped_note = ""
     if skipped:
         skipped_note = (f'<p class="meta">Skipped this run (no local data file): '
@@ -219,7 +233,7 @@ def build_index(payload: dict, out_path: str | None = None):
   <h1>{html.escape(payload['project_name'])}</h1>
   <p class="tagline">{html.escape(payload['tagline'])}</p>
   <p class="meta">as_of: <strong>{html.escape(payload['as_of'])}</strong> &middot; generated {html.escape(payload['generated_at'])}
-  &middot; <a href="ko/index.html">한국어 (Korean edition)</a></p>
+  &middot; {lang_links}</p>
   <div class="tally">{tally_html}</div>
   {skipped_note}
 </header>
@@ -257,13 +271,22 @@ def _registry_table_html():
     return "\n".join(rows)
 
 
-def build_methodology(out_path: str | None = None):
+def build_methodology(out_path: str | None = None, assets: list | None = None,
+                       lang_links: str | None = None):
+    """spec_v3 §A extension (additive): `assets`/`lang_links` let the stocks edition reuse this
+    template (see build_index's docstring above for the same rationale); both default to exactly
+    what this function already hard-coded before spec_v3."""
     out_path = out_path or os.path.join(config.DOCS_DIR, "methodology.html")
-    # Filtered to config.ASSETS (not all of config.COST) so this English page's output is
-    # unaffected by the Korean edition's COST["KRW-BTC"/"KRW-ETH"] entries added alongside it.
+    assets = assets if assets is not None else config.ASSETS
+    lang_links = lang_links if lang_links is not None else (
+        '<a href="stocks/methodology.html">Stocks edition</a> &middot; '
+        '<a href="ko/methodology.html">한국어 (Korean edition)</a>'
+    )
+    # Filtered to `assets` (not all of config.COST) so this page's output is unaffected by the
+    # other editions' COST entries added alongside it.
     cost_rows = "".join(
         f"<tr><td>{html.escape(a)}</td><td>{config.COST[a]*100:.2f}%</td></tr>"
-        for a in config.ASSETS
+        for a in assets
     )
     th = config.VERDICT_THRESHOLDS
 
@@ -278,7 +301,7 @@ def build_methodology(out_path: str | None = None):
 <body>
 <header class="top">
   <h1>Methodology</h1>
-  <p class="tagline"><a href="index.html">&larr; back to results</a> &middot; <a href="ko/methodology.html">한국어 (Korean edition)</a></p>
+  <p class="tagline"><a href="index.html">&larr; back to results</a> &middot; {lang_links}</p>
 </header>
 <main>
   <section class="assetblock">
@@ -584,7 +607,7 @@ def build_index_ko(payload: dict, out_path: str | None = None):
   <h1>{html.escape(payload['project_name'])}</h1>
   <p class="tagline">{html.escape(payload.get('tagline') or config.TAGLINE_KO)}</p>
   <p class="meta">기준일 <strong>{html.escape(payload['as_of'])}</strong> &middot;
-     매주 월요일 오전 9시 30분(한국 시간)에 자동으로 다시 계산합니다 &middot; <a href="../index.html">English</a></p>
+     매주 월요일 오전 9시 30분(한국 시간)에 자동으로 다시 계산합니다 &middot; <a href="../index.html">English</a> &middot; <a href="../stocks/index.html">Stocks</a></p>
   <div class="tally">{tally_html}</div>
   {skipped_note}
 </header>
@@ -593,7 +616,7 @@ def build_index_ko(payload: dict, out_path: str | None = None):
   {sections_html}
 </main>
 <footer class="bottom">
-  <div><a href="methodology.html">어떻게 계산했나</a>{repo_html}{signup_html} &middot; <a href="../index.html">English</a></div>
+  <div><a href="methodology.html">어떻게 계산했나</a>{repo_html}{signup_html} &middot; <a href="../index.html">English</a> &middot; <a href="../stocks/index.html">Stocks</a></div>
 </footer>
 {_disclaimer_block_ko()}
 </body>
@@ -669,7 +692,7 @@ def build_methodology_ko(out_path: str | None = None):
 <header class="top">
   <h1>어떻게 계산했나</h1>
   <p class="tagline"><a href="index.html">&larr; 결과표로 돌아가기</a> &middot;
-     <a href="../methodology.html">English</a></p>
+     <a href="../methodology.html">English</a> &middot; <a href="../stocks/methodology.html">Stocks</a></p>
 </header>
 <main>
   <section class="assetblock">
@@ -740,7 +763,7 @@ def build_methodology_ko(out_path: str | None = None):
   </section>
 </main>
 <footer class="bottom">
-  <div><a href="index.html">&larr; 결과표로 돌아가기</a> &middot; <a href="../methodology.html">English</a></div>
+  <div><a href="index.html">&larr; 결과표로 돌아가기</a> &middot; <a href="../methodology.html">English</a> &middot; <a href="../stocks/methodology.html">Stocks</a></div>
 </footer>
 {_disclaimer_block_ko()}
 </body>
@@ -773,7 +796,7 @@ def build_empty_edition_page_ko(out_path: str | None = None, as_of: str | None =
   <h1>{html.escape(config.PROJECT_NAME)}</h1>
   <p class="tagline">{html.escape(config.TAGLINE_KO)}</p>
   <p class="meta">기준일 <strong>{html.escape(as_of)}</strong> &middot;
-     <a href="../index.html">English</a></p>
+     <a href="../index.html">English</a> &middot; <a href="../stocks/index.html">Stocks</a></p>
 </header>
 <main>
   <div class="notice-box">
@@ -785,7 +808,7 @@ def build_empty_edition_page_ko(out_path: str | None = None, as_of: str | None =
   </div>
 </main>
 <footer class="bottom">
-  <div><a href="methodology.html">어떻게 계산했나</a> &middot; <a href="../index.html">English</a></div>
+  <div><a href="methodology.html">어떻게 계산했나</a> &middot; <a href="../index.html">English</a> &middot; <a href="../stocks/index.html">Stocks</a></div>
 </footer>
 {_disclaimer_block_ko()}
 </body>

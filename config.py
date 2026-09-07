@@ -163,3 +163,25 @@ EDITIONS = {
     "en": {"assets": ASSETS, "lang": "en", "out": DOCS_DIR},
     "ko": {"assets": UPBIT_ASSETS, "lang": "ko", "out": DOCS_DIR_KO},
 }
+
+# ---------------------------------------------------------------------------
+# Stocks edition (spec_v3 §A) — SPY/QQQ daily, English only. Additive: nothing above this line
+# (crypto en/ko editions, ASSETS/COST/BARS_PER_YEAR/VERDICT_THRESHOLDS/registry) is modified. This
+# edition is run through the exact same engine.py/strategies.py/verdict.py/registry.py machinery
+# as the crypto editions — only the asset list, one-way cost, bars_per_year convention (252
+# trading days/year, not 365 calendar days — stocks markets are closed weekends/holidays), data
+# floor date, and output paths/language-switch differ.
+# ---------------------------------------------------------------------------
+STOCKS_ASSETS = ["SPY", "QQQ"]
+STOCKS_TIMEFRAMES = ["1d"]
+STOCKS_DATA_START = "2000-01-01"
+STOCKS_BARS_PER_YEAR = 252
+
+# One-way cost for the stocks edition (spec_v3 §A: "Cost 0.02% one-way"), added as new COST dict
+# entries — the existing BTCUSD/ETHUSD/KRW-* entries above are untouched.
+COST["SPY"] = 0.0002
+COST["QQQ"] = 0.0002
+
+DOCS_DIR_STOCKS = os.path.join(DOCS_DIR, "stocks")
+EDITIONS["stocks"] = {"assets": STOCKS_ASSETS, "lang": "en", "out": DOCS_DIR_STOCKS,
+                       "timeframes": STOCKS_TIMEFRAMES}

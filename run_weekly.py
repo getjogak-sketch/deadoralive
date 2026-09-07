@@ -68,8 +68,24 @@ def _gross_oos_return(stype, signal_out, hold_n, df, oos_mask):
 
 
 def build_rows_for_asset_tf(symbol: str, tf: str, df: pd.DataFrame):
+    """Public entry point, kept byte-for-byte equivalent to spec_v2's original behavior: looks up
+    cost/bars_per_year from the module-level config dicts (keyed by symbol / by timeframe) and
+    delegates to _build_rows_for_asset_tf_impl. Existing callers (the English/Korean editions)
+    keep this exact signature and get exactly the same numbers as before spec_v3."""
     cost = config.COST[symbol]
     bars_per_year = config.BARS_PER_YEAR[tf]
+    return _build_rows_for_asset_tf_impl(symbol, tf, df, cost, bars_per_year)
+
+
+def _build_rows_for_asset_tf_impl(symbol: str, tf: str, df: pd.DataFrame, cost: float,
+                                   bars_per_year: float):
+    """spec_v3 §A extension (additive): the body of build_rows_for_asset_tf above, factored out
+    so a new edition whose cost/bars_per_year don't come from the module-level config.COST[symbol]
+    / config.BARS_PER_YEAR[tf] dicts (the stocks edition uses 252 trading days/year, not the
+    365-calendar-day convention keyed by timeframe alone) can reuse the exact same row-building
+    logic without duplicating it. Nothing in this function's body differs from the original
+    build_rows_for_asset_tf — it is the same code, just parameterized on cost/bars_per_year
+    instead of looking them up itself."""
     as_of, is_mask, oos_mask = rolling_is_oos_window(df, config.OOS_DAYS)
 
     rows = []
@@ -261,6 +277,12 @@ def main():
     # -------------------------------------------------------------------------------------------
     _run_ko_edition()
 
+    # -------------------------------------------------------------------------------------------
+    # Stocks edition (SPY/QQQ, daily) — spec_v3 §A, additive extension. Nothing above this line
+    # (English/Korean crypto editions) is changed by this block.
+    # -------------------------------------------------------------------------------------------
+    _run_stocks_edition()
+
     return 0
 
 
@@ -370,6 +392,104 @@ def _run_ko_edition():
 
     build_site.build_index_ko(payload, os.path.join(out_dir, "index.html"))
     build_site.build_methodology_ko(os.path.join(out_dir, "methodology.html"))
+    print(f"Wrote {os.path.join(out_dir, 'index.html')}")
+    print(f"Wrote {os.path.join(out_dir, 'methodology.html')}")
+
+
+def _run_stocks_edition():
+    """Stocks edition (SPY/QQQ, daily) — spec_v3 §A. English-only, reuses the exact same
+    registry/engine/verdict machinery as the crypto editions above, via
+    _build_rows_for_asset_tf_impl (see its docstring for why the plain build_rows_for_asset_tf
+    isn't reused directly: this edition's bars_per_year convention, config.STOCKS_BARS_PER_YEAR =
+    252 trading days/year, differs from the calendar-day convention config.BARS_PER_YEAR[tf]
+    encodes for the crypto editions). If neither SPY nor QQQ has a local data file this run
+    (Stooq/Yahoo both blocked or both failing), nothing is written for this edition and a warning
+    is printed — never a hard failure for the crypto editions, matching the Korean edition's
+    "no data this week" tolerance, except here (since English text has no separate
+    "no-data" page requirement in spec_v3 §A) we simply skip writing this edition's pages."""
+    import build_site
+
+    edition = config.EDITIONS["stocks"]
+    assets = edition["assets"]
+    timeframes = edition["timeframes"]
+    out_dir = edition["out"]
+
+    all_rows = []
+    all_suspicious = []
+    run_as_of = None
+
+    for symbol in assets:
+        for tf in timeframes:
+            path = _data_path(symbol, tf)
+            if not os.path.exists(path):
+                print(f"[run_weekly] [stocks] WARNING: no data file for {symbol} {tf} ({path}) — "
+                      f"skipping (not a failure; Stooq/Yahoo may be unavailable this run).")
+                continue
+            df = load_generic(path, min_date=config.STOCKS_DATA_START)
+            if len(df) < 260:
+                print(f"[run_weekly] [stocks] WARNING: {symbol} {tf} has only {len(df)} bars — "
+                      f"skipping (not enough history for the longest-lookback strategies).")
+                continue
+
+            cost = config.COST[symbol]
+            as_of, rows, suspicious = _build_rows_for_asset_tf_impl(
+                symbol, tf, df, cost, config.STOCKS_BARS_PER_YEAR)
+            for r in rows:
+                r["edition"] = "stocks"
+            all_rows.extend(rows)
+            all_suspicious.extend(suspicious)
+            run_as_of = as_of if run_as_of is None else max(run_as_of, as_of)
+            print(f"[run_weekly] [stocks] {symbol} {tf}: as_of={as_of.date()}, {len(rows)} rows "
+                  f"({reg.count_variants()} strategy variants + 2 reference)")
+
+    os.makedirs(config.RESULTS_DIR, exist_ok=True)
+    os.makedirs(config.HISTORY_DIR, exist_ok=True)
+    os.makedirs(out_dir, exist_ok=True)
+
+    if not all_rows:
+        print("[run_weekly] [stocks] No SPY/QQQ data available this week — skipping the stocks "
+              "edition's pages (not a failure for the crypto editions).")
+        return
+
+    tally = vd.tally([r["verdict"] for r in all_rows if r["verdict"] is not None])
+    payload = {
+        "project_name": config.PROJECT_NAME, "edition": "stocks", "lang": "en",
+        "tagline": config.TAGLINE,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "as_of": str(run_as_of.date()), "oos_days": config.OOS_DAYS,
+        "tally": tally, "rows": all_rows, "suspicious": all_suspicious,
+        "legal_disclaimer": config.LEGAL_DISCLAIMER,
+        "repo_url": config.REPO_URL, "signup_url": config.SIGNUP_URL,
+    }
+
+    latest_path = os.path.join(config.RESULTS_DIR, "latest_stocks.json")
+    with open(latest_path, "w") as f:
+        json.dump(payload, f, indent=2, default=str)
+    history_path = os.path.join(config.HISTORY_DIR, f"stocks_{run_as_of.date()}.json")
+    with open(history_path, "w") as f:
+        json.dump(payload, f, indent=2, default=str)
+    docs_json_path = os.path.join(out_dir, "latest.json")
+    with open(docs_json_path, "w") as f:
+        json.dump(payload, f, indent=2, default=str)
+
+    print(f"\n[stocks] Wrote {len(all_rows)} rows to {latest_path}")
+    print(f"Wrote {history_path}")
+    print(f"Wrote {docs_json_path}")
+    print(f"[stocks] Verdict tally: {tally}")
+    if all_suspicious:
+        print(f"\n[stocks] SUSPICIOUS RESULTS (OOS PF > {config.SUSPICIOUS_OOS_PF} or Sharpe > "
+              f"{config.SUSPICIOUS_OOS_SHARPE}) — treat as a possible bug, per spec_v2 §6:")
+        for s in all_suspicious:
+            print(f"  - {s}")
+
+    build_site.build_index(payload, out_path=os.path.join(out_dir, "index.html"),
+                            assets=assets, timeframes=timeframes,
+                            lang_links=('<a href="../index.html">English (crypto)</a> &middot; '
+                                        '<a href="../ko/index.html">한국어</a>'))
+    build_site.build_methodology(out_path=os.path.join(out_dir, "methodology.html"),
+                                  assets=assets,
+                                  lang_links=('<a href="../methodology.html">English (crypto)</a> '
+                                              '&middot; <a href="../ko/methodology.html">한국어</a>'))
     print(f"Wrote {os.path.join(out_dir, 'index.html')}")
     print(f"Wrote {os.path.join(out_dir, 'methodology.html')}")
 

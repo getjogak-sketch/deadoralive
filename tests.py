@@ -402,6 +402,160 @@ def test_korean_page_disclaimer_and_banned_words():
         _assert_page_ok(meth_html, "methodology")
 
 
+# ---------------------------------------------------------------------------
+# Stocks edition (spec_v3 §A) — additive extension, nothing above this line is modified.
+#
+# Stooq/Yahoo are both network-blocked in this dev environment exactly like Bitstamp/Upbit, so
+# these unit-test the pure parsers (_parse_stooq_csv, _parse_yahoo_chart_json) and the
+# same-day-bar-drop helper (_drop_unclosed_stocks_bar) against hand-written fake payloads.
+# ---------------------------------------------------------------------------
+
+def test_stooq_parser():
+    import fetch_data as fd
+
+    good_csv = (
+        "Date,Open,High,Low,Close,Volume\n"
+        "2024-01-02,470.42,472.14,468.17,472.65,74882300\n"
+        "2024-01-03,470.29,470.90,467.23,468.79,59991100\n"
+        "2024-01-04,468.35,470.44,467.05,467.28,52117200\n"
+    )
+    df = fd._parse_stooq_csv(good_csv)
+    check("Stooq parser: correct normalized columns",
+          list(df.columns) == ["date", "open", "high", "low", "close", "volume"],
+          f"got {list(df.columns)}")
+    check("Stooq parser: 3 rows in, 3 rows out", len(df) == 3, f"got {len(df)}")
+    check("Stooq parser: ascending order (oldest first)",
+          list(df["date"]) == sorted(df["date"]))
+    check("Stooq parser: field mapping correct (close on last row)",
+          df["close"].iloc[-1] == 467.28, f"got {df['close'].iloc[-1]}")
+    check("Stooq parser: oldest row's date is 2024-01-02",
+          df["date"].iloc[0] == pd.Timestamp("2024-01-02"))
+
+    # Malformed responses (Stooq's actual failure modes) must come back empty, never raise.
+    check("Stooq parser: empty body -> empty frame", fd._parse_stooq_csv("").empty)
+    check("Stooq parser: HTML error page -> empty frame",
+          fd._parse_stooq_csv("<html><body>Exceeded the daily hits limit</body></html>").empty)
+    check("Stooq parser: unexpected header -> empty frame",
+          fd._parse_stooq_csv("Symbol,Date,Time\nSPY.US,2024-01-02,00:00\n").empty)
+    check("Stooq parser: None input -> empty frame", fd._parse_stooq_csv(None).empty)
+
+
+def test_yahoo_parser():
+    import fetch_data as fd
+
+    good_payload = {
+        "chart": {
+            "result": [{
+                "timestamp": [1704196800, 1704283200, 1704369600],
+                "indicators": {
+                    "quote": [{
+                        "open": [470.42, 470.29, None],
+                        "high": [472.14, 470.90, 469.0],
+                        "low": [468.17, 467.23, 466.0],
+                        "close": [472.65, 468.79, 467.5],
+                        "volume": [74882300, 59991100, 52117200],
+                    }]
+                },
+            }],
+            "error": None,
+        }
+    }
+    df = fd._parse_yahoo_chart_json(good_payload)
+    check("Yahoo parser: correct normalized columns",
+          list(df.columns) == ["date", "open", "high", "low", "close", "volume"],
+          f"got {list(df.columns)}")
+    check("Yahoo parser: null-OHLC bar dropped (3 in, 2 out)", len(df) == 2, f"got {len(df)}")
+    check("Yahoo parser: ascending order (oldest first)", list(df["date"]) == sorted(df["date"]))
+    check("Yahoo parser: field mapping correct (first row close)",
+          df["close"].iloc[0] == 472.65, f"got {df['close'].iloc[0]}")
+
+    check("Yahoo parser: missing 'chart' key -> empty frame", fd._parse_yahoo_chart_json({}).empty)
+    check("Yahoo parser: null result -> empty frame",
+          fd._parse_yahoo_chart_json({"chart": {"result": None, "error": {"code": "Not Found"}}}).empty)
+    check("Yahoo parser: None payload -> empty frame", fd._parse_yahoo_chart_json(None).empty)
+
+
+def test_stocks_edition_pipeline():
+    """End-to-end check of the stocks edition's row-building + page templates, using the same
+    real SPY daily file the rest of this dev box already has locally
+    (data_loader.load_raw("spy", "1d") — v1's own SPY series, not fetch_data.py's Stooq/Yahoo
+    path). This is pure computation on already-local data (no network involved), so unlike
+    fetch_ohlc_stooq/fetch_ohlc_yahoo it CAN be exercised end-to-end here: it verifies
+    _build_rows_for_asset_tf_impl (252 bars_per_year, 0.02% cost) and build_site.build_index/
+    build_methodology render a real stocks-edition page without error, using a real (if
+    differently-sourced) series — not just the synthetic Korean-style payload used elsewhere."""
+    import tempfile
+    import run_weekly as rw
+    import build_site
+
+    if resolve_path("spy", "1d") is None:
+        print("[SKIP] test_stocks_edition_pipeline: no local SPY file")
+        return
+
+    df = load_raw("spy", "1d")
+    df = df[df["date"] >= pd.Timestamp(config.STOCKS_DATA_START)].reset_index(drop=True)
+    as_of, rows, suspicious = rw._build_rows_for_asset_tf_impl(
+        "SPY", "1d", df, config.COST["SPY"], config.STOCKS_BARS_PER_YEAR)
+    for r in rows:
+        r["edition"] = "stocks"
+
+    check("Stocks pipeline: produces the full registry row count (22 variants + 2 reference)",
+          len(rows) == _registry.count_variants() + 2, f"got {len(rows)}")
+
+    payload = {
+        "project_name": config.PROJECT_NAME, "edition": "stocks", "lang": "en",
+        "tagline": config.TAGLINE, "generated_at": "2026-09-07T00:00:00+00:00",
+        "as_of": str(as_of.date()), "oos_days": config.OOS_DAYS,
+        "tally": __import__("verdict").tally([r["verdict"] for r in rows if r["verdict"]]),
+        "rows": rows, "suspicious": suspicious,
+        "legal_disclaimer": config.LEGAL_DISCLAIMER,
+        "repo_url": config.REPO_URL, "signup_url": config.SIGNUP_URL,
+    }
+
+    with tempfile.TemporaryDirectory() as tmp:
+        index_path = build_site.build_index(
+            payload, out_path=os.path.join(tmp, "index.html"),
+            assets=config.STOCKS_ASSETS, timeframes=config.STOCKS_TIMEFRAMES,
+            lang_links='<a href="../index.html">English (crypto)</a>')
+        meth_path = build_site.build_methodology(
+            out_path=os.path.join(tmp, "methodology.html"), assets=config.STOCKS_ASSETS,
+            lang_links='<a href="../methodology.html">English (crypto)</a>')
+        with open(index_path, encoding="utf-8") as f:
+            index_html = f.read()
+        with open(meth_path, encoding="utf-8") as f:
+            meth_html = f.read()
+
+        check("Stocks index page: SPY section present", 'id="SPY-1d"' in index_html)
+        check("Stocks index page: no QQQ rows rendered (no local QQQ file in this dev env)",
+              'id="QQQ-1d"' not in index_html)
+        check("Stocks index page: shows a verdict badge", "badge" in index_html)
+        check("Stocks methodology page: SPY cost row present (0.02%)", "0.02%" in meth_html)
+        check("Stocks methodology page: no KRW-BTC cost row leaked in (edition isolation)",
+              "KRW-BTC" not in meth_html)
+
+
+def test_drop_unclosed_stocks_bar():
+    import fetch_data as fd
+
+    df = pd.DataFrame({
+        "date": [pd.Timestamp("2026-09-04"), pd.Timestamp("2026-09-05"), pd.Timestamp("2026-09-07")],
+        "open": [1.0, 2.0, 3.0], "high": [1.0, 2.0, 3.0], "low": [1.0, 2.0, 3.0],
+        "close": [1.0, 2.0, 3.0], "volume": [1.0, 1.0, 1.0],
+    })
+    now_same_day = pd.Timestamp("2026-09-07T15:00:00")
+    dropped = fd._drop_unclosed_stocks_bar(df, now=now_same_day)
+    check("Stocks: today's (still-forming) bar is dropped",
+          len(dropped) == 2 and dropped["date"].iloc[-1] == pd.Timestamp("2026-09-05"),
+          f"got {list(dropped['date'])}")
+
+    now_next_day = pd.Timestamp("2026-09-08T01:00:00")
+    kept = fd._drop_unclosed_stocks_bar(df, now=now_next_day)
+    check("Stocks: yesterday's (fully closed) bar is kept", len(kept) == 3, f"got {len(kept)}")
+
+    check("Stocks: empty frame is a no-op",
+          fd._drop_unclosed_stocks_bar(pd.DataFrame(columns=df.columns)).empty)
+
+
 if __name__ == "__main__":
     test_no_lookahead_ma_cross()
     test_no_lookahead_vol_breakout()
@@ -411,6 +565,10 @@ if __name__ == "__main__":
     test_indicator_spot_checks()
     test_upbit_parser()
     test_korean_page_disclaimer_and_banned_words()
+    test_stooq_parser()
+    test_yahoo_parser()
+    test_drop_unclosed_stocks_bar()
+    test_stocks_edition_pipeline()
 
     print()
     if FAILURES:

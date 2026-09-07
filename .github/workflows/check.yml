@@ -1,0 +1,68 @@
+name: check-strategy
+
+# spec_v3 §E: "Check my strategy" via GitHub Issues. Runs check_issue.py (parse -> validate ->
+# backtest -> render) against ONE issue at a time, using only data already committed to data/ (no
+# fetch, no network call other than the GitHub API calls below) and posts exactly one comment,
+# then closes the issue — label "done" only when the input was valid.
+on:
+  issues:
+    types: [opened, labeled]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  check:
+    # Only for issues carrying the "check" label — either it was there on open (the issue-form
+    # template applies it automatically), or it was just added. Ignores every other issue/label.
+    if: contains(github.event.issue.labels.*.name, 'check')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install pandas numpy requests
+
+      - name: Write issue body to a file
+        # Never interpolate untrusted issue content into a shell command — pass it through the
+        # environment and let printf treat it as inert data (%s), never as a format string or
+        # shell syntax. check_issue.py itself never eval()/exec()s any of it either.
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: printf '%s' "$ISSUE_BODY" > /tmp/issue_body.txt
+
+      - name: Run tests (hard gate — never run an unverified engine against a live issue)
+        run: python tests.py
+
+      - name: Parse, validate, and backtest this one issue (dry-run: no GitHub calls yet)
+        id: render
+        run: |
+          python check_issue.py --body /tmp/issue_body.txt --dry-run > /tmp/comment.md
+          if grep -q '<!-- check-issue-status: valid -->' /tmp/comment.md; then
+            echo "status=valid" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=invalid" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Post the result comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh issue comment "${{ github.event.issue.number }}" --body-file /tmp/comment.md --repo "${{ github.repository }}"
+
+      - name: Label as done (valid input only)
+        if: steps.render.outputs.status == 'valid'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh issue edit "${{ github.event.issue.number }}" --add-label done --repo "${{ github.repository }}"
+
+      - name: Close the issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh issue close "${{ github.event.issue.number }}" --repo "${{ github.repository }}"

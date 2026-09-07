@@ -68,6 +68,13 @@ footer.bottom .disclaimer { margin-top: 0.75rem; }
 """
 
 
+def _check_strategy_url() -> str:
+    """spec_v3 §E: the new-issue URL for the "Check my strategy" issue form, built from
+    config.REPO_URL — the one and only place this path is assembled, so every page's link stays
+    in sync if REPO_URL is ever filled in with the repo's real public address."""
+    return config.REPO_URL.rstrip("/") + "/issues/new?template=check-strategy.yml"
+
+
 def _fmt_pct(x, dp=1):
     if x is None or (isinstance(x, float) and math.isnan(x)):
         return "-"
@@ -338,7 +345,8 @@ def build_index(payload: dict, out_path: str | None = None, assets: list | None 
   {popular_combos_html}
 </main>
 <footer class="bottom">
-  <div><a href="methodology.html">Methodology</a>{repo_html}{signup_html}</div>
+  <div><a href="methodology.html">Methodology</a>{repo_html}{signup_html}
+  &middot; <a href="{html.escape(_check_strategy_url())}">Check your own strategy</a></div>
   <div class="disclaimer">{html.escape(payload['legal_disclaimer'])}</div>
 </footer>
 </body>
@@ -509,6 +517,16 @@ def build_methodology(out_path: str | None = None, assets: list | None = None,
   </section>
 
   <section class="assetblock">
+    <h2>Check your own strategy</h2>
+    <p>Open a <a href="{html.escape(_check_strategy_url())}">GitHub issue with the "Check my
+       strategy" template</a> to run one strategy id/parameter combination through this same
+       engine, cost model, and verdict thresholds, against the data already committed to this
+       repo. A bot replies on the issue with the scorecard and closes it automatically &mdash;
+       there is no server, nothing is stored beyond that comment, and the result is exactly as
+       automated and non-advisory as the rest of this page.</p>
+  </section>
+
+  <section class="assetblock">
     <h2>What we don't do</h2>
     <p>No parameter tuning, no new filters, no adding a strategy variant after seeing how it
        performs. Every strategy and every parameter value that will ever appear on this site is
@@ -518,7 +536,8 @@ def build_methodology(out_path: str | None = None, assets: list | None = None,
   </section>
 </main>
 <footer class="bottom">
-  <div><a href="index.html">&larr; back to results</a></div>
+  <div><a href="index.html">&larr; back to results</a>
+  &middot; <a href="{html.escape(_check_strategy_url())}">Check your own strategy</a></div>
   <div class="disclaimer">{html.escape(config.LEGAL_DISCLAIMER)}</div>
 </footer>
 </body>
@@ -817,7 +836,8 @@ def build_index_ko(payload: dict, out_path: str | None = None):
   {popular_combos_html}
 </main>
 <footer class="bottom">
-  <div><a href="methodology.html">어떻게 계산했나</a>{repo_html}{signup_html} &middot; <a href="../index.html">English</a> &middot; <a href="../stocks/index.html">Stocks</a></div>
+  <div><a href="methodology.html">어떻게 계산했나</a>{repo_html}{signup_html} &middot; <a href="../index.html">English</a> &middot; <a href="../stocks/index.html">Stocks</a>
+  &middot; <a href="{html.escape(_check_strategy_url())}">내 전략도 검사해 보기</a></div>
 </footer>
 {_disclaimer_block_ko()}
 </body>
@@ -1007,6 +1027,15 @@ def build_methodology_ko(out_path: str | None = None):
   </section>
 
   <section class="assetblock">
+    <h2>내 전략도 검사해 보기</h2>
+    <p><a href="{html.escape(_check_strategy_url())}">"Check my strategy" 이슈 양식</a>으로
+       깃허브 이슈를 하나 열면, 이미 저장소에 있는 데이터를 기준으로 같은 엔진·수수료·판정 기준을
+       그대로 적용해 전략 하나를 검사해 드립니다. 봇이 결과를 이슈 댓글로 남기고 이슈를 자동으로
+       닫으며, 이 결과 역시 사이트의 다른 결과와 마찬가지로 자동화된 참고 자료일 뿐 투자 자문이
+       아닙니다.</p>
+  </section>
+
+  <section class="assetblock">
     <h2>일부러 하지 않는 것</h2>
     <p>설정값을 결과가 좋아질 때까지 바꾸는 일, 결과를 본 뒤 조건을 덧붙이는 일은 하지 않습니다.
        그렇게 하면 과거에만 맞는 전략이 만들어지기 때문입니다. 이 사이트에 있는 모든 전략과 설정값은
@@ -1015,7 +1044,8 @@ def build_methodology_ko(out_path: str | None = None):
   </section>
 </main>
 <footer class="bottom">
-  <div><a href="index.html">&larr; 결과표로 돌아가기</a> &middot; <a href="../methodology.html">English</a> &middot; <a href="../stocks/methodology.html">Stocks</a></div>
+  <div><a href="index.html">&larr; 결과표로 돌아가기</a> &middot; <a href="../methodology.html">English</a> &middot; <a href="../stocks/methodology.html">Stocks</a>
+  &middot; <a href="{html.escape(_check_strategy_url())}">내 전략도 검사해 보기</a></div>
 </footer>
 {_disclaimer_block_ko()}
 </body>
@@ -1060,7 +1090,8 @@ def build_empty_edition_page_ko(out_path: str | None = None, as_of: str | None =
   </div>
 </main>
 <footer class="bottom">
-  <div><a href="methodology.html">어떻게 계산했나</a> &middot; <a href="../index.html">English</a> &middot; <a href="../stocks/index.html">Stocks</a></div>
+  <div><a href="methodology.html">어떻게 계산했나</a> &middot; <a href="../index.html">English</a> &middot; <a href="../stocks/index.html">Stocks</a>
+  &middot; <a href="{html.escape(_check_strategy_url())}">내 전략도 검사해 보기</a></div>
 </footer>
 {_disclaimer_block_ko()}
 </body>
@@ -1287,7 +1318,8 @@ def build_api_index_html(out_path: str | None = None) -> str:
 {_api_readme_html_body()}
 </main>
 <footer class="bottom">
-  <div><a href="../index.html">&larr; back to results</a></div>
+  <div><a href="../index.html">&larr; back to results</a>
+  &middot; <a href="{html.escape(_check_strategy_url())}">Check your own strategy</a></div>
   <div class="disclaimer">{html.escape(config.LEGAL_DISCLAIMER)}</div>
 </footer>
 </body>

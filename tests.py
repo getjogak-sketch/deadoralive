@@ -816,6 +816,115 @@ def test_drop_unclosed_stocks_bar():
           fd._drop_unclosed_stocks_bar(pd.DataFrame(columns=df.columns)).empty)
 
 
+# ---------------------------------------------------------------------------
+# spec_v3 §E: "Check my strategy" via GitHub Issues — parser/validator unit test, 5 good + 5 bad
+# inputs (spec's own requirement). Uses check_issue.py's own parse_issue_body/validate directly
+# (not the full run_check backtest, which needs local data files that may not exist for every
+# asset in this dev environment) — this test is about the strict-regex parsing/validation gate,
+# the part spec_v3 §E calls out as the injection-safety-critical piece.
+# ---------------------------------------------------------------------------
+
+def _issue_body(edition, asset, timeframe, strategy, params, checked=True):
+    box = "[x]" if checked else "[ ]"
+    return (
+        f"### Edition\n\n{edition}\n\n"
+        f"### Asset\n\n{asset}\n\n"
+        f"### Timeframe\n\n{timeframe}\n\n"
+        f"### Strategy type\n\n{strategy}\n\n"
+        f"### Params\n\n{params}\n\n"
+        f"### Confirmation\n\n"
+        f"- {box} I understand this is an automated educational backtest, not investment advice.\n"
+    )
+
+
+def test_check_issue_parser_validator():
+    import check_issue as ci
+
+    good_cases = [
+        ("en", "en:BTCUSD", "1d", "sma_cross", "n_fast=10, n_slow=50"),
+        ("en", "en:BTCUSD", "4h", "vol_breakout", "k=0.5"),
+        ("stocks", "stocks:SPY", "1d", "macd", ""),
+        ("ko", "ko:KRW-BTC", "1d", "rsi_uptrend", "n_sma=200"),
+        ("en", "en:BTCUSD", "1d", "dip_pct", "threshold=-0.05, n_hold=5"),
+    ]
+    for edition, asset, tf, sid, params in good_cases:
+        body = _issue_body(edition, asset, tf, sid, params, checked=True)
+        fields = ci.parse_issue_body(body)
+        try:
+            normalized = ci.validate(fields)
+            ok, detail = True, ""
+        except ci.ValidationError as e:
+            ok, detail = False, str(e)
+        check(f"check_issue: good input accepted ({sid}, '{params}')", ok, detail)
+
+    bad_cases = [
+        # unknown strategy id
+        ("en", "en:BTCUSD", "1d", "not_a_real_strategy", "", True),
+        # fast >= slow
+        ("en", "en:BTCUSD", "1d", "sma_cross", "n_fast=50, n_slow=10", True),
+        # k out of the 0.1..2.0 bound
+        ("en", "en:BTCUSD", "1d", "vol_breakout", "k=5.0", True),
+        # asset prefix doesn't match the edition field
+        ("en", "ko:KRW-BTC", "1d", "rsi_uptrend", "n_sma=200", True),
+        # confirmation checkbox not checked
+        ("en", "en:BTCUSD", "1d", "sma_cross", "n_fast=10, n_slow=50", False),
+    ]
+    for edition, asset, tf, sid, params, checked in bad_cases:
+        body = _issue_body(edition, asset, tf, sid, params, checked=checked)
+        fields = ci.parse_issue_body(body)
+        try:
+            ci.validate(fields)
+            ok = False
+        except ci.ValidationError:
+            ok = True
+        check(f"check_issue: bad input rejected ({sid}, '{params}', checked={checked})", ok)
+
+    # Extra hardening checks called out by spec_v3 §E ("never eval user text; parse with a strict
+    # regex"): a params field that tries to smuggle Python syntax must be rejected by the regex,
+    # never evaluated.
+    injection_attempts = ["__import__('os').system('echo hi')", "n_fast=10 and True",
+                           "n_fast=10, n_slow=(50)"]
+    for bad_params in injection_attempts:
+        try:
+            ci.parse_params(bad_params)
+            ok = False
+        except ci.ValidationError:
+            ok = True
+        check(f"check_issue: injection-shaped params string rejected ({bad_params!r})", ok)
+
+    # Fixed-strategy params must be empty; non-empty params for a fixed strategy is an error.
+    body = _issue_body("en", "en:BTCUSD", "1d", "macd", "n=5", checked=True)
+    try:
+        ci.validate(ci.parse_issue_body(body))
+        ok = False
+    except ci.ValidationError:
+        ok = True
+    check("check_issue: non-empty params for a fixed strategy rejected", ok)
+
+
+def test_check_issue_dry_run_end_to_end():
+    """The dry-run CLI path (spec_v3 §E: `python check_issue.py --body sample.md --dry-run`),
+    exercised against real local BTCUSD data end-to-end (parse -> validate -> run -> render),
+    without ever touching the network or GitHub."""
+    import check_issue as ci
+
+    body = _issue_body("en", "en:BTCUSD", "1d", "sma_cross", "n_fast=10, n_slow=50", checked=True)
+    comment_md, is_valid = ci.build_comment(body)
+    check("check_issue: end-to-end dry run on real BTCUSD data succeeds", is_valid, comment_md)
+    check("check_issue: dry-run comment carries the valid-status marker",
+          "check-issue-status: valid" in comment_md)
+    check("check_issue: dry-run comment shows the verdict line",
+          "**Verdict:**" in comment_md)
+    check("check_issue: dry-run comment links to methodology",
+          config.PAGES_URL + "/methodology.html" in comment_md)
+
+    bad_body = _issue_body("en", "en:BTCUSD", "1d", "sma_cross", "n_fast=50, n_slow=10", checked=True)
+    bad_comment, bad_valid = ci.build_comment(bad_body)
+    check("check_issue: end-to-end dry run on bad input is rejected, not crashed", not bad_valid)
+    check("check_issue: invalid comment carries the invalid-status marker",
+          "check-issue-status: invalid" in bad_comment)
+
+
 if __name__ == "__main__":
     test_no_lookahead_ma_cross()
     test_no_lookahead_vol_breakout()
@@ -837,6 +946,8 @@ if __name__ == "__main__":
     test_robustness_ma_pair_and_grid_size()
     test_robustness_does_not_mutate_registered_params()
     test_robustness_runtime_on_local_btc_data()
+    test_check_issue_parser_validator()
+    test_check_issue_dry_run_end_to_end()
 
     print()
     if FAILURES:

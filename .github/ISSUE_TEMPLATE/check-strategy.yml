@@ -1,0 +1,108 @@
+name: Check my strategy
+description: >-
+  Run one strategy variant against the committed data, net of the same costs and thresholds
+  the weekly pages use. Automated and educational only — see the confirmation checkbox below.
+title: "[check] "
+labels: ["check"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This opens an automated, one-off backtest of a single strategy variant, using the exact
+        same engine, costs, and badge thresholds as the weekly pages. A bot will reply on this
+        issue with the result and then close it. **This is not investment advice** — see
+        methodology for what the numbers do and don't mean.
+
+  - type: dropdown
+    id: edition
+    attributes:
+      label: Edition
+      description: Which edition's data/costs/thresholds to check against.
+      options:
+        - en
+        - ko
+        - stocks
+    validations:
+      required: true
+
+  - type: dropdown
+    id: asset
+    attributes:
+      label: Asset
+      description: >-
+        Pick the asset prefixed with the edition you selected above (e.g. pick an "en:" asset if
+        you chose edition "en"). Picking a mismatched pair will be rejected.
+      options:
+        - "en:BTCUSD"
+        - "en:ETHUSD"
+        - "ko:KRW-BTC"
+        - "ko:KRW-ETH"
+        - "stocks:SPY"
+        - "stocks:QQQ"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: timeframe
+    attributes:
+      label: Timeframe
+      description: The stocks edition only has 1d data.
+      options:
+        - "1d"
+        - "4h"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: strategy
+    attributes:
+      label: Strategy type
+      description: >-
+        Pick a strategy id from the main registry or from "Popular combos". Reference rows
+        (buy_and_hold, dca_weekly) are not checkable — they have no verdict.
+      options:
+        - sma_cross
+        - ema_cross
+        - above_sma
+        - donchian
+        - vol_breakout
+        - vol_breakout_trend
+        - rsi_mr
+        - rsi2_connors
+        - bb_mr
+        - bb_breakout
+        - macd
+        - supertrend
+        - tsmom
+        - dip_3down
+        - dip_pct
+        - ema_9_21
+        - ema200_macd
+        - rsi_uptrend
+        - bb_squeeze
+        - ichimoku_cloud
+        - heikin_ashi_trend
+        - supertrend_ema200
+    validations:
+      required: true
+
+  - type: input
+    id: params
+    attributes:
+      label: Params
+      description: >-
+        Format: name=value, name=value (e.g. "n_fast=10, n_slow=50"). Leave EMPTY for strategies
+        with fixed parameters (rsi2_connors, bb_mr, bb_breakout, macd, supertrend, dip_3down,
+        ichimoku_cloud). Window lengths must be whole numbers 2-500; k must be 0.1-2.0.
+      placeholder: "n_fast=10, n_slow=50"
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Confirmation
+      options:
+        - label: >-
+            I understand this is an automated educational backtest, not investment advice.
+          required: true

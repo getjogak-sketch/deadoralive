@@ -14,7 +14,7 @@ import os
 PROJECT_NAME = "Dead or Alive"
 TAGLINE = "Popular trading strategies, re-tested every week — after fees, out-of-sample."
 REPO_URL = "https://github.com/getjogak-sketch/deadoralive"     # placeholder — fill in once the repo has a public home
-SIGNUP_URL = ""   # placeholder — empty means the signup link is hidden on the page
+SIGNUP_URL = "https://buttondown.com/jogak"   # placeholder — empty means the signup link is hidden on the page
 
 # Privacy-friendly visit counter (GoatCounter: no cookies, no personal data). Public snippet —
 # it only tells the browser where to send an anonymous page-view ping. Empty string disables it.

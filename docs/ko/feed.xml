@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+<channel>
+  <title>Dead or Alive — 주간 요약</title>
+  <link>https://getjogak-sketch.github.io/deadoralive</link>
+  <description>매주 전략 백테스트 결과 중 바뀐 부분만 숫자로 정리한 요약입니다.</description>
+
+</channel>
+</rss>

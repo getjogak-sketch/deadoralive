@@ -437,6 +437,16 @@ def main():
     print(f"Wrote {os.path.join(config.DOCS_DIR, 'sitemap.xml')}")
     print(f"Wrote {os.path.join(config.DOCS_DIR, 'robots.txt')}")
 
+    # -------------------------------------------------------------------------------------------
+    # Weekly digest (this task's §S2) + feeds (RSS/JSON Feed) built from it — additive, read-only
+    # over the same payloads (compares each edition's just-written payload above against its
+    # previous results/history/<...>.json snapshot; see digest.py's own docstring).
+    # -------------------------------------------------------------------------------------------
+    import digest as digest_mod
+    digest_mod.build_all(edition_payloads)
+    print(f"Wrote {os.path.join(config.DOCS_DIR, 'digest')}, docs/feed.xml, docs/feed.json, "
+          f"docs/ko/digest, docs/ko/feed.xml (edition data permitting)")
+
     return 0
 
 
@@ -663,7 +673,8 @@ def _run_stocks_edition():
     build_site.build_index(payload, out_path=os.path.join(out_dir, "index.html"),
                             assets=assets, timeframes=timeframes,
                             lang_links=('<a href="../index.html">English (crypto)</a> &middot; '
-                                        '<a href="../ko/index.html">한국어</a>'))
+                                        '<a href="../ko/index.html">한국어</a>'),
+                            feed_html="")
     build_site.build_methodology(out_path=os.path.join(out_dir, "methodology.html"),
                                   assets=assets,
                                   lang_links=('<a href="../methodology.html">English (crypto)</a> '

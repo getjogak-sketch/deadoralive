@@ -1045,6 +1045,131 @@ def test_seo_pages_no_banned_korean_words():
 
 
 
+# ---------------------------------------------------------------------------
+# S2: weekly digest (digest.py)
+# ---------------------------------------------------------------------------
+
+def test_digest_first_week_and_flips():
+    import json as _json
+    import digest as dg
+
+    curr = {
+        "as_of": "2026-09-08",
+        "tally": {"ALIVE": 1, "FADING": 1, "DEAD": 0, "TOO FEW TRADES": 0},
+        "rows": [
+            {"strategy_id": "sma_cross", "strategy_name": "SMA crossover", "params": "10-50",
+             "asset": "BTCUSD", "timeframe": "1d", "type": "state", "verdict": "ALIVE",
+             "oos": {"fee_drag": 0.01, "n_trades": 40, "profit_factor": 1.5}},
+            {"strategy_id": "macd", "strategy_name": "MACD signal cross", "params": "12-26-9",
+             "asset": "BTCUSD", "timeframe": "1d", "type": "state", "verdict": "FADING",
+             "oos": {"fee_drag": 0.2, "n_trades": 35, "profit_factor": 1.05}},
+        ],
+        "popular_combos": [],
+    }
+    prev = {
+        "as_of": "2026-09-01",
+        "tally": {"ALIVE": 0, "FADING": 2, "DEAD": 0, "TOO FEW TRADES": 0},
+        "rows": [
+            {"strategy_id": "sma_cross", "strategy_name": "SMA crossover", "params": "10-50",
+             "asset": "BTCUSD", "timeframe": "1d", "type": "state", "verdict": "FADING",
+             "oos": {"fee_drag": 0.01, "n_trades": 38, "profit_factor": 1.1}},
+            {"strategy_id": "macd", "strategy_name": "MACD signal cross", "params": "12-26-9",
+             "asset": "BTCUSD", "timeframe": "1d", "type": "state", "verdict": "FADING",
+             "oos": {"fee_drag": 0.15, "n_trades": 33, "profit_factor": 1.02}},
+        ],
+        "popular_combos": [],
+    }
+
+    orig_hist_dir = config.HISTORY_DIR
+    import tempfile
+    tmp = tempfile.mkdtemp()
+    config.HISTORY_DIR = tmp
+    try:
+        d_first = dg.compute_digest("en", curr)
+        check("digest: first week (no history file at all) has no flips and first_week=True",
+              d_first["first_week"] is True and d_first["flips"] == [])
+
+        with open(os.path.join(tmp, "2026-09-01.json"), "w") as f:
+            _json.dump(prev, f)
+        d_second = dg.compute_digest("en", curr)
+        check("digest: second week finds the previous snapshot",
+              d_second["first_week"] is False and d_second["prev_as_of"] == "2026-09-01")
+        check("digest: detects exactly one verdict flip (sma_cross FADING -> ALIVE)",
+              len(d_second["flips"]) == 1 and d_second["flips"][0]["strategy_id"] == "sma_cross"
+              and d_second["flips"][0]["from"] == "FADING" and d_second["flips"][0]["to"] == "ALIVE")
+        check("digest: best/worst OOS PF picked only among rows with >=30 trades",
+              d_second["best_pf"]["strategy_id"] == "sma_cross"
+              and d_second["worst_pf"]["strategy_id"] == "macd")
+
+        title = dg.digest_title_en(d_second)
+        check("digest: title matches the required 'Week of <as_of>: N alive / ...' shape",
+              title.startswith("Week of 2026-09-08:") and "what changed" in title)
+        liners = dg.one_liners_en(d_second)
+        check("digest: exactly 3 one-liners", len(liners) == 3, f"got {len(liners)}")
+        for s in liners:
+            check(f"digest: one-liner has no opinion/advice language ({s[:40]}...)",
+                  not any(w in s.lower() for w in ["should", "recommend", "guarantee", "advice"]))
+    finally:
+        config.HISTORY_DIR = orig_hist_dir
+
+
+def test_digest_build_writes_pages_and_feeds():
+    import json as _json
+    import tempfile
+    import digest as dg
+
+    latest_path = os.path.join(config.RESULTS_DIR, "latest.json")
+    if not os.path.exists(latest_path):
+        print("[SKIP] test_digest_build_writes_pages_and_feeds: no results/latest.json")
+        return
+    with open(latest_path, encoding="utf-8") as f:
+        payload = _json.load(f)
+
+    orig_docs, orig_results, orig_hist = config.DOCS_DIR, config.RESULTS_DIR, config.HISTORY_DIR
+    tmp = tempfile.mkdtemp()
+    config.DOCS_DIR = tmp
+    config.RESULTS_DIR = os.path.join(tmp, "results")
+    config.HISTORY_DIR = os.path.join(config.RESULTS_DIR, "history")
+    os.makedirs(config.HISTORY_DIR, exist_ok=True)
+    dg.DIGEST_DIR = os.path.join(config.RESULTS_DIR, "digest")
+    orig_subdir = dict(dg.EDITION_DOCS_SUBDIR)
+    dg.EDITION_DOCS_SUBDIR["en"] = config.DOCS_DIR
+    dg.EDITION_DOCS_SUBDIR["ko"] = os.path.join(tmp, "ko")
+    dg.EDITION_DOCS_SUBDIR["stocks"] = os.path.join(tmp, "stocks")
+    try:
+        out = dg.build_all({"en": payload, "ko": None, "stocks": None})
+        check("digest: build_for_edition returns a digest dict for en", out["en"] is not None)
+        check("digest: returns None for editions with no data", out["ko"] is None and out["stocks"] is None)
+
+        page_path = os.path.join(config.DOCS_DIR, "digest", f"{payload['as_of']}.html")
+        check("digest: per-as_of HTML page written", os.path.exists(page_path))
+        check("digest: digest index page written",
+              os.path.exists(os.path.join(config.DOCS_DIR, "digest", "index.html")))
+
+        feed_xml_path = os.path.join(config.DOCS_DIR, "feed.xml")
+        check("digest: docs/feed.xml written", os.path.exists(feed_xml_path))
+        with open(feed_xml_path, encoding="utf-8") as f:
+            feed_xml = f.read()
+        check("digest: feed.xml is RSS 2.0 with full HTML content per item",
+              "<rss version=\"2.0\"" in feed_xml and "<content:encoded>" in feed_xml
+              and "<item>" in feed_xml)
+
+        feed_json_path = os.path.join(config.DOCS_DIR, "feed.json")
+        check("digest: docs/feed.json written", os.path.exists(feed_json_path))
+        with open(feed_json_path, encoding="utf-8") as f:
+            feed_json = _json.load(f)
+        check("digest: feed.json is JSON Feed 1.1 with >=1 item",
+              feed_json.get("version") == "https://jsonfeed.org/version/1.1"
+              and len(feed_json.get("items", [])) >= 1
+              and "content_html" in feed_json["items"][0])
+    finally:
+        config.DOCS_DIR, config.RESULTS_DIR, config.HISTORY_DIR = orig_docs, orig_results, orig_hist
+        dg.DIGEST_DIR = os.path.join(config.RESULTS_DIR, "digest")
+        dg.EDITION_DOCS_SUBDIR.update(orig_subdir)
+
+
+
+
 if __name__ == "__main__":
     test_no_lookahead_ma_cross()
     test_no_lookahead_vol_breakout()
@@ -1070,6 +1195,8 @@ if __name__ == "__main__":
     test_check_issue_dry_run_end_to_end()
     test_seo_pages_strategy_page_count_and_shape()
     test_seo_pages_no_banned_korean_words()
+    test_digest_first_week_and_flips()
+    test_digest_build_writes_pages_and_feeds()
 
     print()
     if FAILURES:

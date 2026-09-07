@@ -1,0 +1,15 @@
+{
+  "version": "https://jsonfeed.org/version/1.1",
+  "title": "Dead or Alive \u2014 weekly digest",
+  "home_page_url": "https://getjogak-sketch.github.io/deadoralive",
+  "feed_url": "https://getjogak-sketch.github.io/deadoralive/feed.json",
+  "items": [
+    {
+      "id": "https://getjogak-sketch.github.io/deadoralive/digest/2026-09-05.html",
+      "url": "https://getjogak-sketch.github.io/deadoralive/digest/2026-09-05.html",
+      "title": "Week of 2026-09-05: 8 alive / 17 fading / 12 dead \u2014 what changed",
+      "content_html": "<ul><li>This run covers 58 strategy/asset/timeframe rows: 8 ALIVE, 17 FADING, 12 DEAD, 7 with too few trades.</li><li>This is the first recorded week for this edition, so there is no prior run to compare verdicts against.</li><li>Among rows with at least 30 out-of-sample trades, the highest was 2.15 (Buy the dip (3 down closes) (fixed) on BTCUSD 1d); the lowest was 0.56 (Volatility breakout + trend filter (k0.5-sma20) on BTCUSD 4h).</li></ul><p><strong>Biggest fee drag:</strong> 214.6% on Larry Williams volatility breakout (k0.7) on BTCUSD 4h.</p>",
+      "date_published": "2026-09-05T00:00:00Z"
+    }
+  ]
+}

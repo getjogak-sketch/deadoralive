@@ -269,20 +269,27 @@ def _popular_combos_html(payload: dict, assets: list | None = None, timeframes: 
 
 
 def build_index(payload: dict, out_path: str | None = None, assets: list | None = None,
-                 timeframes: list | None = None, lang_links: str | None = None):
+                 timeframes: list | None = None, lang_links: str | None = None,
+                 feed_html: str | None = None):
     """spec_v3 §A extension (additive): `assets`/`timeframes`/`lang_links` let a second edition
     (the stocks edition — SPY/QQQ, 1d only) reuse this exact template instead of duplicating it,
     per spec_v3 §A's own instruction ("reuse the English builders with an edition parameter").
     All three default to exactly what this function already hard-coded before spec_v3, so the
     English crypto edition's call site (no new args passed) renders byte-for-byte the same rows/
     table structure as before — only its header gained one more nav link (Stocks), which changes
-    no number on the page."""
+    no number on the page. `feed_html` (task S1/S2 addition): the stocks edition has no feed.xml
+    of its own (spec_v3 §A is English/ko/stocks but S1's feeds are only en+ko), so its call site
+    passes feed_html="" while the English crypto edition's default links docs/feed.xml/feed.json."""
     out_path = out_path or os.path.join(config.DOCS_DIR, "index.html")
     assets = assets if assets is not None else config.ASSETS
     timeframes = timeframes if timeframes is not None else config.TIMEFRAMES
     lang_links = lang_links if lang_links is not None else (
         '<a href="stocks/index.html">Stocks edition</a> &middot; '
         '<a href="ko/index.html">한국어 (Korean edition)</a>'
+    )
+    feed_html = feed_html if feed_html is not None else (
+        ' &middot; <a href="feed.xml">RSS</a> &middot; <a href="feed.json">JSON Feed</a> '
+        '&middot; <a href="digest/index.html">Weekly digests</a>'
     )
 
     groups = {}
@@ -347,7 +354,7 @@ def build_index(payload: dict, out_path: str | None = None, assets: list | None 
 <footer class="bottom">
   <div><a href="methodology.html">Methodology</a>{repo_html}{signup_html}
   &middot; <a href="{html.escape(_check_strategy_url())}">Check your own strategy</a>
-  &middot; <a href="s/index.html">All strategy pages</a></div>
+  &middot; <a href="s/index.html">All strategy pages</a>{feed_html}</div>
   <div class="disclaimer">{html.escape(payload['legal_disclaimer'])}</div>
 </footer>
 {config.ANALYTICS_SNIPPET}
@@ -842,7 +849,8 @@ def build_index_ko(payload: dict, out_path: str | None = None):
 <footer class="bottom">
   <div><a href="methodology.html">어떻게 계산했나</a>{repo_html}{signup_html} &middot; <a href="../index.html">English</a> &middot; <a href="../stocks/index.html">Stocks</a>
   &middot; <a href="{html.escape(_check_strategy_url())}">내 전략도 검사해 보기</a>
-  &middot; <a href="s/index.html">전략별 페이지 전체</a></div>
+  &middot; <a href="s/index.html">전략별 페이지 전체</a>
+  &middot; <a href="feed.xml">RSS</a> &middot; <a href="digest/index.html">주간 요약</a></div>
 </footer>
 {_disclaimer_block_ko()}
 {config.ANALYTICS_SNIPPET}
@@ -1100,7 +1108,8 @@ def build_empty_edition_page_ko(out_path: str | None = None, as_of: str | None =
 <footer class="bottom">
   <div><a href="methodology.html">어떻게 계산했나</a> &middot; <a href="../index.html">English</a> &middot; <a href="../stocks/index.html">Stocks</a>
   &middot; <a href="{html.escape(_check_strategy_url())}">내 전략도 검사해 보기</a>
-  &middot; <a href="s/index.html">전략별 페이지 전체</a></div>
+  &middot; <a href="s/index.html">전략별 페이지 전체</a>
+  &middot; <a href="feed.xml">RSS</a> &middot; <a href="digest/index.html">주간 요약</a></div>
 </footer>
 {_disclaimer_block_ko()}
 {config.ANALYTICS_SNIPPET}

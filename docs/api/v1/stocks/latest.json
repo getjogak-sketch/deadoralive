@@ -3,7 +3,7 @@
   "edition": "stocks",
   "lang": "en",
   "tagline": "Popular trading strategies, re-tested every week \u2014 after fees, out-of-sample.",
-  "generated_at": "2026-09-07T08:32:20.514993+00:00",
+  "generated_at": "2026-09-07T08:43:03.081770+00:00",
   "as_of": "2026-09-04",
   "oos_days": 730,
   "tally": {
@@ -4266,5 +4266,5 @@
   ],
   "legal_disclaimer": "Educational / informational content only. This is not investment advice, and nothing here is a recommendation to buy or sell any asset. Past backtested performance, especially net-of-cost historical simulation, does not guarantee future results.",
   "repo_url": "https://github.com/getjogak-sketch/deadoralive",
-  "signup_url": ""
+  "signup_url": "https://buttondown.com/jogak"
 }

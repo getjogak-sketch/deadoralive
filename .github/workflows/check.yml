@@ -53,7 +53,7 @@ jobs:
         # ordinary free check, with a clear message, whenever GUMROAD_PRODUCT_ID isn't set — so
         # this step needs no `if:` guard, unlike publish.py's secret-gated steps elsewhere.
         env:
-          GUMROAD_PRODUCT_ID: ${{ secrets.GUMROAD_PRODUCT_ID }}
+          GUMROAD_PRODUCT_ID: ${{ secrets.GUMROAD_PRODUCT_ID || vars.GUMROAD_PRODUCT_ID }}
           GUMROAD_URL: ${{ vars.GUMROAD_URL }}
         run: |
           python check_issue.py --body /tmp/issue_body.txt --dry-run > /tmp/comment.md

@@ -14,11 +14,12 @@ See `CRITERIA.md` for the full pre-registered rule. This file reports only aggre
 | macro | 270 | 9 | 9 |
 | stocks | 108 | 11 | 11 |
 
-**Placebo** (block-bootstrap-by-month noise floor, 20 shuffles): mean 155.20, sd 16.15, per-shuffle counts [150, 172, 150, 152, 168, 176, 167, 159, 166, 173, 135, 177, 151, 117, 145, 134, 149, 137, 160, 166].
+**Placebo — block bootstrap by month, whole bars** (PRIMARY, used for the decision below; 20 shuffles): mean 122.75, sd 12.86, per-shuffle counts [118, 136, 129, 132, 122, 137, 139, 116, 128, 108, 110, 135, 118, 91, 113, 113, 121, 135, 114, 140].
+**Placebo — circular time-shift** (secondary sanity check, NOT used for the decision; 20 shuffles): mean 121.40, sd 17.43, per-shuffle counts [113, 113, 122, 100, 129, 105, 126, 121, 150, 122, 99, 136, 91, 103, 122, 147, 109, 141, 149, 130]. If the selection rule has no hidden time-specific edge, this should land close to the real count (87), not near the block-bootstrap floor above.
 
 ## Decision: NO EVIDENCE OF EDGE
 
-87 real survivor(s) does not exceed the placebo noise floor (mean 155.20 + 1 sd 16.15 = 171.35) — this many 'survivors' would be expected by chance alone from testing this many combinations, even with no real edge.
+87 real survivor(s) does not exceed the block-bootstrap placebo noise floor (mean 122.75 + 1 sd 12.86 = 135.61) — this many 'survivors' would be expected by chance alone from testing this many combinations, even with no real edge.
 
 ## Private record
 **Not written this run** — `EDGE_PASSPHRASE` was unset, so no private file was produced (CRITERIA.md E4: nothing private is ever written without it).
